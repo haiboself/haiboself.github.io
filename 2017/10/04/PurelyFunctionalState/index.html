@@ -87,10 +87,12 @@
 <meta property="og:site_name" content="One Journeyman">
 <meta property="og:description" content="scala函数式编程:纯函数式编程读书笔记Overview： 带状态的方法的声明式实现可能带有副作用，难以保持引用透明。 以纯函数式的方式实现带状态的函数的关键在于让状态更新是显式的，不要以副作用方式更新状态，而是连同生成的值一起返回一个新的状态。即把状态的隐式更改暴露出去。 例：函数nextInt返回改变后的新状态nextRNG1234567891011121314151617181920212">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2017-10-04T15:50:31.000Z">
+<meta property="og:image" content="http://oxaz2p2ac.bkt.clouddn.com/Screen%20Shot%202017-10-04%20at%2010.21.02%20PM.png">
+<meta property="og:updated_time" content="2017-10-04T16:29:01.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="scala函数式编程:纯函数式编程读书笔记">
 <meta name="twitter:description" content="scala函数式编程:纯函数式编程读书笔记Overview： 带状态的方法的声明式实现可能带有副作用，难以保持引用透明。 以纯函数式的方式实现带状态的函数的关键在于让状态更新是显式的，不要以副作用方式更新状态，而是连同生成的值一起返回一个新的状态。即把状态的隐式更改暴露出去。 例：函数nextInt返回改变后的新状态nextRNG1234567891011121314151617181920212">
+<meta name="twitter:image" content="http://oxaz2p2ac.bkt.clouddn.com/Screen%20Shot%202017-10-04%20at%2010.21.02%20PM.png">
 
 
 
@@ -375,53 +377,54 @@
 </ul>
 <h4 id="组合子："><a href="#组合子：" class="headerlink" title="组合子："></a>组合子：</h4><ul>
 <li>组合子是一个高阶函数，可以看作函数的<strong>类型别名</strong>，用来<strong>避免显示</strong>地进行状态<strong>传递</strong>。</li>
-<li><p>RNG=&gt;(A,RNG)是一个函数,接受旧RNG,得到新的RNG，状态行为可以通过组合子来表示，如组合子Rand：</p>
+<li>RNG=&gt;(A,RNG)是一个函数,接受旧RNG,得到新的RNG，状态行为可以通过组合子来表示，如组合子Rand：</li>
+</ul>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">type Rand[+A] = RNG =&gt; (A, RNG)</div></pre></td></tr></table></figure>
-</li>
-<li><p>实例分析：</p>
 <ul>
-<li><figure class="highlight plain"><figcaption><span>int: Rand[Int] </span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">    * ```_.nextInt 等价于 RNG =&gt; (Int,RNG)```。即接受一个RNG类型参数并返回一个(Int,RNG)类型元组的函数。</div><div class="line">    * 而```Rand[Int]```是函数```RNG =&gt; (Int,RNG)```的类型别名。</div><div class="line"></div><div class="line">#### 使用组合子来组合状态行为：</div><div class="line">* 即对于有状态的函数，首先将其参数和返回值包装为组合子。然后通过map,flatMap等来以纯函数的形式实现该函数。其中f,g等即该函数。</div><div class="line">* 一个状态行为: s(rng1: RNG)返回(v: Int,rng2: RNG)</div></pre></td></tr></table></figure>
-</li>
+<li>实例分析：<ul>
+<li><code>val int: Rand[Int] = _.nextInt</code></li>
+<li><code>_.nextInt 等价于 RNG =&gt; (Int,RNG)</code>。即接受一个RNG类型参数并返回一个(Int,RNG)类型元组的函数。</li>
+<li>而<code>Rand[Int]</code>是函数<code>RNG =&gt; (Int,RNG)</code>的类型别名。</li>
 </ul>
 </li>
 </ul>
-<p>def map<a href="s: Rand[A]" target="_blank" rel="external">A,B</a>(f: A =&gt; B): Rand[B] =<br>    rng1 =&gt; {<br>        val (v,rng2) = s(rng1)<br>        (f(v),rng2)<br>    }</p>
-<p>def flatMap<a href="f: Rand[A" target="_blank" rel="external">A,B</a>(g: A =&gt; Rand[B]): Rand[B] =<br>    rng =&gt; {<br>        (v,r) = f(rng)<br>        g(v)(r)<br>    }<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">* 组合2个状态行为:</div></pre></td></tr></table></figure></p>
-<p>def map2<a href="ra: Rand[A], rb: Rand[B]" target="_blank" rel="external">A,B,C</a>(f: (A,B) =&gt; C): Rand[c] =<br>    rng1 =&gt; {<br>        val (v1,rng2) = ra(rng1)<br>        val (v2,rng3) = rb(rng2)<br>        (f(v1,v2),rng3)<br>    }<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">* 组合一序列状态行为：</div></pre></td></tr></table></figure></p>
-<p>def unit<a href="a: A" target="_blank" rel="external">A</a>: Rand[A] = rng =&gt; (a,rng)</p>
-<p>def sequence<a href="fs: List[Rand[A]]" target="_blank" rel="external">A</a>: Rand[List[A]] =<br>    List.foldRight(fs,unit(List[A())))((x,y) =&gt; map2(x,y)((a,b) =&gt; Cons(a,b)))<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">#### 通用的状态行为数据类型</div><div class="line">* 前边组合子状态是类型RNG。我们来把组合子泛化。S表示任何状态。</div></pre></td></tr></table></figure></p>
-<p>type State[+A,S] = S =&gt; (A,S)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">* 我们也可以将泛化的组合子定义为一个class。**State[+A,S]中定义的函数是实现函数式风格的任何状态机或带状态程序所需的全部工具。**</div></pre></td></tr></table></figure></p>
-<p>case class State<a href="run: S =&gt; (A,S" target="_blank" rel="external">+A,S</a>) extends AnyVal{</p>
-<p>  def map<a href="f: A =&gt; B" target="_blank" rel="external">B</a>: State[B,S] = State(<br>    s =&gt; {<br>      val (i,r) = run(s)<br>      (f(i),r)<br>    })</p>
-<p>  def map2<a href="b: State[B,S]" target="_blank" rel="external">B,C</a>(f: (A,B) =&gt; C): State[C,S] = State(<br>    s =&gt; {<br>      val (v1,s1) = run(s)<br>      val (v2,s2) = b.run(s1)<br>      (f(v1,v2),s2)<br>    })</p>
-<p>  //def _map2<a href="b: State[B,S]" target="_blank" rel="external">B,C</a>(f: (A,B) =&gt; C): State[C,S] =<br>  //  flatMap(x =&gt; b.map(y =&gt; f((x,y))))</p>
-<p>  def flatMap<a href="f: A =&gt; State[B,S]" target="_blank" rel="external">B</a>: State[B,S] = State(<br>    s =&gt; {<br>      val (v,s1) = run(s)<br>      f(v).run(s1)<br>    })<br>}</p>
-<p>object State{</p>
-<p>  def unit<a href="x: A" target="_blank" rel="external">A,S</a>: State[A,S] = State(s =&gt; (x,s))<br>  def sequence<a href="ls: List[State[A,S]]" target="_blank" rel="external">A,S</a>: State[List[A],S] =<br>    List.foldRight(ls,unit<a href="List(">List[A],S</a>))((x,y) =&gt; x.map2(y)(Cons(<em>,</em>)))</p>
-<p>  def modify<a href="f: S =&gt; S" target="_blank" rel="external">S</a>: State[Unit,S] = for {<br>    s &lt;- get  //获取当前状态分配给s<br>    _ &lt;- set(f(s)) //设置新状态<br>  } yield ()</p>
-<p>  def get[S]: State[S,S] = State(s =&gt; (s,s))<br>  def set<a href="s: S" target="_blank" rel="external">S</a>: State[Unit,S] = State(_ =&gt; ((), s))<br>}</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">#### 应用实例</div><div class="line">* 题目</div><div class="line">&lt;p&gt;EXERCISE 13 (hard): To gain experience with the use of State, implement a simulation of a simple candy dispenser. The machine has two types of input: You can insert a coin, or you can turn the knob to dispense candy. It can be in one of two states: locked or unlocked. It also tracks how many candies are left and how many coins it contains.&lt;/p&gt;</div><div class="line"></div><div class="line">![image](http://oxaz2p2ac.bkt.clouddn.com/Screen%20Shot%202017-10-04%20at%2010.21.02%20PM.png)</div><div class="line"></div><div class="line">* 标准答案: https://github.com/fpinscala/fpinscala/blob/master/answerkey/state/11.answer.scala</div><div class="line">* 我的解法: https://github.com/haiboself/Scala-learning/tree/master/src/PureFunctionalState</div><div class="line">* 参考资料：</div><div class="line">    * https://stackoverflow.com/questions/41012375/functional-programing-in-scala-simulatemachine/41328969#41328969</div><div class="line">    * https://groups.google.com/forum/#!topic/scala-functional/8iHaSFPPjgw</div></pre></td></tr></table></figure>
-<p>package PureFunctionalState</p>
-<p>import datastruct._</p>
-<p>sealed trait Input<br>case object Coin extends Input<br>case object Turn extends Input</p>
-<p>case class Machine(locked: Boolean, candies: Int, coins: Int) {</p>
-<p>  /** 有副作用的实现</p>
-<pre><code>* 实际上Machine的状态就是自己的属性,所以返回值类型Machine实际上既是值又是状态
-* 所以这个实现应该可以看作纯函数式的实现
-*/
-</code></pre><p>  def simulateMachine(inputs: List[Input]): Machine = {<br>    List.foldLeft(inputs,Machine(locked,candies,coins))((x, y) =&gt; (x,y) match {<br>      case (Coin,Machine(true,cands,x)) if cands&gt;0 =&gt; Machine(false,cands,x)<br>      case (Turn,Machine(false,cands,x)) if cands&gt;0 =&gt; Machine(true,cands-1,x+1)<br>      case _ =&gt; y<br>    }<br>    )<br>  }</p>
-<p>  /** 纯函数式实现。</p>
-<pre><code>* modify返回State[Unit,Machine]。modify从旧状态生成新状态,也就是据inputs的每个输入得到一个新的Machine
-* map返回List[State[Unit,Machine]]
-* sequence返回State[List[Unit],Machine]
-*/
-</code></pre><p>  def simulateMachine3(inputs: List[Input]): State[(Int, Int),Machine] = for {<br>    <em> &lt;- State.sequence(List.map(inputs)(i =&gt; State.modify((s: Machine) =&gt; (i, s) match {<br>      case (</em>, Machine(<em>, 0, </em>)) =&gt; s<br>      case (Coin, Machine(false, <em>, </em>)) =&gt; s<br>      case (Turn, Machine(true, <em>, </em>)) =&gt; s<br>      case (Coin, Machine(true, candy, coin)) =&gt;<br>        Machine(false, candy, coin + 1)<br>      case (Turn, Machine(false, candy, coin)) =&gt;<br>        Machine(true, candy - 1, coin)<br>    })))<br>    s &lt;- State.get<br>  } yield (s.candies, s.coins)</p>
-<p>}</p>
-<p>object TestMachine{<br>  def main(args: Array[String]): Unit = {<br>    val machine = Machine(true,10,0)<br>    val ls = List(Coin,Turn,Turn,Coin,Turn,Coin,Coin,Turn)</p>
-<pre><code>println(machine.simulateMachine(ls))
-println(machine.simulateMachine3(ls).run(machine))
-</code></pre><p>  }<br>}<br>```</p>
+<h4 id="使用组合子来组合状态行为："><a href="#使用组合子来组合状态行为：" class="headerlink" title="使用组合子来组合状态行为："></a>使用组合子来组合状态行为：</h4><ul>
+<li>即对于有状态的函数，首先将其参数和返回值包装为组合子。然后通过map,flatMap等来以纯函数的形式实现该函数。其中f,g等即该函数。</li>
+<li>一个状态行为: s(rng1: RNG)返回(v: Int,rng2: RNG)</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">def map[A,B](s: Rand[A])(f: A =&gt; B): Rand[B] = </div><div class="line">    rng1 =&gt; &#123;</div><div class="line">        val (v,rng2) = s(rng1)</div><div class="line">        (f(v),rng2)</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">def flatMap[A,B](f: Rand[A)(g: A =&gt; Rand[B]): Rand[B] = </div><div class="line">    rng =&gt; &#123;</div><div class="line">        (v,r) = f(rng)</div><div class="line">        g(v)(r)</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>组合2个状态行为:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A,B) =&gt; C): Rand[c] = </div><div class="line">    rng1 =&gt; &#123;</div><div class="line">        val (v1,rng2) = ra(rng1)</div><div class="line">        val (v2,rng3) = rb(rng2)</div><div class="line">        (f(v1,v2),rng3)</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>组合一序列状态行为：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">def unit[A](a: A): Rand[A] = rng =&gt; (a,rng)</div><div class="line"></div><div class="line">def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =</div><div class="line">    List.foldRight(fs,unit(List[A())))((x,y) =&gt; map2(x,y)((a,b) =&gt; Cons(a,b)))</div></pre></td></tr></table></figure>
+<h4 id="通用的状态行为数据类型"><a href="#通用的状态行为数据类型" class="headerlink" title="通用的状态行为数据类型"></a>通用的状态行为数据类型</h4><ul>
+<li><p>前边组合子状态是类型RNG。我们来把组合子泛化。S表示任何状态。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">type State[+A,S] = S =&gt; (A,S)</div></pre></td></tr></table></figure>
+</li>
+<li><p>我们也可以将泛化的组合子定义为一个class。<strong>State[+A,S]中定义的函数是实现函数式风格的任何状态机或带状态程序所需的全部工具。</strong></p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line">case class State[+A,S](run: S =&gt; (A,S)) extends AnyVal&#123;</div><div class="line">  </div><div class="line">  def map[B](f: A =&gt; B): State[B,S] = State(</div><div class="line">    s =&gt; &#123;</div><div class="line">      val (i,r) = run(s)</div><div class="line">      (f(i),r)</div><div class="line">    &#125;)</div><div class="line"></div><div class="line">  def map2[B,C](b: State[B,S])(f: (A,B) =&gt; C): State[C,S] = State(</div><div class="line">    s =&gt; &#123;</div><div class="line">      val (v1,s1) = run(s)</div><div class="line">      val (v2,s2) = b.run(s1)</div><div class="line">      (f(v1,v2),s2)</div><div class="line">    &#125;)</div><div class="line"></div><div class="line">  //def _map2[B,C](b: State[B,S])(f: (A,B) =&gt; C): State[C,S] =</div><div class="line">  //  flatMap(x =&gt; b.map(y =&gt; f((x,y))))</div><div class="line"></div><div class="line"></div><div class="line">  def flatMap[B](f: A =&gt; State[B,S]): State[B,S] = State(</div><div class="line">    s =&gt; &#123;</div><div class="line">      val (v,s1) = run(s)</div><div class="line">      f(v).run(s1)</div><div class="line">    &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line">object State&#123;</div><div class="line"></div><div class="line">  def unit[A,S](x: A): State[A,S] = State(s =&gt; (x,s))</div><div class="line">  def sequence[A,S](ls: List[State[A,S]]): State[List[A],S] =</div><div class="line">    List.foldRight(ls,unit[List[A],S](List()))((x,y) =&gt; x.map2(y)(Cons(_,_)))</div><div class="line"></div><div class="line">  def modify[S](f: S =&gt; S): State[Unit,S] = for &#123;</div><div class="line">    s &lt;- get  //获取当前状态分配给s</div><div class="line">    _ &lt;- set(f(s)) //设置新状态</div><div class="line">  &#125; yield ()</div><div class="line"></div><div class="line">  def get[S]: State[S,S] = State(s =&gt; (s,s))</div><div class="line">  def set[S](s: S): State[Unit,S] = State(_ =&gt; ((), s))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="应用实例"><a href="#应用实例" class="headerlink" title="应用实例"></a>应用实例</h4><ul>
+<li>题目<p>EXERCISE 13 (hard): To gain experience with the use of State, implement a simulation of a simple candy dispenser. The machine has two types of input: You can insert a coin, or you can turn the knob to dispense candy. It can be in one of two states: locked or unlocked. It also tracks how many candies are left and how many coins it contains.</p>
 
+</li>
+</ul>
+<p><img src="http://oxaz2p2ac.bkt.clouddn.com/Screen%20Shot%202017-10-04%20at%2010.21.02%20PM.png" alt="image"></p>
+<ul>
+<li><a href="https://github.com/haiboself/Scala-learning/tree/master/src/PureFunctionalState" target="_blank" rel="external">我的解法</a></li>
+<li><a href="https://github.com/fpinscala/fpinscala/blob/master/answerkey/state/11.answer.scala" target="_blank" rel="external">标准答案</a></li>
+<li>参考资料：<ul>
+<li><a href="https://stackoverflow.com/questions/41012375/functional-programing-in-scala-simulatemachine/41328969#41328969" target="_blank" rel="external">StackOverflow</a></li>
+<li><a href="https://groups.google.com/forum/#!topic/scala-functional/8iHaSFPPjgw" target="_blank" rel="external">GoogleGroup</a></li>
+</ul>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line">package PureFunctionalState</div><div class="line"></div><div class="line">import datastruct._</div><div class="line"></div><div class="line">sealed trait Input</div><div class="line">case object Coin extends Input</div><div class="line">case object Turn extends Input</div><div class="line"></div><div class="line">case class Machine(locked: Boolean, candies: Int, coins: Int) &#123;</div><div class="line"></div><div class="line">  </div><div class="line">  /** 有副作用的实现</div><div class="line">    * 实际上Machine的状态就是自己的属性,所以返回值类型Machine实际上既是值又是状态</div><div class="line">    * 所以这个实现应该可以看作纯函数式的实现</div><div class="line">    */</div><div class="line">  def simulateMachine(inputs: List[Input]): Machine = &#123;</div><div class="line">    List.foldLeft(inputs,Machine(locked,candies,coins))((x, y) =&gt; (x,y) match &#123;</div><div class="line">      case (Coin,Machine(true,cands,x)) if cands&gt;0 =&gt; Machine(false,cands,x)</div><div class="line">      case (Turn,Machine(false,cands,x)) if cands&gt;0 =&gt; Machine(true,cands-1,x+1)</div><div class="line">      case _ =&gt; y</div><div class="line">    &#125;</div><div class="line">    )</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  /** 纯函数式实现。</div><div class="line">    * modify返回State[Unit,Machine]。modify从旧状态生成新状态,也就是据inputs的每个输入得到一个新的Machine</div><div class="line">    * map返回List[State[Unit,Machine]]</div><div class="line">    * sequence返回State[List[Unit],Machine]</div><div class="line">    */</div><div class="line">  def simulateMachine3(inputs: List[Input]): State[(Int, Int),Machine] = for &#123;</div><div class="line">    _ &lt;- State.sequence(List.map(inputs)(i =&gt; State.modify((s: Machine) =&gt; (i, s) match &#123;</div><div class="line">      case (_, Machine(_, 0, _)) =&gt; s</div><div class="line">      case (Coin, Machine(false, _, _)) =&gt; s</div><div class="line">      case (Turn, Machine(true, _, _)) =&gt; s</div><div class="line">      case (Coin, Machine(true, candy, coin)) =&gt;</div><div class="line">        Machine(false, candy, coin + 1)</div><div class="line">      case (Turn, Machine(false, candy, coin)) =&gt;</div><div class="line">        Machine(true, candy - 1, coin)</div><div class="line">    &#125;)))</div><div class="line">    s &lt;- State.get</div><div class="line">  &#125; yield (s.candies, s.coins)</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line">object TestMachine&#123;</div><div class="line">  def main(args: Array[String]): Unit = &#123;</div><div class="line">    val machine = Machine(true,10,0)</div><div class="line">    val ls = List(Coin,Turn,Turn,Coin,Turn,Coin,Coin,Turn)</div><div class="line"></div><div class="line">    println(machine.simulateMachine(ls))</div><div class="line">    println(machine.simulateMachine3(ls).run(machine))</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
       
     </div>
     
@@ -611,7 +614,7 @@ println(machine.simulateMachine3(ls).run(machine))
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#scala函数式编程-纯函数式编程读书笔记"><span class="nav-number">1.</span> <span class="nav-text">scala函数式编程:纯函数式编程读书笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Overview："><span class="nav-number">1.1.</span> <span class="nav-text">Overview：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#组合子："><span class="nav-number">1.2.</span> <span class="nav-text">组合子：</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#scala函数式编程-纯函数式编程读书笔记"><span class="nav-number">1.</span> <span class="nav-text">scala函数式编程:纯函数式编程读书笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Overview："><span class="nav-number">1.1.</span> <span class="nav-text">Overview：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#组合子："><span class="nav-number">1.2.</span> <span class="nav-text">组合子：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用组合子来组合状态行为："><span class="nav-number">1.3.</span> <span class="nav-text">使用组合子来组合状态行为：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通用的状态行为数据类型"><span class="nav-number">1.4.</span> <span class="nav-text">通用的状态行为数据类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#应用实例"><span class="nav-number">1.5.</span> <span class="nav-text">应用实例</span></a></li></ol></li></ol></div>
             
 
           </div>
