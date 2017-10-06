@@ -79,19 +79,19 @@
 
 
 
-<meta name="description" content="scala函数式编程:纯函数式编程读书笔记Overview： 带状态的方法的声明式实现可能带有副作用，难以保持引用透明。 以纯函数式的方式实现带状态的函数的关键在于让状态更新是显式的，不要以副作用方式更新状态，而是连同生成的值一起返回一个新的状态。即把状态的隐式更改暴露出去。 例：函数nextInt返回改变后的新状态nextRNG1234567891011121314151617181920212">
+<meta name="description" content="scala函数式编程:纯函数状态读书笔记Overview： 带状态的方法的声明式实现可能带有副作用，难以保持引用透明。 以纯函数式的方式实现带状态的函数的关键在于让状态更新是显式的，不要以副作用方式更新状态，而是连同生成的值一起返回一个新的状态。即把状态的隐式更改暴露出去。 例：函数nextInt返回改变后的新状态nextRNG12345678910111213141516171819202122">
 <meta name="keywords" content="scala">
 <meta property="og:type" content="article">
 <meta property="og:title" content="scala函数式编程:纯函数式状态读书笔记">
 <meta property="og:url" content="http://journeyman.top/2017/10/04/PurelyFunctionalState/index.html">
 <meta property="og:site_name" content="One Journeyman">
-<meta property="og:description" content="scala函数式编程:纯函数式编程读书笔记Overview： 带状态的方法的声明式实现可能带有副作用，难以保持引用透明。 以纯函数式的方式实现带状态的函数的关键在于让状态更新是显式的，不要以副作用方式更新状态，而是连同生成的值一起返回一个新的状态。即把状态的隐式更改暴露出去。 例：函数nextInt返回改变后的新状态nextRNG1234567891011121314151617181920212">
+<meta property="og:description" content="scala函数式编程:纯函数状态读书笔记Overview： 带状态的方法的声明式实现可能带有副作用，难以保持引用透明。 以纯函数式的方式实现带状态的函数的关键在于让状态更新是显式的，不要以副作用方式更新状态，而是连同生成的值一起返回一个新的状态。即把状态的隐式更改暴露出去。 例：函数nextInt返回改变后的新状态nextRNG12345678910111213141516171819202122">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="http://oxaz2p2ac.bkt.clouddn.com/Screen%20Shot%202017-10-04%20at%2010.21.02%20PM.png">
-<meta property="og:updated_time" content="2017-10-05T05:38:22.000Z">
+<meta property="og:updated_time" content="2017-10-06T15:17:52.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="scala函数式编程:纯函数式状态读书笔记">
-<meta name="twitter:description" content="scala函数式编程:纯函数式编程读书笔记Overview： 带状态的方法的声明式实现可能带有副作用，难以保持引用透明。 以纯函数式的方式实现带状态的函数的关键在于让状态更新是显式的，不要以副作用方式更新状态，而是连同生成的值一起返回一个新的状态。即把状态的隐式更改暴露出去。 例：函数nextInt返回改变后的新状态nextRNG1234567891011121314151617181920212">
+<meta name="twitter:description" content="scala函数式编程:纯函数状态读书笔记Overview： 带状态的方法的声明式实现可能带有副作用，难以保持引用透明。 以纯函数式的方式实现带状态的函数的关键在于让状态更新是显式的，不要以副作用方式更新状态，而是连同生成的值一起返回一个新的状态。即把状态的隐式更改暴露出去。 例：函数nextInt返回改变后的新状态nextRNG12345678910111213141516171819202122">
 <meta name="twitter:image" content="http://oxaz2p2ac.bkt.clouddn.com/Screen%20Shot%202017-10-04%20at%2010.21.02%20PM.png">
 
 
@@ -369,7 +369,7 @@
       
 
       
-        <h3 id="scala函数式编程-纯函数式编程读书笔记"><a href="#scala函数式编程-纯函数式编程读书笔记" class="headerlink" title="scala函数式编程:纯函数式编程读书笔记"></a>scala函数式编程:纯函数式编程读书笔记</h3><h4 id="Overview："><a href="#Overview：" class="headerlink" title="Overview："></a>Overview：</h4><ul>
+        <h3 id="scala函数式编程-纯函数状态读书笔记"><a href="#scala函数式编程-纯函数状态读书笔记" class="headerlink" title="scala函数式编程:纯函数状态读书笔记"></a>scala函数式编程:纯函数状态读书笔记</h3><h4 id="Overview："><a href="#Overview：" class="headerlink" title="Overview："></a>Overview：</h4><ul>
 <li>带状态的方法的声明式实现可能带有副作用，难以保持引用透明。</li>
 <li>以纯函数式的方式实现带状态的函数的关键在于让状态更新是显式的，不要以副作用方式更新状态，而是<strong>连同生成的值一起返回一个新的状态</strong>。即<strong>把状态的隐式更改暴露出去。</strong></li>
 <li>例：函数nextInt返回改变后的新状态nextRNG<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">trait RNG&#123;</div><div class="line">  def nextInt: (Int,RNG)</div><div class="line">&#125;</div><div class="line"></div><div class="line">case class SimpleRNG(seed: Long) extends RNG&#123;</div><div class="line">  //返回一个随机Int值,纯函数式实现,返回新的SimpleRNG</div><div class="line">  def nextInt: (Int,RNG) = &#123;</div><div class="line">    val newSeed = (seed * 0x5DEECE66DL + 0xBL) &amp; 0xFFFFFFFFL</div><div class="line">    val nextRNG = SimpleRNG(newSeed)</div><div class="line">    val n = (newSeed &gt;&gt;&gt; 16).toInt</div><div class="line"></div><div class="line">    (n, nextRNG)</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  //带有副作用的实现,currentSeed的更新是隐含的</div><div class="line">  val currentSeed = seed</div><div class="line">  def nextInt2: Int = &#123;</div><div class="line">    val newSeed = (currentTime * 0x5DEECE66DL + 0xBL) &amp; 0xFFFFFFFFL</div><div class="line">    currentSeed = newSeed</div><div class="line">    val n = (newSeed &gt;&gt;&gt; 16).toInt</div><div class="line"></div><div class="line">    n</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
@@ -619,7 +619,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#scala函数式编程-纯函数式编程读书笔记"><span class="nav-number">1.</span> <span class="nav-text">scala函数式编程:纯函数式编程读书笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Overview："><span class="nav-number">1.1.</span> <span class="nav-text">Overview：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#组合子："><span class="nav-number">1.2.</span> <span class="nav-text">组合子：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用组合子来组合状态行为："><span class="nav-number">1.3.</span> <span class="nav-text">使用组合子来组合状态行为：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通用的状态行为数据类型"><span class="nav-number">1.4.</span> <span class="nav-text">通用的状态行为数据类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#应用实例"><span class="nav-number">1.5.</span> <span class="nav-text">应用实例</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#scala函数式编程-纯函数状态读书笔记"><span class="nav-number">1.</span> <span class="nav-text">scala函数式编程:纯函数状态读书笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Overview："><span class="nav-number">1.1.</span> <span class="nav-text">Overview：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#组合子："><span class="nav-number">1.2.</span> <span class="nav-text">组合子：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用组合子来组合状态行为："><span class="nav-number">1.3.</span> <span class="nav-text">使用组合子来组合状态行为：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通用的状态行为数据类型"><span class="nav-number">1.4.</span> <span class="nav-text">通用的状态行为数据类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#应用实例"><span class="nav-number">1.5.</span> <span class="nav-text">应用实例</span></a></li></ol></li></ol></div>
             
 
           </div>
