@@ -272,6 +272,197 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://journeyman.top/2017/10/07/HandlingErrorsWithoutException/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ji Lian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/curry.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="One Journeyman">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/10/07/HandlingErrorsWithoutException/" itemprop="url">HandlingErrorsWithoutException</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-07T20:06:48+08:00">
+                2017-10-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Scala/" itemprop="url" rel="index">
+                    <span itemprop="name">Scala</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="scala函数式编程：不使用异常进行错误处理笔记"><a href="#scala函数式编程：不使用异常进行错误处理笔记" class="headerlink" title="scala函数式编程：不使用异常进行错误处理笔记"></a>scala函数式编程：不使用异常进行错误处理笔记</h3><h4 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h4><ul>
+<li>引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。</li>
+<li>问题：<ul>
+<li>异常依赖上下文,需要全局推导。<ul>
+<li>即异常与其所在try块和catch块有依赖关系。</li>
+<li>所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用</li>
+</ul>
+</li>
+<li>异常不是类型安全的,如果不处理异常,直到运行才能发现异常。</li>
+</ul>
+</li>
+<li>好处：<ul>
+<li>一场最主要的好处：整合集中的错误处理逻辑。</li>
+</ul>
+</li>
+</ul>
+<h4 id="不使用异常的方案"><a href="#不使用异常的方案" class="headerlink" title="不使用异常的方案"></a>不使用异常的方案</h4><ul>
+<li>替代抛出异常：<strong>以值的方式返回错误</strong>，类似于错误吗。但是我们可以为错误定义一个类Option，来包含更多的信息</li>
+<li>用普通的值表现失败和异常,通过高阶函数(Option中的各种函数)抽象出错误处理和恢复的常用模式。这样统一了错误处理逻辑。</li>
+<li>错误处理逻辑放哪？<ul>
+<li><strong>能推迟(Option中的函数都利用模式匹配做了None时的处理,使用Option的调用链就可以推迟错误处理逻辑)决定如何处理未定义的情况</strong>，可以在最合适的时候去处理。</li>
+<li>类型安全：因为得到的结果Option[A]和调用者需要的A不是一个类型,所以调用者必做处理。</li>
+</ul>
+</li>
+</ul>
+<h4 id="函数提升"><a href="#函数提升" class="headerlink" title="函数提升"></a>函数提升</h4><ul>
+<li><code>def lift[A,B](f: A =&gt; B): Option[A] =&gt; Option[B] = x:Option[A] =&gt; x.map(f)</code><ul>
+<li>map: (Option[A],f) =&gt; Optoin[B]等价于Option[A] =&gt; f =&gt; Option[B]</li>
+<li>map: f =&gt; Option[A] =&gt; Option[B]</li>
+<li>所以map就是一个把发f:A=&gt;B变为f:Option[A] =&gt; Option[B]的函数。</li>
+</ul>
+</li>
+<li>这意味着已存在普通函数都可以转换成在一个Option值的上下文里进行操作的函数。</li>
+<li>通过使用Option中的map,flatMap等将函数来提升函数f,<strong>其实就是在f的执行逻辑上包了一层Option中的模式匹配如<code>case Some(x) =&gt; f(x); case None =&gt; None</code></strong></li>
+</ul>
+<h4 id="for推导"><a href="#for推导" class="headerlink" title="for推导"></a>for推导</h4><ul>
+<li>for推导是语法糖。它会自动展开为一系列的flatMap和map调用。</li>
+<li>实际上一系列的flatMap嵌套最终会组成一个大函数,因为要先通过参数调用函数,所以一层层由外向里求值。map和flatMap都是把Option中的值拿出来参与世纪运算。</li>
+<li>编译器会把绑定操作的语法糖转换为flatMap操作,对最后一个绑定和yield会转换为map调用。</li>
+</ul>
+<h4 id="Either"><a href="#Either" class="headerlink" title="Either"></a>Either</h4><ul>
+<li>Either有2个值，一个表示成功，一个表示失败。这是区别与Option的失败值是None的地方。</li>
+<li>Either在失败时可以提供更多信息。而Option只能提供None值。None值的含义需要调用者自己去解释。</li>
+<li>如果需要错误发生时的堆栈信息，将异常存入Either返回即可。</li>
+<li>Either只能表示一个错误信息，如果要表示多个，可以把错误信息组织称一个List。即<br><code>Left[E](es: List[E])</code></li>
+</ul>
+<h4 id="习题4-7"><a href="#习题4-7" class="headerlink" title="习题4.7"></a>习题4.7</h4><ul>
+<li>对Either实现sequence和tranverse。<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">def sequence[E,A](es: List[Either[E,A]]): Either[E,List[A]] =</div><div class="line">    List.foldRightr(es,Right(Nil: List[A]))((x,y) =&gt; x match &#123;</div><div class="line">      case Left(v) =&gt; y</div><div class="line">      case Right(v) =&gt; Right(Cons(v,y.value))</div><div class="line">    &#125;)</div><div class="line"></div><div class="line">  def sequence2[E,A](es: List[Either[E,A]]): Either[E,List[A]] =</div><div class="line">    es match &#123;</div><div class="line">      case Nil =&gt; Right(Nil)</div><div class="line">      case Cons(h,t) =&gt; h.map2(sequence2(t))((x,y) =&gt; Cons(x,y))</div><div class="line">    &#125;</div><div class="line"></div><div class="line">  def traverse[E,A,B](as: List[A])(f: A =&gt; Either[E,B]): Either[E,List[B]] =</div><div class="line">    as match &#123;</div><div class="line">      case Nil =&gt; Right(Nil)</div><div class="line">      case Cons(h,t) =&gt; (f(h) map2 traverse(t)(f))((x,y) =&gt; Cons(x,y))</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://journeyman.top/2017/10/06/StrictnessAndLaziness/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1143,7 +1334,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
