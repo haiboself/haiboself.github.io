@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="scala函数式编程：不使用异常进行错误处理笔记异常 引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。 问题： 异常依赖上下文,需要全局推导。 即异常与其所在try块和catch块有依赖关系。 所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用   异常不是类型安全的,如果不处理异常,直到运行才能发现异常。   好处： 一场最主要的好处：整合集中的错误处理逻辑。">
+<meta name="description" content="scala函数式编程：不使用异常进行错误处理笔记异常 引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。 问题： 异常依赖上下文,需要全局推导。 即异常与其所在try块和catch块有依赖关系。 所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用   异常不是类型安全的,如果不处理异常,直到运行才能发现异常。   好处： 异常最主要的好处：整合集中的错误处理逻辑。">
 <meta name="keywords" content="scala">
 <meta property="og:type" content="article">
 <meta property="og:title" content="HandlingErrorsWithoutException">
 <meta property="og:url" content="http://journeyman.top/2017/10/07/HandlingErrorsWithoutException/index.html">
 <meta property="og:site_name" content="One Journeyman">
-<meta property="og:description" content="scala函数式编程：不使用异常进行错误处理笔记异常 引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。 问题： 异常依赖上下文,需要全局推导。 即异常与其所在try块和catch块有依赖关系。 所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用   异常不是类型安全的,如果不处理异常,直到运行才能发现异常。   好处： 一场最主要的好处：整合集中的错误处理逻辑。">
+<meta property="og:description" content="scala函数式编程：不使用异常进行错误处理笔记异常 引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。 问题： 异常依赖上下文,需要全局推导。 即异常与其所在try块和catch块有依赖关系。 所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用   异常不是类型安全的,如果不处理异常,直到运行才能发现异常。   好处： 异常最主要的好处：整合集中的错误处理逻辑。">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2017-10-07T12:11:02.000Z">
+<meta property="og:updated_time" content="2017-10-07T12:32:57.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="HandlingErrorsWithoutException">
-<meta name="twitter:description" content="scala函数式编程：不使用异常进行错误处理笔记异常 引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。 问题： 异常依赖上下文,需要全局推导。 即异常与其所在try块和catch块有依赖关系。 所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用   异常不是类型安全的,如果不处理异常,直到运行才能发现异常。   好处： 一场最主要的好处：整合集中的错误处理逻辑。">
+<meta name="twitter:description" content="scala函数式编程：不使用异常进行错误处理笔记异常 引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。 问题： 异常依赖上下文,需要全局推导。 即异常与其所在try块和catch块有依赖关系。 所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用   异常不是类型安全的,如果不处理异常,直到运行才能发现异常。   好处： 异常最主要的好处：整合集中的错误处理逻辑。">
 
 
 
@@ -379,7 +379,7 @@
 </ul>
 </li>
 <li>好处：<ul>
-<li>一场最主要的好处：整合集中的错误处理逻辑。</li>
+<li>异常最主要的好处：整合集中的错误处理逻辑。</li>
 </ul>
 </li>
 </ul>
