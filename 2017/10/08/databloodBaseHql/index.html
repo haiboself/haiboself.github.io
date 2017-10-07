@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="预备知识 表级数据血缘：数据表的派生关系。 Hql: hive sql 通过hive的hql parser在AST(抽象语法树)层级操作 如果需要做字段血缘,在AST级别是可以完成的,不过需要熟悉大量的hql语法规则和其在ast中的实际表示。 耳闻hiv的ast并不好,也许是积重难返吧,新语法规则的引入必然要和旧的规则做妥协。可以换用spark sql的parser或者presto的parser。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Hql的表级数据血缘">
+<meta property="og:url" content="http://journeyman.top/2017/10/08/databloodBaseHql/index.html">
+<meta property="og:site_name" content="One Journeyman">
+<meta property="og:description" content="预备知识 表级数据血缘：数据表的派生关系。 Hql: hive sql 通过hive的hql parser在AST(抽象语法树)层级操作 如果需要做字段血缘,在AST级别是可以完成的,不过需要熟悉大量的hql语法规则和其在ast中的实际表示。 耳闻hiv的ast并不好,也许是积重难返吧,新语法规则的引入必然要和旧的规则做妥协。可以换用spark sql的parser或者presto的parser。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-10-07T16:07:33.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于Hql的表级数据血缘">
+<meta name="twitter:description" content="预备知识 表级数据血缘：数据表的派生关系。 Hql: hive sql 通过hive的hql parser在AST(抽象语法树)层级操作 如果需要做字段血缘,在AST级别是可以完成的,不过需要熟悉大量的hql语法规则和其在ast中的实际表示。 耳闻hiv的ast并不好,也许是积重难返吧,新语法规则的引入必然要和旧的规则做妥协。可以换用spark sql的parser或者presto的parser。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://journeyman.top/2017/10/08/databloodBaseHql/"/>
+
+
+
+
+
+  <title>基于Hql的表级数据血缘 | One Journeyman</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?33043728b082d2d83eab881e9ca2946f";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">One Journeyman</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://journeyman.top/2017/10/08/databloodBaseHql/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ji Lian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/curry.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="One Journeyman">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于Hql的表级数据血缘</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-08T00:02:12+08:00">
+                2017-10-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Bigdata/" itemprop="url" rel="index">
+                    <span itemprop="name">Bigdata</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> Views
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h4><ul>
+<li>表级数据血缘：数据表的派生关系。</li>
+<li>Hql: hive sql</li>
+<li>通过hive的hql parser在AST(抽象语法树)层级操作</li>
+<li>如果需要做字段血缘,在AST级别是可以完成的,不过需要熟悉大量的hql语法规则和其在ast中的实际表示。</li>
+<li>耳闻hiv的ast并不好,也许是积重难返吧,新语法规则的引入必然要和旧的规则做妥协。可以换用spark sql的parser或者presto的parser。</li>
+</ul>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><ul>
+<li><a href="https://tech.meituan.com/hive-sql-to-mapreduce.html" target="_blank" rel="external">hql的编译过程</a></li>
+<li><a href="http://backend.blog.163.com/blog/static/2022941262012525115638837/" target="_blank" rel="external">从Hive到Antlr，再到DFA</a></li>
+<li><a href="http://www.a-site.cn/article/84610.html" target="_blank" rel="external">AST抽象语法树</a></li>
+</ul>
+<h4 id="数据血缘"><a href="#数据血缘" class="headerlink" title="数据血缘"></a>数据血缘</h4><ul>
+<li>分析过程：<ul>
+<li>查看hql的官方文档,结合应用实例,分析确定存在血缘关系的hql有2种:<ul>
+<li>Create Table As Select (CTAS)</li>
+<li>Inserting data into Hive Tables from queries</li>
+</ul>
+</li>
+<li>了解基本的AST结构,分析上边2种hql的AST结构,从中抽取原表和目标表的对应关系。</li>
+</ul>
+</li>
+<li>hql获取：一种方式是通过hive hook的方式从hive server端获取。</li>
+<li>结论：搞清ast的结构,结果还是很清晰和简单的。</li>
+</ul>
+<h3 id="Create-Table-As-Select-CTAS"><a href="#Create-Table-As-Select-CTAS" class="headerlink" title="Create Table As Select (CTAS)"></a>Create Table As Select (CTAS)</h3><ul>
+<li>前置条件：create hql中除了destination table，其他所有出现的表都是source table。</li>
+<li><p>comman AST:</p>
+<ul>
+<li>所有的db_name.tb_name都存储在TOK_TABNAME节点下。</li>
+<li>将子查询的from子句展开后，每个表生成一个TOK_TABREF节点。 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">TOK_CREATETABLE:</div><div class="line">    TOK_TABNAME</div><div class="line">        db_name</div><div class="line">        tb_name</div><div class="line">    TOK_LIKETABLE:-&gt; [create like 可以从这入手]</div><div class="line">    TOK_QUERY:</div><div class="line">        TOK_FROM:</div><div class="line">            &#123;...&#125;</div><div class="line">        TOK_INSERT</div><div class="line">            &#123;...&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>pscode:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    AST = createAST From (sql : String);</div><div class="line">    root = getRootToken From (AST : Tree);</div><div class="line">    desc_table = getdest_table From  childWithName(root.childs,&apos;TOK_TABNAME&apos;)</div><div class="line">    query_sql = getQuerySql From childWithName(nodes = root.childs,&apos;TOK_QUERY&apos;)-&gt;&#123;</div><div class="line">        nodes.foreach(c -&gt; return getsql(c) if c is subquery else childWithName(nodes = c.childs,&apos;TOK_QUERY&apos;))&#125;</div><div class="line">    </div><div class="line">    AST = createAST From (query_sql : String);</div><div class="line">    source_tatbles : List = getSrcTb From (nodes = AST.root.childs,&apos;TOK_TABREF&apos;))&quot;) -&gt;&#123;</div><div class="line">        nodes.foreach(c -&gt; return getTb(c) if c is &apos;TOK_TABREF&apos; || c == null else childWithName(nodes = c.childs,&apos;TOK_TABREF&apos;))</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="select-hql"><a href="#select-hql" class="headerlink" title="select hql"></a>select hql</h3><ul>
+<li>select语句并不存在血缘关系,但是它是有血缘关系的hql的ast的子树。</li>
+<li>common AST<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">TOK_QUERY</div><div class="line">      TOK_FROM</div><div class="line">         TOK_TABREF</div><div class="line">            TOK_TABNAME</div><div class="line">               loan</div><div class="line">               gjj_basic</div><div class="line">      TOK_INSERT</div><div class="line">         TOK_DESTINATION</div><div class="line">            TOK_DIR</div><div class="line">               TOK_TMP_FILE</div><div class="line">         TOK_SELECT</div><div class="line">            TOK_SELEXPR</div><div class="line">               TOK_TABLE_OR_COL</div><div class="line">                  id</div><div class="line">            TOK_SELEXPR</div><div class="line">               TOK_TABLE_OR_COL</div><div class="line">                  name</div><div class="line">            TOK_SELEXPR</div><div class="line">               TOK_TABLE_OR_COL</div><div class="line">                  gender</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="Inserting-data-into-Hive-Tables-from-queries"><a href="#Inserting-data-into-Hive-Tables-from-queries" class="headerlink" title="Inserting data into Hive Tables from queries"></a>Inserting data into Hive Tables from queries</h3><ul>
+<li>insert语句的语法树是一致的形式。</li>
+<li>把单表插入和动态分区插入看作多表插入一种特殊形式,统一处理。</li>
+<li>think single table insert as an special situation of multi table inserts</li>
+<li><p>common AST:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line">from test1  </div><div class="line">    insert into table test2  </div><div class="line">    partition (age)  </div><div class="line">    select name,address,school,age  </div><div class="line">    insert overwrite table test3  </div><div class="line">    select name,address  </div><div class="line">    where age&gt;24;  </div><div class="line">    </div><div class="line">    TOK_QUERY</div><div class="line">      TOK_FROM</div><div class="line">         TOK_TABREF</div><div class="line">            TOK_TABNAME</div><div class="line">               test</div><div class="line">      TOK_INSERT</div><div class="line">         TOK_INSERT_INTO</div><div class="line">            TOK_TAB</div><div class="line">               TOK_TABNAME</div><div class="line">                  test2</div><div class="line">               TOK_PARTSPEC</div><div class="line">                  TOK_PARTVAL</div><div class="line">                     age</div><div class="line">         TOK_SELECT</div><div class="line">            TOK_SELEXPR</div><div class="line">               TOK_TABLE_OR_COL</div><div class="line">                  name</div><div class="line">            TOK_SELEXPR</div><div class="line">               TOK_TABLE_OR_COL</div><div class="line">                  address</div><div class="line">            TOK_SELEXPR</div><div class="line">               TOK_TABLE_OR_COL</div><div class="line">                  school</div><div class="line">            TOK_SELEXPR</div><div class="line">               TOK_TABLE_OR_COL</div><div class="line">                  age</div><div class="line">      TOK_INSERT</div><div class="line">         TOK_DESTINATION</div><div class="line">            TOK_TAB</div><div class="line">               TOK_TABNAME</div><div class="line">                  test3</div><div class="line">         TOK_SELECT</div><div class="line">            TOK_SELEXPR</div><div class="line">               TOK_TABLE_OR_COL</div><div class="line">                  name</div><div class="line">            TOK_SELEXPR</div><div class="line">               TOK_TABLE_OR_COL</div><div class="line">                  address</div><div class="line">         TOK_WHERE</div><div class="line">            &gt;</div><div class="line">               TOK_TABLE_OR_COL</div><div class="line">                  age</div><div class="line">               24</div></pre></td></tr></table></figure>
+</li>
+<li><p>pscode:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">source_table[] = all TOK_TABREF in TOK_QUERY</div><div class="line">desc_table[]   = all TOK_TAB in all TOK_INSERT</div></pre></td></tr></table></figure>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/07/HandlingErrorsWithoutException/" rel="next" title="HandlingErrorsWithoutException">
+                <i class="fa fa-chevron-left"></i> HandlingErrorsWithoutException
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/curry.jpg"
+                alt="Ji Lian" />
+            
+              <p class="site-author-name" itemprop="name">Ji Lian</p>
+              <p class="site-description motion-element" itemprop="description">A Pragmatic Programmer</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/haiboself" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://stackoverflow.com/users/6813668/bo-hai" target="_blank" title="StackOverflow">
+                    
+                      <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=298 height=52 src="//music.163.com/outchain/player?type=0&id=397511615&auto=1&height=32"></iframe>
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#预备知识"><span class="nav-number">1.</span> <span class="nav-text">预备知识</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#参考"><span class="nav-number">2.</span> <span class="nav-text">参考</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据血缘"><span class="nav-number">3.</span> <span class="nav-text">数据血缘</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Create-Table-As-Select-CTAS"><span class="nav-number"></span> <span class="nav-text">Create Table As Select (CTAS)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#select-hql"><span class="nav-number"></span> <span class="nav-text">select hql</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Inserting-data-into-Hive-Tables-from-queries"><span class="nav-number"></span> <span class="nav-text">Inserting data into Hive Tables from queries</span></a></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ji Lian</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
