@@ -365,58 +365,23 @@
       
         
           
-            <h3 id="scala函数式编程：不使用异常进行错误处理笔记"><a href="#scala函数式编程：不使用异常进行错误处理笔记" class="headerlink" title="scala函数式编程：不使用异常进行错误处理笔记"></a>scala函数式编程：不使用异常进行错误处理笔记</h3><h4 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h4><ul>
-<li>引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。</li>
-<li>问题：<ul>
-<li>异常依赖上下文,需要全局推导。<ul>
-<li>即异常与其所在try块和catch块有依赖关系。</li>
-<li>所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用</li>
-</ul>
-</li>
-<li>异常不是类型安全的,如果不处理异常,直到运行才能发现异常。</li>
-</ul>
-</li>
-<li>好处：<ul>
-<li>异常最主要的好处：整合集中的错误处理逻辑。</li>
-</ul>
-</li>
-</ul>
-<h4 id="不使用异常的方案"><a href="#不使用异常的方案" class="headerlink" title="不使用异常的方案"></a>不使用异常的方案</h4><ul>
-<li>替代抛出异常：<strong>以值的方式返回错误</strong>，类似于错误吗。但是我们可以为错误定义一个类Option，来包含更多的信息</li>
-<li>用普通的值表现失败和异常,通过高阶函数(Option中的各种函数)抽象出错误处理和恢复的常用模式。这样统一了错误处理逻辑。</li>
-<li>错误处理逻辑放哪？<ul>
-<li><strong>能推迟(Option中的函数都利用模式匹配做了None时的处理,使用Option的调用链就可以推迟错误处理逻辑)决定如何处理未定义的情况</strong>，可以在最合适的时候去处理。</li>
-<li>类型安全：因为得到的结果Option[A]和调用者需要的A不是一个类型,所以调用者必做处理。</li>
-</ul>
-</li>
-</ul>
-<h4 id="函数提升"><a href="#函数提升" class="headerlink" title="函数提升"></a>函数提升</h4><ul>
-<li><code>def lift[A,B](f: A =&gt; B): Option[A] =&gt; Option[B] = x:Option[A] =&gt; x.map(f)</code><ul>
-<li>map: (Option[A],f) =&gt; Optoin[B]等价于Option[A] =&gt; f =&gt; Option[B]</li>
-<li>map: f =&gt; Option[A] =&gt; Option[B]</li>
-<li>所以map就是一个把发f:A=&gt;B变为f:Option[A] =&gt; Option[B]的函数。</li>
-</ul>
-</li>
-<li>这意味着已存在普通函数都可以转换成在一个Option值的上下文里进行操作的函数。</li>
-<li>通过使用Option中的map,flatMap等将函数来提升函数f,<strong>其实就是在f的执行逻辑上包了一层Option中的模式匹配如<code>case Some(x) =&gt; f(x); case None =&gt; None</code></strong></li>
-</ul>
-<h4 id="for推导"><a href="#for推导" class="headerlink" title="for推导"></a>for推导</h4><ul>
-<li>for推导是语法糖。它会自动展开为一系列的flatMap和map调用。</li>
-<li>实际上一系列的flatMap嵌套最终会组成一个大函数,因为要先通过参数调用函数,所以一层层由外向里求值。map和flatMap都是把Option中的值拿出来参与世纪运算。</li>
-<li>编译器会把绑定操作的语法糖转换为flatMap操作,对最后一个绑定和yield会转换为map调用。</li>
-</ul>
-<h4 id="Either"><a href="#Either" class="headerlink" title="Either"></a>Either</h4><ul>
-<li>Either有2个值，一个表示成功，一个表示失败。这是区别与Option的失败值是None的地方。</li>
-<li>Either在失败时可以提供更多信息。而Option只能提供None值。None值的含义需要调用者自己去解释。</li>
-<li>如果需要错误发生时的堆栈信息，将异常存入Either返回即可。</li>
-<li>Either只能表示一个错误信息，如果要表示多个，可以把错误信息组织称一个List。即<br><code>Left[E](es: List[E])</code></li>
-</ul>
-<h4 id="习题4-7"><a href="#习题4-7" class="headerlink" title="习题4.7"></a>习题4.7</h4><ul>
-<li>对Either实现sequence和tranverse。<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">def sequence[E,A](es: List[Either[E,A]]): Either[E,List[A]] =</div><div class="line">    List.foldRightr(es,Right(Nil: List[A]))((x,y) =&gt; x match &#123;</div><div class="line">      case Left(v) =&gt; y</div><div class="line">      case Right(v) =&gt; Right(Cons(v,y.value))</div><div class="line">    &#125;)</div><div class="line"></div><div class="line">  def sequence2[E,A](es: List[Either[E,A]]): Either[E,List[A]] =</div><div class="line">    es match &#123;</div><div class="line">      case Nil =&gt; Right(Nil)</div><div class="line">      case Cons(h,t) =&gt; h.map2(sequence2(t))((x,y) =&gt; Cons(x,y))</div><div class="line">    &#125;</div><div class="line"></div><div class="line">  def traverse[E,A,B](as: List[A])(f: A =&gt; Either[E,B]): Either[E,List[B]] =</div><div class="line">    as match &#123;</div><div class="line">      case Nil =&gt; Right(Nil)</div><div class="line">      case Cons(h,t) =&gt; (f(h) map2 traverse(t)(f))((x,y) =&gt; Cons(x,y))</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
-</li>
-</ul>
+          scala函数式编程：不使用异常进行错误处理笔记异常
+引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。
+问题：
+异常依赖上下文,需要全局推导。
+即异常与其所在try块和catch块有依赖关系。
+所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用
 
-          
+
+异常不是类型安全的,如
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/10/07/HandlingErrorsWithoutException/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -556,170 +521,18 @@
       
         
           
-            <h3 id="scala函数式编程：严格求值与惰性求值笔记"><a href="#scala函数式编程：严格求值与惰性求值笔记" class="headerlink" title="scala函数式编程：严格求值与惰性求值笔记"></a>scala函数式编程：严格求值与惰性求值笔记</h3><h4 id="先验知识"><a href="#先验知识" class="headerlink" title="先验知识"></a>先验知识</h4><ul>
-<li>传名参数和传值参数：传值参数在函数调用之前表达式会被求值，传名参数在函数调用前表达式不会被求值，而是会被包裹成一个匿名函数作为函数参数传递下去，例如参数类型为无参函数的参数就是传名参数。</li>
-<li>function0是接受0个参数的函数类型。</li>
-<li>() =&gt; A和A是2种类型。() =&gt; A是个函数,A是个数据类型。</li>
-<li>=&gt; A 是 () =&gt; A的简写。 </li>
-<li>lazy关键字：<ul>
-<li>The difference between them is, that a <strong>val</strong> is executed when it is defined whereas a <strong>lazy val</strong> is executed when it is accessed the first time.</li>
-<li>例：<code>val x</code> 和 <code>lazy val x</code></li>
-</ul>
-</li>
-</ul>
-<h4 id="严格求值和非严格-惰性-求值"><a href="#严格求值和非严格-惰性-求值" class="headerlink" title="严格求值和非严格(惰性)求值"></a>严格求值和非严格(惰性)求值</h4><ul>
-<li>一个严格求值的函数总是对它的参数求值,<strong>即该参数会在函数被调用前求值。</strong></li>
-<li>给一个函数传递一个未求值的参数，在函数中引用的地方会被求值，即scala不会缓存未求值参数的求值结果。<strong>这是因为未求值的参数是一个匿名函数,每次引用相当于对该函数求值。可以用lazy关键字来显示地缓存这个值</strong>。</li>
-</ul>
-<h4 id="非严格求值函数"><a href="#非严格求值函数" class="headerlink" title="非严格求值函数"></a>非严格求值函数</h4><ul>
-<li>scala中非严格求值的函数接收的参数是传名参数而非传值参数。</li>
-<li><strong>scala中用() =&gt; A这种无参函数作为传名参数实现非严格求值函数。</strong></li>
-<li>on: () =&gt; A表示参数on非严格求值，其实是一个接受0个参数的函数，通常一个表达式的未求值形式称为chunk</li>
-<li>使用on()强制对on求值</li>
-</ul>
-<h4 id="一个非严格求值的例子"><a href="#一个非严格求值的例子" class="headerlink" title="一个非严格求值的例子"></a>一个非严格求值的例子</h4><ul>
-<li><code>Stream[A] = Cons(h: () =&gt; A, t: () =&gt; Stream[A])</code></li>
-<li>cons函数接受2个非严格求值参数。即<code>() =&gt; A和() =&gt; Stream[A]</code></li>
-<li>所以在apply中调用cons的时候,即as.head和apply(as.tail: <em>*)这2个参数会被系统包装为chunk。即相当于cons(() =&gt; as.head,() =&gt; apply(as.tail: </em><em>))。因此这2个参数是传名参数,不会被求值所以<em>*递归不会发生。</em></em></li>
-<li>如调用<code>apply(1,2,3),apply</code>只会被调用1次。返回值为<code>Cons(() =&gt; 0,() =&gt; apply(2,3)。</code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">def cons[A](hd: =&gt; A, tl: =&gt; Stream[A]) = &#123;</div><div class="line">  lazy val head = hd</div><div class="line">  lazy val tail = tl</div><div class="line">  Cons(() =&gt; head, () =&gt; tail)</div><div class="line">&#125;</div><div class="line"></div><div class="line">def empty[A]: Stream[A] = Empty</div><div class="line"></div><div class="line">//初始化时仅仅执行一次</div><div class="line">def apply[A](as: A*): Stream[A] = &#123;</div><div class="line">  println(&quot;hell&quot;)</div><div class="line">  if (as.isEmpty) empty else cons(as.head,apply(as.tail: _*))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<h4 id="把函数的描述和求值分离"><a href="#把函数的描述和求值分离" class="headerlink" title="把函数的描述和求值分离"></a>把函数的描述和求值分离</h4><ul>
-<li>对于Stream，可以构建一个产生一系列元素的计算逻辑直到实际需要这些元素时才运行</li>
-<li>一般而言，惰性化让我们对一个表达式<strong>分离了它的描述和求值</strong>。<ul>
-<li>描述表达式A：<code>f: () =&gt; A</code>,这种描述可以当作传名参数传递。</li>
-<li>求值：需要求值的时候用<code>f()</code>强制求值。</li>
-<li>例如：<code>Stream(1,2,3)</code>等同于<code>Cons(()=&gt;1,() =&gt; apply(2,3))</code>,<code>() =&gt; apply(2,3)</code>就可以看作描述。</li>
-</ul>
-</li>
-<li>分离描述和求值使得可以<code>对一个大表达式的部分求值</code>。<ul>
-<li>逻辑运算表达式可以利用短路运算实现部分求值。如<code>boolean1() &amp;&amp; boolean2()</code></li>
-<li>同理：<ul>
-<li>定义函数<code>f: (a, =&gt; b) = boolean1(a) &amp;&amp; boolean2(b)</code></li>
-<li>定义函数<code>g: (x,y) =&gt; f(x,() =&gt; y)</code></li>
-<li>f的b是传名参数。所以g调用f时y就不会被求值,可以在f中进行短路运算.否则在g调用f的时候y就要被求值。</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>非严格求值通过分离表达式的描述和求值同时获得了模块化。分离意味着可以在多个上下文<strong>复用</strong>描述,通过<strong>部分求值</strong>可以在不同的上下文求的不同的结果。</li>
-</ul>
-<h4 id="增量计算"><a href="#增量计算" class="headerlink" title="增量计算"></a>增量计算</h4><ul>
-<li><strong>通过非严格求值函数来实现。</strong></li>
-<li>概念：根据书中例子<code>Stream(1,2,3,4).map(_ + 10).filter(_ % 2 == 0).toList()。</code>增量运算的概念就是先对1进行map,filter,toList一系列运算，然后再对2进行这一系列运算，依次类推。</li>
-<li><p>增量运算的好处：</p>
-<ul>
-<li>不会完全实例化运算的中间结果,见增量计算例证分析。</li>
-<li>节省内存，因为不再需要生成中间结果。每一步只需要处理当前元素所需要的内存即可。</li>
-</ul>
-</li>
-<li><p>本来都是递归，然而第一个元素会被1路强制求值，后边的元素会包成一个大函数，依次类推，从第二个元素再走一遍，直到最后一个元素。</p>
-</li>
-</ul>
-<h4 id="增量计算例证分析"><a href="#增量计算例证分析" class="headerlink" title="增量计算例证分析"></a>增量计算例证分析</h4><ul>
-<li><p>以<code>Stream.toList(Stream(1,2).map(_ + 10))</code>为例。<a href="https://github.com/haiboself/Scala-learning/blob/master/src/datastruct/Stream.scala" target="_blank" rel="external">完整代码</a></p>
-</li>
-<li><p>涉及函数代码,需要照着这些代码来分析执行的每个步骤</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">def foldRight[B](z: =&gt; B)(f: (A, =&gt;B) =&gt; B): B = this match &#123;</div><div class="line">    case SCons(h,t) =&gt; f(h(), t().foldRight(z)(f))</div><div class="line">    case _ =&gt; z</div><div class="line">  &#125;</div><div class="line">  </div><div class="line"> def map[B](f: A =&gt; B): Stream[B] =</div><div class="line">    foldRight(Stream[B]())((a,b) =&gt; cons(() =&gt; f(a),() =&gt; b))</div><div class="line"></div><div class="line"></div><div class="line">  //初始化时仅仅执行一次</div><div class="line">  def apply[A](as: A*): Stream[A] = &#123;</div><div class="line">    println(&quot;apply&quot;)</div><div class="line">    if (as.isEmpty) empty else cons(() =&gt; as.head,() =&gt;  apply(as.tail: _*))</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  def cons[A](hd: () =&gt; A, tl: () =&gt; Stream[A]) = &#123;</div><div class="line">    lazy val head = hd()</div><div class="line">    lazy val tail = tl()</div><div class="line">    var x = SCons(() =&gt; head, () =&gt; tail)</div><div class="line">    x</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  def toList[A](s: Stream[A]): List[A] = &#123;</div><div class="line">    @annotation.tailrec</div><div class="line">    def go(s: Stream[A], acc: List[A]): List[A] = s match &#123;</div><div class="line">      case SCons(hh,tt) =&gt; go(t(), Cons(h(),acc))</div><div class="line">      case _ =&gt; acc</div><div class="line">    &#125;</div><div class="line">    go(s, List())</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  def empty[A] = Empty</div></pre></td></tr></table></figure>
-</li>
-<li><p>===符号为自定义符号，在这里表示等同于。</p>
-</li>
-<li>step1：<code>Stream.toList(Stream(1,2).map(_ + 10))</code></li>
-<li>step2: <code>Stream(1,2) === SCons(() =&gt; 1, () =&gt; apply(2))</code></li>
-<li>step3: 执行map<ul>
-<li>令<code>g: x:Int =&gt; x + 10</code></li>
-<li><code>SCons(() =&gt; 1, () =&gt; apply(2)).map(g)</code></li>
-</ul>
-</li>
-<li>step4: 调用foldRight<ul>
-<li>令<code>f: (a:Int,=&gt;b:Stream[Int]) =&gt; cons(() =&gt; g(a),() =&gt; b)</code></li>
-<li>令<code>z = Stream[Int]()</code></li>
-<li><code>foldRight(Stream[Int]())(f)</code></li>
-</ul>
-</li>
-<li>step5: 执行foldRight<ul>
-<li><code>case SCons(h,t) =&gt; f(h(), t().foldRight(z)(f))</code></li>
-<li><code>h() === 1</code>,<code>t === () =&gt; apply(2)</code>。f的第二个参数是传名参数,不求值。</li>
-<li><code>case SCons(h,t) =&gt; f(() =&gt; 1, () =&gt; t().foldRight(z)(f))</code></li>
-<li><code>cons(() =&gt; g(1), () =&gt; t().foldRight(z)(f))</code> </li>
-<li>返回<code>SCons(() =&gt; g(1), () =&gt; t().foldRight(z)(f))</code></li>
-</ul>
-</li>
-<li>step7: 执行toList<ul>
-<li><code>go(SCons(() =&gt; g(1), () =&gt; t().foldRight(z)(f)),List())</code></li>
-<li><code>case SCons(hh,tt) =&gt; go(tt(), Cons(hh(),List()))</code>。Cons是list的。</li>
-<li><code>tt() === t().foldRight(z)(f)),List()</code>,<code>hh() === g(1) === 11</code></li>
-<li><code>go(t().foldRight(z)(f), Cons(11,List()))</code></li>
-<li><code>t() === apply(2) === SCons(() =&gt; 2,() =&gt; apply())</code></li>
-<li><code>go(SCons(() =&gt; 2,() =&gt; apply()).foldRight(z)(f), Cons(11,List()))</code></li>
-</ul>
-</li>
-<li>step8: 执行foldRight<ul>
-<li><code>this === SCons(() =&gt; 2,() =&gt; apply())</code></li>
-<li><code>case SCons(h,t) =&gt; f(h(), t().foldRight(z)(f))</code></li>
-<li><code>h() === 2</code>,<code>t === () =&gt; apply()</code>。</li>
-<li><code>case SCons(h,t) =&gt; cons(() =&gt; 2, () =&gt; t().foldRight(z)(f))</code></li>
-<li><code>cons(() =&gt; g(2), () =&gt; t().foldRight(z)(f))</code> </li>
-<li>返回<code>SCons(() =&gt; g(2), () =&gt; t().foldRight(z)(f))</code></li>
-</ul>
-</li>
-<li>step9: 执行toList<ul>
-<li><code>go(SCons(() =&gt; g(2), () =&gt; t().foldRight(z)(f)),Cons(11,List()))</code></li>
-<li><code>case SCons(hh,tt) =&gt; go(tt(), Cons(hh(),Cons(11,List())))</code></li>
-<li><code>tt() === t().foldRight(z)(f)),List()</code>,<code>hh() === g(2) === 12</code></li>
-<li><code>go(t().foldRight(z)(f), Cons(12,Cons(11,List())))</code></li>
-<li><code>t() === apply() === Empty</code></li>
-<li><code>go(SCons(Empty.foldRight(z)(f),Cons(12,Cons(11,List()))</code></li>
-</ul>
-</li>
-<li>step10: 执行foldRight<ul>
-<li><code>case_ =&gt; z</code></li>
-<li><code>z == Stream() === Empty</code></li>
-</ul>
-</li>
-<li>step11: 执行toList<ul>
-<li><code>case _ =&gt; Cons(12,Cons(11,List()))</code></li>
-</ul>
-</li>
-<li>step10: 结束返回<code>Cons(12,Cons(11,List())) === Cons(12,Cons(11,Nil)</code></li>
-<li>总结：<ul>
-<li>只要涉及遍历多个元素如map等都是递归。而map,filter等都基于foldRight</li>
-<li>foldRight的f函数的第二个参数为传名参数。</li>
-<li>递归函数调用过程中。f函数会将SCons(h,t)中的h求值,t是<code>() =&gt; apply(..)</code>不会对t求值,而是进一步利用传名参数组装为一个调用链如<code>() =&gt; t().foldRight(z)(f)</code>。直到toList中才对t求值,然后又去调用<code>foldRight(z)(f)===map的实现</code>(实际等于又调用map),如此循环知道最后一个元素。</li>
-<li><code>Stream(1,2,3,4).map(_ + 10).filter(_ % 2 == 0).toList()</code>同理，因为filter也是foldright实现的，f第二个参数是传名参数，所以t只会再增加一下调用链条而已,如<code>() =&gt; t().foldRight(z)(f).filter(z)</code>。</li>
-</ul>
-</li>
-</ul>
-<h4 id="无限流与共递归"><a href="#无限流与共递归" class="headerlink" title="无限流与共递归"></a>无限流与共递归</h4><ul>
-<li>由于是增量计算和惰性的，所以非严格求值函数适用于无限流(infinite stream)</li>
-<li>如<code>val ones :Stream[Int] = Stream.cons(1, ones)</code>，会返回<code>SCons(() =&gt; 1,() =&gt; ones)</code>,递归并不会发生，所以可以进行增量计算，只要<strong>给定终止条件</strong>就可以了。</li>
-<li><p>通用构造流的函数：Option用于表示流何时结束。A为下一，S为下一状态。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">def unfold[A,S](z: S)(f: S =&gt; Option[(A,S)]): Stream[A] = f(z) match&#123; </div><div class="line">    case Some(h,s) =&gt; cons(Some(z),unfold(s)(f))</div><div class="line">    case _ =&gt; Stream()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>共递归：只需要保持生产数据不需要结束。何时结束由生产函数确定。而普通递归需要给定终止条件。</p>
-</li>
-</ul>
-<h4 id="习题分析"><a href="#习题分析" class="headerlink" title="习题分析"></a>习题分析</h4><ul>
-<li>题目<p>EXERCISE 15 (hard, optional): Generalize tails to the function scanRight, which is like a foldRight that returns a stream of the intermediate results. For example:<br></p>
-
-</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Stream(1,2,3).scanRight(0)(_ + _).toList</div><div class="line">res0: List[Int] = List(6,5,3,0)</div></pre></td></tr></table></figure>
-<p>his example would be equivalent to the expression List(1+2+3+0, 2+3+0, 3+0, 0). Your function should reuse intermediate results so that traversing a Stream with n elements always takes time linear in n.</p>
-
-<ul>
-<li><a href="https://github.com/fpinscala/fpinscala/blob/master/answerkey/laziness/16.answer.scala" target="_blank" rel="external">标准答案</a></li>
-<li><a href="https://github.com/haiboself/Scala-learning/blob/master/src/datastruct/Stream.scala" target="_blank" rel="external">我的做法</a></li>
-<li>思路：<ul>
-<li>需要从右向左进行累加计算,每次计算生成一个新的Stream。所以需要从右向左遍历。把逻辑写在递归调用scanRight下就好了。</li>
-<li>因为从右向左计算，所以每次奖计算结果一并返回即可。</li>
-<li>code<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">def scanRight[A,B](s: Stream[A],z: B)(f: (A, =&gt; B) =&gt; B): (B,Stream[B]) = s match &#123;</div><div class="line">    case SCons(h,t) =&gt; &#123;</div><div class="line">      val x = scanRight(t(),z)(f)</div><div class="line">      lazy val r = f(h(),x._1)</div><div class="line"></div><div class="line">      (r,cons(() =&gt; r,() =&gt; x._2))</div><div class="line">    &#125;</div><div class="line">    case Empty =&gt; (z,cons(() =&gt; z,() =&gt; Empty))</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-</ul>
-
-          
+          scala函数式编程：严格求值与惰性求值笔记先验知识
+传名参数和传值参数：传值参数在函数调用之前表达式会被求值，传名参数在函数调用前表达式不会被求值，而是会被包裹成一个匿名函数作为函数参数传递下去，例如参数类型为无参函数的参数就是传名参数。
+function0是接受0个参数的函数类型。
+() =&g
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/10/06/StrictnessAndLaziness/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -859,64 +672,18 @@
       
         
           
-            <h3 id="scala函数式编程-纯函数状态读书笔记"><a href="#scala函数式编程-纯函数状态读书笔记" class="headerlink" title="scala函数式编程:纯函数状态读书笔记"></a>scala函数式编程:纯函数状态读书笔记</h3><h4 id="Overview："><a href="#Overview：" class="headerlink" title="Overview："></a>Overview：</h4><ul>
-<li>带状态的方法的声明式实现可能带有副作用，难以保持引用透明。</li>
-<li>以纯函数式的方式实现带状态的函数的关键在于让状态更新是显式的，不要以副作用方式更新状态，而是<strong>连同生成的值一起返回一个新的状态</strong>。即<strong>把状态的隐式更改暴露出去。</strong></li>
-<li>例：函数nextInt返回改变后的新状态nextRNG<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">trait RNG&#123;</div><div class="line">  def nextInt: (Int,RNG)</div><div class="line">&#125;</div><div class="line"></div><div class="line">case class SimpleRNG(seed: Long) extends RNG&#123;</div><div class="line">  //返回一个随机Int值,纯函数式实现,返回新的SimpleRNG</div><div class="line">  def nextInt: (Int,RNG) = &#123;</div><div class="line">    val newSeed = (seed * 0x5DEECE66DL + 0xBL) &amp; 0xFFFFFFFFL</div><div class="line">    val nextRNG = SimpleRNG(newSeed)</div><div class="line">    val n = (newSeed &gt;&gt;&gt; 16).toInt</div><div class="line"></div><div class="line">    (n, nextRNG)</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  //带有副作用的实现,currentSeed的更新是隐含的</div><div class="line">  val currentSeed = seed</div><div class="line">  def nextInt2: Int = &#123;</div><div class="line">    val newSeed = (currentTime * 0x5DEECE66DL + 0xBL) &amp; 0xFFFFFFFFL</div><div class="line">    currentSeed = newSeed</div><div class="line">    val n = (newSeed &gt;&gt;&gt; 16).toInt</div><div class="line"></div><div class="line">    n</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<h4 id="组合子："><a href="#组合子：" class="headerlink" title="组合子："></a>组合子：</h4><ul>
-<li>组合子是一个高阶函数，可以看作函数的<strong>类型别名</strong>，用来<strong>避免显示</strong>地进行状态<strong>传递</strong>。</li>
-<li>RNG=&gt;(A,RNG)是一个函数,接受旧RNG,得到新的RNG，状态行为可以通过组合子来表示，如组合子Rand：</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">type Rand[+A] = RNG =&gt; (A, RNG)</div></pre></td></tr></table></figure>
-<ul>
-<li>实例分析：<ul>
-<li><code>val int: Rand[Int] = _.nextInt</code></li>
-<li><code>_.nextInt 等价于 RNG =&gt; (Int,RNG)</code>。即接受一个RNG类型参数并返回一个(Int,RNG)类型元组的函数。</li>
-<li>而<code>Rand[Int]</code>是函数<code>RNG =&gt; (Int,RNG)</code>的类型别名。</li>
-</ul>
-</li>
-</ul>
-<h4 id="使用组合子来组合状态行为："><a href="#使用组合子来组合状态行为：" class="headerlink" title="使用组合子来组合状态行为："></a>使用组合子来组合状态行为：</h4><ul>
-<li>即对于有状态的函数，首先将其参数和返回值包装为组合子。然后通过map,flatMap等来以纯函数的形式实现该函数。其中f,g等即该函数。</li>
-<li>一个状态行为: s(rng1: RNG)返回(v: Int,rng2: RNG)</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">def map[A,B](s: Rand[A])(f: A =&gt; B): Rand[B] = </div><div class="line">    rng1 =&gt; &#123;</div><div class="line">        val (v,rng2) = s(rng1)</div><div class="line">        (f(v),rng2)</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">def flatMap[A,B](f: Rand[A)(g: A =&gt; Rand[B]): Rand[B] = </div><div class="line">    rng =&gt; &#123;</div><div class="line">        (v,r) = f(rng)</div><div class="line">        g(v)(r)</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
-<ul>
-<li>组合2个状态行为:</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A,B) =&gt; C): Rand[c] = </div><div class="line">    rng1 =&gt; &#123;</div><div class="line">        val (v1,rng2) = ra(rng1)</div><div class="line">        val (v2,rng3) = rb(rng2)</div><div class="line">        (f(v1,v2),rng3)</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
-<ul>
-<li>组合一序列状态行为：</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">def unit[A](a: A): Rand[A] = rng =&gt; (a,rng)</div><div class="line"></div><div class="line">def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =</div><div class="line">    List.foldRight(fs,unit(List[A())))((x,y) =&gt; map2(x,y)((a,b) =&gt; Cons(a,b)))</div></pre></td></tr></table></figure>
-<h4 id="通用的状态行为数据类型"><a href="#通用的状态行为数据类型" class="headerlink" title="通用的状态行为数据类型"></a>通用的状态行为数据类型</h4><ul>
-<li><p>前边组合子状态是类型RNG。我们来把组合子泛化。S表示任何状态。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">type State[+A,S] = S =&gt; (A,S)</div></pre></td></tr></table></figure>
-</li>
-<li><p>我们也可以将泛化的组合子定义为一个class。<strong>State[+A,S]中定义的函数是实现函数式风格的任何状态机或带状态程序所需的全部工具。</strong></p>
-</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line">case class State[+A,S](run: S =&gt; (A,S)) extends AnyVal&#123;</div><div class="line">  </div><div class="line">  def map[B](f: A =&gt; B): State[B,S] = State(</div><div class="line">    s =&gt; &#123;</div><div class="line">      val (i,r) = run(s)</div><div class="line">      (f(i),r)</div><div class="line">    &#125;)</div><div class="line"></div><div class="line">  def map2[B,C](b: State[B,S])(f: (A,B) =&gt; C): State[C,S] = State(</div><div class="line">    s =&gt; &#123;</div><div class="line">      val (v1,s1) = run(s)</div><div class="line">      val (v2,s2) = b.run(s1)</div><div class="line">      (f(v1,v2),s2)</div><div class="line">    &#125;)</div><div class="line"></div><div class="line">  //def _map2[B,C](b: State[B,S])(f: (A,B) =&gt; C): State[C,S] =</div><div class="line">  //  flatMap(x =&gt; b.map(y =&gt; f((x,y))))</div><div class="line"></div><div class="line"></div><div class="line">  def flatMap[B](f: A =&gt; State[B,S]): State[B,S] = State(</div><div class="line">    s =&gt; &#123;</div><div class="line">      val (v,s1) = run(s)</div><div class="line">      f(v).run(s1)</div><div class="line">    &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line">object State&#123;</div><div class="line"></div><div class="line">  def unit[A,S](x: A): State[A,S] = State(s =&gt; (x,s))</div><div class="line">  def sequence[A,S](ls: List[State[A,S]]): State[List[A],S] =</div><div class="line">    List.foldRight(ls,unit[List[A],S](List()))((x,y) =&gt; x.map2(y)(Cons(_,_)))</div><div class="line"></div><div class="line">  def modify[S](f: S =&gt; S): State[Unit,S] = for &#123;</div><div class="line">    s &lt;- get  //获取当前状态分配给s</div><div class="line">    _ &lt;- set(f(s)) //设置新状态</div><div class="line">  &#125; yield ()</div><div class="line"></div><div class="line">  def get[S]: State[S,S] = State(s =&gt; (s,s))</div><div class="line">  def set[S](s: S): State[Unit,S] = State(_ =&gt; ((), s))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h4 id="应用实例"><a href="#应用实例" class="headerlink" title="应用实例"></a>应用实例</h4><ul>
-<li>题目<p>EXERCISE 13 (hard): To gain experience with the use of State, implement a simulation of a simple candy dispenser. The machine has two types of input: You can insert a coin, or you can turn the knob to dispense candy. It can be in one of two states: locked or unlocked. It also tracks how many candies are left and how many coins it contains.</p>
-
-</li>
-</ul>
-<p><img src="http://oxaz2p2ac.bkt.clouddn.com/Screen%20Shot%202017-10-04%20at%2010.21.02%20PM.png" alt="image"></p>
-<ul>
-<li><a href="https://github.com/haiboself/Scala-learning/tree/master/src/PureFunctionalState" target="_blank" rel="external">我的解法</a></li>
-<li><a href="https://github.com/fpinscala/fpinscala/blob/master/answerkey/state/11.answer.scala" target="_blank" rel="external">标准答案</a></li>
-<li>参考资料：<ul>
-<li><a href="https://stackoverflow.com/questions/41012375/functional-programing-in-scala-simulatemachine/41328969#41328969" target="_blank" rel="external">StackOverflow</a></li>
-<li><a href="https://groups.google.com/forum/#!topic/scala-functional/8iHaSFPPjgw" target="_blank" rel="external">GoogleGroup</a></li>
-</ul>
-</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line">package PureFunctionalState</div><div class="line"></div><div class="line">import datastruct._</div><div class="line"></div><div class="line">sealed trait Input</div><div class="line">case object Coin extends Input</div><div class="line">case object Turn extends Input</div><div class="line"></div><div class="line">case class Machine(locked: Boolean, candies: Int, coins: Int) &#123;</div><div class="line"></div><div class="line">  </div><div class="line">  /** 有副作用的实现</div><div class="line">    * 实际上Machine的状态就是自己的属性,所以返回值类型Machine实际上既是值又是状态</div><div class="line">    * 所以这个实现应该可以看作纯函数式的实现</div><div class="line">    */</div><div class="line">  def simulateMachine(inputs: List[Input]): Machine = &#123;</div><div class="line">    List.foldLeft(inputs,Machine(locked,candies,coins))((x, y) =&gt; (x,y) match &#123;</div><div class="line">      case (Coin,Machine(true,cands,x)) if cands&gt;0 =&gt; Machine(false,cands,x)</div><div class="line">      case (Turn,Machine(false,cands,x)) if cands&gt;0 =&gt; Machine(true,cands-1,x+1)</div><div class="line">      case _ =&gt; y</div><div class="line">    &#125;</div><div class="line">    )</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  /** 纯函数式实现。</div><div class="line">    * modify返回State[Unit,Machine]。modify从旧状态生成新状态,也就是据inputs的每个输入得到一个新的Machine</div><div class="line">    * map返回List[State[Unit,Machine]]</div><div class="line">    * sequence返回State[List[Unit],Machine]</div><div class="line">    */</div><div class="line">  def simulateMachine3(inputs: List[Input]): State[(Int, Int),Machine] = for &#123;</div><div class="line">    _ &lt;- State.sequence(List.map(inputs)(i =&gt; State.modify((s: Machine) =&gt; (i, s) match &#123;</div><div class="line">      case (_, Machine(_, 0, _)) =&gt; s</div><div class="line">      case (Coin, Machine(false, _, _)) =&gt; s</div><div class="line">      case (Turn, Machine(true, _, _)) =&gt; s</div><div class="line">      case (Coin, Machine(true, candy, coin)) =&gt;</div><div class="line">        Machine(false, candy, coin + 1)</div><div class="line">      case (Turn, Machine(false, candy, coin)) =&gt;</div><div class="line">        Machine(true, candy - 1, coin)</div><div class="line">    &#125;)))</div><div class="line">    s &lt;- State.get</div><div class="line">  &#125; yield (s.candies, s.coins)</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line">object TestMachine&#123;</div><div class="line">  def main(args: Array[String]): Unit = &#123;</div><div class="line">    val machine = Machine(true,10,0)</div><div class="line">    val ls = List(Coin,Turn,Turn,Coin,Turn,Coin,Coin,Turn)</div><div class="line"></div><div class="line">    println(machine.simulateMachine(ls))</div><div class="line">    println(machine.simulateMachine3(ls).run(machine))</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-
-          
+          scala函数式编程:纯函数状态读书笔记Overview：
+带状态的方法的声明式实现可能带有副作用，难以保持引用透明。
+以纯函数式的方式实现带状态的函数的关键在于让状态更新是显式的，不要以副作用方式更新状态，而是连同生成的值一起返回一个新的状态。即把状态的隐式更改暴露出去。
+例：函数nextInt返
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/10/04/PurelyFunctionalState/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1056,201 +823,18 @@
       
         
           
-            <h3 id="程序员修炼之道-从小工到专家读后感"><a href="#程序员修炼之道-从小工到专家读后感" class="headerlink" title="程序员修炼之道-从小工到专家读后感"></a>程序员修炼之道-从小工到专家读后感</h3><h4 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h4><ul>
-<li>书的内容是从开发经验中总结出的一些软件开发的指导<strong>原则</strong>。所有内容都是围绕核心主题开展的。</li>
-<li>书的核心主题是”Progmatic”即<strong>实效</strong>。实效的具体含义是-&gt;高效并且有效地完成任务，即速度要快，质量要高。</li>
-<li>让书中的内容落地就要<strong>内化</strong>原则，内化是指把书中的经验原则融入自己的知识体系，在实际的开发中去应用这些指导原则。</li>
-</ul>
-<h4 id="如何落地执行："><a href="#如何落地执行：" class="headerlink" title="如何落地执行："></a>如何落地执行：</h4><ul>
-<li>本书含有一些经验总结出的tip，如DRY(dont repeat yourself)，如何执行这些tip：</li>
-</ul>
-<ol>
-<li><strong>频繁的高强度的外部刺激和自主的有意识的反复提醒</strong>是加速内化的两个重要方法。如看到if分支就要看是否有else分支。</li>
-<li>需要抽象出一些简单的词句和规则(如if，else分支查看)，靠记忆和不断地提醒，小规模地内化这些小声音。</li>
-<li>实践：先大致理解和记住一些tip，然后每周实践2到3个。实践的方式包含1,2。</li>
-</ol>
-<h4 id="一些tips-这些tips都是以实效为核心"><a href="#一些tips-这些tips都是以实效为核心" class="headerlink" title="一些tips: 这些tips都是以实效为核心"></a>一些tips: 这些tips都是以实效为核心</h4><ul>
-<li>使用<strong>靠近问题的领域语言来书写伪代码</strong>。这样有利于伪码直接转为代码实现。</li>
-<li>不要预设立场。如检查if，else分支是否覆盖所有情况，如果没有，需要说明。(预设立场非常普遍)</li>
-<li>不要容忍破窗户,破窗户指存在问题的代码和设计，即使小问题也要解决，防患于未然。如果无法解决，添加注释信息，记录问题。–&gt;总之，<strong>要让问题得到暴露和修复</strong>。（暴露问题，解决问题，不要隐藏问题，逃避问题）</li>
-<li>不要过分地陷入到细节当中，要时刻记得项目的架构。（在项目实现过程中抓大放小）</li>
-<li>批判性的分析你独到的和听到的。（即要有个人<strong>判断</strong>优劣，对错的能力）</li>
-<li>把问题放到更大的语境中去考虑。(在需求分析中要<strong>抓大放小</strong>)</li>
-<li>要负责：提供解决方案，而非寻找借口（提高效率，以解决问题为核心，这条比较反人性，<strong>在出问题时要记着这条tip</strong>）</li>
-<li>接受变化。(在所有阶段都需要考虑可能的变化,言下之意就是要做<strong>灵活的设计,可扩展的实现</strong>)</li>
-<li>交流(和所有项目相关人员,目的是为了<strong>达成一致,及时反馈,不断调整</strong>)</li>
-<li>当多种数据元素互相依赖时，要保证这种依赖关系。当保证这种依赖关系的开销过大时，需要解除依赖关系，此时可以使影响局部化，不要把这种变化过多地暴露。</li>
-</ul>
-<h4 id="注重实效的途径："><a href="#注重实效的途径：" class="headerlink" title="注重实效的途径："></a>注重实效的途径：</h4><ul>
-<li><p>DRY原则：</p>
-<ul>
-<li>即dont repeat yourself,含义是系统中的每一项知识都必须具有单一，无歧义，权威的表示。即要<strong>避免重复</strong>。</li>
-<li>程序员需要持续不断的维护，这是整个开发过程中的例行事务。<strong>DRY使开发更易于理解和维护。</strong></li>
-<li>重复的类型：<ul>
-<li>强加的重复,指环境因素导致的重复.解决需要智慧。</li>
-</ul>
-<ol>
-<li>信息的多种表示（如不同平台不同语言对同一信息的表示），这样可能导致不一致，通过编写简单的过滤器或代码生成器来解决，即从同一个源（信息的表示）来生成。</li>
-<li>要把低级的知识放在代码中，把注释保留给其他的高级说明。即指分层设计，高层的逻辑尽量抽象以避免修改。这样底层和高层解耦,也防止注释过期。</li>
-</ol>
-<ul>
-<li>无意的重复和无耐性的重复要被避免。</li>
-<li>开发者之间的重复。</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>正交性:</p>
-<ul>
-<li>含义就是解耦。用来表示某种不相互依赖性或者解耦性。</li>
-<li>需要消除无关事务之间的影响。组合正交组件提高效率。不要依赖你无法控制的事务属性。</li>
-<li>建立正交的系统：<ul>
-<li>模块化</li>
-<li>层次化。</li>
-<li>AOP让你在一个地方表达本来会分散在源码各处的某种行为。</li>
-<li>限制模块之间的交互。</li>
-<li>遵守得墨忒耳法则缩小了调用类中的相应集的规模。</li>
-</ul>
-</li>
-<li>在编码上：<ul>
-<li>让代码保持解耦</li>
-<li>避免使用全局数据</li>
-<li>避免编写相似的函数</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>可撤销性</p>
-<ul>
-<li>含义是不存在最终决策，所以功能要可撤销。即<strong>代码可回滚</strong>。</li>
-<li>使用版本控制系统。</li>
-<li>采用灵活的架构。</li>
-<li>设计正交的系统。</li>
-</ul>
-</li>
-<li><p>曳光弹和原型化    </p>
-<ul>
-<li>区别在于原型化更注重为交互建立原型,最终会被丢弃。</li>
-<li>而曳光弹更偏重对核心功能的实现,最终会成为系统的一部分。</li>
-<li>曳光弹的使用场景是当需求模糊,无法做出宏观上完善的系统设计时。<strong>采用盲人摸象的方式进行开发,即先实现确定的地方.</strong></li>
-</ul>
-</li>
-<li><p>估算：<strong>从已有的类似项目来进行估算比较靠谱</strong></p>
-<ul>
-<li>确定估算粒度。如天，周，月。</li>
-<li>确定问题的范围，即制定约束条件。</li>
-<li>所有的估算都以问题的模型为基础。<strong>去问已经做过这件事的人</strong></li>
-<li>估算系统：建立系统模型-&gt;把模型分解为组件-&gt;给每个参数指定值-&gt;计算答案-&gt;追踪估算能力</li>
-</ul>
-</li>
-</ul>
-<h4 id="基本工具"><a href="#基本工具" class="headerlink" title="基本工具"></a>基本工具</h4><ul>
-<li>构建自己的工具库。</li>
-<li>使用源码控制。</li>
-<li>调试bug：<ul>
-<li>找到问题<strong>根源</strong></li>
-<li>可以快速<strong>复现</strong>bug。</li>
-<li>代码<strong>跟踪</strong>。</li>
-<li>向别人解释程序以找到问题所在。</li>
-<li>找bug范围：先自己代码–&gt;确定无误再找类库或系统问题。<strong>不要固执的认为自己的代码没问题。</strong></li>
-<li><strong>不要假设，要验证。</strong></li>
-</ul>
-</li>
-</ul>
-<h4 id="注重实效的偏执"><a href="#注重实效的偏执" class="headerlink" title="注重实效的偏执"></a>注重实效的偏执</h4><ul>
-<li>放弃写出完美软件的偏执。</li>
-<li>进行防御性编程。</li>
-<li>合约。规定代码的权力和责任，即圈定范围。</li>
-<li>用文档（其他形式:断言，注解等）记载以下声明，并进行校验，是按合约设计（简称DBC）的核心所在。<ul>
-<li>前置条件</li>
-<li>后置条件</li>
-<li>类不变项</li>
-</ul>
-</li>
-<li>当代码发现某种被认为不可能的事情已经发生时，终止它。</li>
-<li>断言式编程：<ul>
-<li>断言检查的是绝不应该发生的事情。</li>
-<li>断言可能会有副作用，引入新的错误。</li>
-</ul>
-</li>
-<li>异常<ul>
-<li>异常表示即时的，非局部的控制转移，是一种级联的goto。</li>
-<li>把异常当做处理逻辑。破坏了封装，通过异常处理，例程和它们的调用者被更紧密的耦合在一起。</li>
-</ul>
-</li>
-</ul>
-<h4 id="当你编码时"><a href="#当你编码时" class="headerlink" title="当你编码时"></a>当你编码时</h4><ul>
-<li>代码需要演化，它不是静态的事务。</li>
-<li>重构<ul>
-<li><strong>不要</strong>试图在重构的同时<strong>增加功能</strong>。</li>
-<li>在开始重构之前，确保你拥有<strong>良好的测试</strong>。</li>
-<li>采用短小，深思熟虑的步骤。</li>
-</ul>
-</li>
-<li>从一<strong>开始就可以把可测试性构建进软件中</strong>，并且在把各个部分连接在一起之前对每个部分进行彻底的测试。 </li>
-</ul>
-<h4 id="在项目开始之前："><a href="#在项目开始之前：" class="headerlink" title="在项目开始之前："></a>在项目开始之前：</h4><ul>
-<li>需求需要挖掘，而不仅仅是收集。找出用户为何要做特定事情的原因，而不是他们目前做这件事情的方式。</li>
-<li>建立需求文档：把形式化的模板做备忘录<ul>
-<li>好的需求文档会保持<strong>抽象</strong></li>
-<li>项目范围的增大需要被<strong>记录和可追溯</strong>，以及可评价(通过统计信息)</li>
-<li>需求的收集和设计实现不是单向的线性关系，而是<strong>双向关系</strong>。它们是“交付高质量的系统”的不同方面。</li>
-</ul>
-</li>
-<li><strong>解开谜题</strong><ul>
-<li>解开谜题的关键在于确定施加的各种约束，并确定你确实拥有的自由度</li>
-<li>确定真正的约束</li>
-<li>对约束进行分类，并划定优先级</li>
-<li>你所需要的知识真正的约束，令人误解的约束，还有区分它们的智慧。</li>
-</ul>
-</li>
-<li>编写程序规范<ul>
-<li>编写程序规范是一个交流活动，旨在解释并阐明系统的需求</li>
-<li>不要追求捕捉系统或需求的每一处细节和细微差别，因为细节不一定可以被自然语言以可理解的方式定义。</li>
-<li><strong>不要陷入对规范的追求中，在合适的时候编码，反哺规范。</strong></li>
-</ul>
-</li>
-<li><strong>不要做方法的奴隶，适合的就是最好的，能解决问题就行。</strong></li>
-</ul>
-<h4 id="注重实效的项目的标准："><a href="#注重实效的项目的标准：" class="headerlink" title="注重实效的项目的标准："></a>注重实效的项目的标准：</h4><ul>
-<li>不符合用户期望的项目注定是失败的。即<strong>以用户为中心</strong>。</li>
-<li>使项目级活动保持一致和可靠的一个最重要的因素是<strong>使你的各种工作流程自动化。</strong></li>
-<li>项目的各种活动，分析，设计，编码，测试不会孤立地发生，它们是看待同一问题的不同方式。</li>
-<li>在开发一个项目时，我们再寻求内聚的，在很大程度上自足的团队。使用组织代码使用的技术，像合约，解耦，正交性，这样的技术来组织各种资源，有助于使团队作为整体与变化的各种效应隔离开来。</li>
-<li>测试：<ul>
-<li>早测试，常测试，自动测试。</li>
-<li>要通过全部的测试，编码才算完成。</li>
-<li>集成测试说明组成项目的主要子系统能工作，并且能很好的协同。</li>
-<li>测试<strong>状态覆盖</strong>，而不是代码覆盖。</li>
-<li>大多数测试都应该自动完成。</li>
-</ul>
-</li>
-<li>注释：注释应该讨论<strong>为何要做某事，它的目的</strong>。代码已经说明了它是怎样完成的。</li>
-</ul>
-<h4 id="我自己的一些tips"><a href="#我自己的一些tips" class="headerlink" title="我自己的一些tips"></a>我自己的一些tips</h4><ul>
-<li>以实用为主，快速学习。而不是拿到一个东西就系统性的去学习。</li>
-<li>当然，深度钻研还是需要的，但是后边再说，尽快上手工作是第一位的。</li>
-<li>交流沟通很重要，不懂就问，不能闭门造车。</li>
-<li>在Microservices时代，我们更建议外部化你的软件产品差异化配置管理，尽量减少Profile的滥用甚至不用。</li>
-<li>可以多看官方文档。</li>
-<li>想清楚再去敲代码，这句话可以用一辈子，</li>
-<li>备份，版本管理很重要。</li>
-<li>有想法，有问题要写下来，不能止步于口头和心里。</li>
-<li>公司的各种设计指南、编程规范、XXX规范要仔细学习</li>
-<li>公共配置项不要乱动，特别是配置库和编译器的</li>
-<li><strong>编码的时候只思考同一个思维层次的逻辑，在这层完成之后再思考下一层。</strong></li>
-<li>计算机科学中的问题都可以通过改变使用方式来解决。</li>
-<li>针对数据库相关的操作一定要考虑到在大数据量下的性能问题。</li>
-<li>通过加点记录程序段运行时间的方式判断性能瓶颈所在。</li>
-<li>修复一个Bug往往会引入一个更为隐秘的Bug，所以在进行Bug修复时需要对修复后的程序逻辑重新进行检查，避免引入Bug。</li>
-<li>在针对解决问题的态度方面，不要轻易得出”问题无法解决”这样的结论，需要有”问题总是可以解决的”的态度和信念。</li>
-<li>在代码风格方面，需要更加规范和一致。</li>
-<li>编写关于数据库操作的代码时。一定要考虑到索引的问题，sql的性能的问题。</li>
-<li>代码中如果需要生成大量对象，一定要考虑到内存占用的问题。</li>
-<li>在对工具的学习中，如git中，充斥着大量的命令和用法，很难一下子熟练掌握。所以对于这种工具的学习，我觉得<br>首先熟悉高频命令+学习其工作原理的方式可以起到较好地作用。对应于git就是着重理解其工作区，暂存区，分支和时<br>间线的概念。</li>
-</ul>
-
-          
+          程序员修炼之道-从小工到专家读后感前言：
+书的内容是从开发经验中总结出的一些软件开发的指导原则。所有内容都是围绕核心主题开展的。
+书的核心主题是”Progmatic”即实效。实效的具体含义是-&gt;高效并且有效地完成任务，即速度要快，质量要高。
+让书中的内容落地就要内化原则，内化是指把书中的经验原
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/10/03/ProgmaticProgrammer/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
