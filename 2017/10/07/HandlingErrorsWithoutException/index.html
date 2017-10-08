@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="One Journeyman">
 <meta property="og:description" content="scala函数式编程：不使用异常进行错误处理笔记异常 引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。 问题： 异常依赖上下文,需要全局推导。 即异常与其所在try块和catch块有依赖关系。 所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用   异常不是类型安全的,如果不处理异常,直到运行才能发现异常。   好处： 异常最主要的好处：整合集中的错误处理逻辑。">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2017-10-07T12:32:57.000Z">
+<meta property="og:updated_time" content="2017-10-08T05:55:11.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="HandlingErrorsWithoutException">
 <meta name="twitter:description" content="scala函数式编程：不使用异常进行错误处理笔记异常 引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。 问题： 异常依赖上下文,需要全局推导。 即异常与其所在try块和catch块有依赖关系。 所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用   异常不是类型安全的,如果不处理异常,直到运行才能发现异常。   好处： 异常最主要的好处：整合集中的错误处理逻辑。">
@@ -384,7 +384,7 @@
 </li>
 </ul>
 <h4 id="不使用异常的方案"><a href="#不使用异常的方案" class="headerlink" title="不使用异常的方案"></a>不使用异常的方案</h4><ul>
-<li>替代抛出异常：<strong>以值的方式返回错误</strong>，类似于错误吗。但是我们可以为错误定义一个类Option，来包含更多的信息</li>
+<li>替代抛出异常：<strong>以值的方式返回错误</strong>，类似于错误码。但是我们可以为错误定义一个类Option，来包含更多的信息</li>
 <li>用普通的值表现失败和异常,通过高阶函数(Option中的各种函数)抽象出错误处理和恢复的常用模式。这样统一了错误处理逻辑。</li>
 <li>错误处理逻辑放哪？<ul>
 <li><strong>能推迟(Option中的函数都利用模式匹配做了None时的处理,使用Option的调用链就可以推迟错误处理逻辑)决定如何处理未定义的情况</strong>，可以在最合适的时候去处理。</li>
