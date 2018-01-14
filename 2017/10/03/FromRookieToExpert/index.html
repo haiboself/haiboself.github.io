@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="scala," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -79,18 +79,17 @@
 
 
 
-<meta name="description" content="scala函数式编程：不使用异常进行错误处理笔记异常 引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。 问题： 异常依赖上下文,需要全局推导。 即异常与其所在try块和catch块有依赖关系。 所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用   异常不是类型安全的,如果不处理异常,直到运行才能发现异常。   好处： 异常最主要的好处：整合集中的错误处理逻辑。">
-<meta name="keywords" content="scala">
+<meta name="description" content="得雷夫斯技能获取模型概述 是一种构建理论,是一种情境模型,即以”有效经验的内化”为中心。 贯穿始终的核心: 依赖经验: 有效经验的增长和利用能力贯穿始终 对于情境(context)的理解能力贯穿始终,即发掘经验的能力,包括自己和别人的经验 当前情境和全局情境的理解 通过发掘经验抽象出基本准则,形成敏锐的判断力-&amp;gt;可以屏蔽不重要的信息,一眼看穿问题本质   不断的交流和反馈以及自我修正 从新手">
 <meta property="og:type" content="article">
-<meta property="og:title" content="HandlingErrorsWithoutException">
-<meta property="og:url" content="http://journeyman.top/2017/10/07/HandlingErrorsWithoutException/index.html">
+<meta property="og:title" content="从新手到专家的历程">
+<meta property="og:url" content="http://journeyman.top/2017/10/03/FromRookieToExpert/index.html">
 <meta property="og:site_name" content="One Journeyman">
-<meta property="og:description" content="scala函数式编程：不使用异常进行错误处理笔记异常 引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。 问题： 异常依赖上下文,需要全局推导。 即异常与其所在try块和catch块有依赖关系。 所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用   异常不是类型安全的,如果不处理异常,直到运行才能发现异常。   好处： 异常最主要的好处：整合集中的错误处理逻辑。">
+<meta property="og:description" content="得雷夫斯技能获取模型概述 是一种构建理论,是一种情境模型,即以”有效经验的内化”为中心。 贯穿始终的核心: 依赖经验: 有效经验的增长和利用能力贯穿始终 对于情境(context)的理解能力贯穿始终,即发掘经验的能力,包括自己和别人的经验 当前情境和全局情境的理解 通过发掘经验抽象出基本准则,形成敏锐的判断力-&amp;gt;可以屏蔽不重要的信息,一眼看穿问题本质   不断的交流和反馈以及自我修正 从新手">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2017-10-08T05:55:11.000Z">
+<meta property="og:updated_time" content="2018-01-14T06:03:21.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="HandlingErrorsWithoutException">
-<meta name="twitter:description" content="scala函数式编程：不使用异常进行错误处理笔记异常 引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。 问题： 异常依赖上下文,需要全局推导。 即异常与其所在try块和catch块有依赖关系。 所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用   异常不是类型安全的,如果不处理异常,直到运行才能发现异常。   好处： 异常最主要的好处：整合集中的错误处理逻辑。">
+<meta name="twitter:title" content="从新手到专家的历程">
+<meta name="twitter:description" content="得雷夫斯技能获取模型概述 是一种构建理论,是一种情境模型,即以”有效经验的内化”为中心。 贯穿始终的核心: 依赖经验: 有效经验的增长和利用能力贯穿始终 对于情境(context)的理解能力贯穿始终,即发掘经验的能力,包括自己和别人的经验 当前情境和全局情境的理解 通过发掘经验抽象出基本准则,形成敏锐的判断力-&amp;gt;可以屏蔽不重要的信息,一眼看穿问题本质   不断的交流和反馈以及自我修正 从新手">
 
 
 
@@ -120,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://journeyman.top/2017/10/07/HandlingErrorsWithoutException/"/>
+  <link rel="canonical" href="http://journeyman.top/2017/10/03/FromRookieToExpert/"/>
 
 
 
 
 
-  <title>HandlingErrorsWithoutException | One Journeyman</title>
+  <title>从新手到专家的历程 | One Journeyman</title>
   
 
 
@@ -273,7 +272,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://journeyman.top/2017/10/07/HandlingErrorsWithoutException/">
+    <link itemprop="mainEntityOfPage" href="http://journeyman.top/2017/10/03/FromRookieToExpert/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Ji Lian">
@@ -290,7 +289,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">HandlingErrorsWithoutException</h1>
+          <h1 class="post-title" itemprop="name headline">从新手到专家的历程</h1>
         
 
         <div class="post-meta">
@@ -302,8 +301,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-07T20:06:48+08:00">
-                2017-10-07
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-03T01:34:49+08:00">
+                2017-10-03
               </time>
             
 
@@ -325,8 +324,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Scala/" itemprop="url" rel="index">
-                    <span itemprop="name">Scala</span>
+                  <a href="/categories/SoftwareDeve/" itemprop="url" rel="index">
+                    <span itemprop="name">SoftwareDeve</span>
                   </a>
                 </span>
 
@@ -367,55 +366,126 @@
       
 
       
-        <h3 id="scala函数式编程：不使用异常进行错误处理笔记"><a href="#scala函数式编程：不使用异常进行错误处理笔记" class="headerlink" title="scala函数式编程：不使用异常进行错误处理笔记"></a>scala函数式编程：不使用异常进行错误处理笔记</h3><h4 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h4><ul>
-<li>引用透明的另一种方式是表达式不依赖上下文，都可以本地推导。</li>
-<li>问题：<ul>
-<li>异常依赖上下文,需要全局推导。<ul>
-<li>即异常与其所在try块和catch块有依赖关系。</li>
-<li>所以引入了上下文依赖从而破坏了引用透明，让代换模型的简单推倒无法适用</li>
+        <h3 id="得雷夫斯技能获取模型"><a href="#得雷夫斯技能获取模型" class="headerlink" title="得雷夫斯技能获取模型"></a>得雷夫斯技能获取模型</h3><h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><ul>
+<li>是一种构建理论,是一种情境模型,即以”有效经验的内化”为中心。</li>
+<li>贯穿始终的核心:<ul>
+<li>依赖经验: 有效经验的增长和利用能力贯穿始终</li>
+<li>对于情境(context)的理解能力贯穿始终,即发掘经验的能力,包括自己和别人的经验<ul>
+<li>当前情境和全局情境的理解</li>
+<li>通过发掘经验抽象出基本准则,形成敏锐的判断力-&gt;可以屏蔽不重要的信息,一眼看穿问题本质</li>
 </ul>
 </li>
-<li>异常不是类型安全的,如果不处理异常,直到运行才能发现异常。</li>
-</ul>
-</li>
-<li>好处：<ul>
-<li>异常最主要的好处：整合集中的错误处理逻辑。</li>
+<li>不断的<strong>交流</strong>和<strong>反馈</strong>以及自我修正</li>
+<li>从新手到专家: 利用规则逐渐弱化,利用直觉逐渐主导.这正是依赖有效经验的积累和发觉所形成的判断力.</li>
 </ul>
 </li>
 </ul>
-<h4 id="不使用异常的方案"><a href="#不使用异常的方案" class="headerlink" title="不使用异常的方案"></a>不使用异常的方案</h4><ul>
-<li>替代抛出异常：<strong>以值的方式返回错误</strong>，类似于错误码。但是我们可以为错误定义一个类Option，来包含更多的信息</li>
-<li>用普通的值表现失败和异常,通过高阶函数(Option中的各种函数)抽象出错误处理和恢复的常用模式。这样统一了错误处理逻辑。</li>
-<li>错误处理逻辑放哪？<ul>
-<li><strong>能推迟(Option中的函数都利用模式匹配做了None时的处理,使用Option的调用链就可以推迟错误处理逻辑)决定如何处理未定义的情况</strong>，可以在最合适的时候去处理。</li>
-<li>类型安全：因为得到的结果Option[A]和调用者需要的A不是一个类型,所以调用者必做处理。</li>
+<h4 id="具体模型"><a href="#具体模型" class="headerlink" title="具体模型"></a>具体模型</h4><ul>
+<li>分为5个阶段:</li>
+<li>新手:<ul>
+<li>没有经验</li>
+<li>心态: 只想实现一个立竿见影的目标,否则就会受挫</li>
+<li><strong>新手需要与情境无关的规则,需要指令清单</strong></li>
+<li>注意: 过多规则会限制成长</li>
+</ul>
+</li>
+<li>高级新手<ul>
+<li>经验不足</li>
+<li>可以根据经验稍微摆脱规则,逐步在正确的情境中采纳建议,但比较吃力</li>
+<li>对于小的上下文,可能是自己负责项目的上下层,开始形成一些总体原则</li>
+<li>缺乏全局思维,而且拒绝全局思维<ul>
+<li>这很正常,将边界划分在自己所负责内容的上下层之间,更有利于解决自己面临的问题</li>
+<li>也就是自己无需考虑全局,这不是自己的职责范围,因而会有本能的拒绝</li>
+<li>当然,也缺乏全局的有效信息和经验</li>
 </ul>
 </li>
 </ul>
-<h4 id="函数提升"><a href="#函数提升" class="headerlink" title="函数提升"></a>函数提升</h4><ul>
-<li><code>def lift[A,B](f: A =&gt; B): Option[A] =&gt; Option[B] = x:Option[A] =&gt; x.map(f)</code><ul>
-<li>map: (Option[A],f) =&gt; Optoin[B]等价于Option[A] =&gt; f =&gt; Option[B]</li>
-<li>map: f =&gt; Option[A] =&gt; Option[B]</li>
-<li>所以map就是一个把发f:A=&gt;B变为f:Option[A] =&gt; Option[B]的函数。</li>
+</li>
+<li>胜任者<ul>
+<li>经验足够,但是缺乏对经验的深度挖掘,和潜意识的敏感性(如难以闻到坏代码的味道)</li>
+<li>能够建立问题域的概念模型,并有效地使用它们</li>
+<li>可以独立解决未知的问题</li>
+<li><strong>工作更多是基于谨慎的计划和过去的经验</strong></li>
+<li>表现: 有主动性和足智多谋</li>
+<li>缺乏反思和自我纠正的能力</li>
 </ul>
 </li>
-<li>这意味着已存在普通函数都可以转换成在一个Option值的上下文里进行操作的函数。</li>
-<li>通过使用Option中的map,flatMap等将函数来提升函数f,<strong>其实就是在f的执行逻辑上包了一层Option中的模式匹配如<code>case Some(x) =&gt; f(x); case None =&gt; None</code></strong></li>
+<li>精通者 <ul>
+<li>需要全局思维,将围绕一个点寻求认知更大的概念框架</li>
+<li>能够自我纠正以往不好的工作表现,会对已有的经验进行反思,进行自我改进</li>
+<li>可以学习别人的经验化为己用</li>
+<li>具有丰富的经验和准确的判断力</li>
+<li>可以有效的运用软件模式</li>
+<li>充分利用思考和<strong>反馈</strong></li>
 </ul>
-<h4 id="for推导"><a href="#for推导" class="headerlink" title="for推导"></a>for推导</h4><ul>
-<li>for推导是语法糖。它会自动展开为一系列的flatMap和map调用。</li>
-<li>实际上一系列的flatMap嵌套最终会组成一个大函数,因为要先通过参数调用函数,所以一层层由外向里求值。map和flatMap都是把Option中的值拿出来参与世纪运算。</li>
-<li>编译器会把绑定操作的语法糖转换为flatMap操作,对最后一个绑定和yield会转换为map调用。</li>
-</ul>
-<h4 id="Either"><a href="#Either" class="headerlink" title="Either"></a>Either</h4><ul>
-<li>Either有2个值，一个表示成功，一个表示失败。这是区别与Option的失败值是None的地方。</li>
-<li>Either在失败时可以提供更多信息。而Option只能提供None值。None值的含义需要调用者自己去解释。</li>
-<li>如果需要错误发生时的堆栈信息，将异常存入Either返回即可。</li>
-<li>Either只能表示一个错误信息，如果要表示多个，可以把错误信息组织称一个List。即<br><code>Left[E](es: List[E])</code></li>
-</ul>
-<h4 id="习题4-7"><a href="#习题4-7" class="headerlink" title="习题4.7"></a>习题4.7</h4><ul>
-<li>对Either实现sequence和tranverse。<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">def sequence[E,A](es: List[Either[E,A]]): Either[E,List[A]] =</div><div class="line">    List.foldRightr(es,Right(Nil: List[A]))((x,y) =&gt; x match &#123;</div><div class="line">      case Left(v) =&gt; y</div><div class="line">      case Right(v) =&gt; Right(Cons(v,y.value))</div><div class="line">    &#125;)</div><div class="line"></div><div class="line">  def sequence2[E,A](es: List[Either[E,A]]): Either[E,List[A]] =</div><div class="line">    es match &#123;</div><div class="line">      case Nil =&gt; Right(Nil)</div><div class="line">      case Cons(h,t) =&gt; h.map2(sequence2(t))((x,y) =&gt; Cons(x,y))</div><div class="line">    &#125;</div><div class="line"></div><div class="line">  def traverse[E,A,B](as: List[A])(f: A =&gt; Either[E,B]): Either[E,List[B]] =</div><div class="line">    as match &#123;</div><div class="line">      case Nil =&gt; Right(Nil)</div><div class="line">      case Cons(h,t) =&gt; (f(h) map2 traverse(t)(f))((x,y) =&gt; Cons(x,y))</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
 </li>
+<li>专家:<ul>
+<li>掌握全局信息</li>
+<li>理解情境(上下文)是成为专家的关键</li>
+<li>具有丰富的经验,可以再恰当的情景中选取和应用经验</li>
+<li>凭直觉工作,知道哪些是无关紧要的细节,哪些是非常重要的细节</li>
+<li>自我怀疑和纠正</li>
+</ul>
+</li>
+</ul>
+<h4 id="成为专家"><a href="#成为专家" class="headerlink" title="成为专家"></a>成为专家</h4><ul>
+<li><p>自我认知: 了解自己处于模型中的哪个阶段,需要学习什么</p>
+<ul>
+<li>较低技能层次的从业者会明显高估他们自己的能力–&gt;不知道自己不知道</li>
+<li>正确自我评估的唯一办法就是提高个人技能层次–&gt;提高经验,眼界–&gt;提高认知能力</li>
+</ul>
+</li>
+<li><p>吸收有效的经验和理解情境是关键: 不仅要做事,还要把事情做好</p>
+<ul>
+<li>当前情境: <ul>
+<li>从和自己负责模块的上下交互层考虑,如果面向用户,要从用户角度进行考虑</li>
+<li>自己负责模块结构的考虑(搞内聚低耦合:正交解耦)</li>
+</ul>
+</li>
+<li>全局情境: <ul>
+<li>有余力思考自己负责模块在整个体系中的位置</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>认识问题: </p>
+<ul>
+<li>勇于承担责任</li>
+<li>问题不是一个相关度等同的所有单元的集合体,而是一个完整和独特的整体</li>
+<li>从问题的旁观者转变为问题涉及的系统本身的一部分?</li>
+</ul>
+</li>
+<li><p>发掘经验,抽象出情境无关的规则–&gt;形成直觉</p>
+<ul>
+<li>世界是非线性的,没有东西是孤立的,但是需要边界</li>
+<li>存在某些根本和重要的东西</li>
+</ul>
+</li>
+<li><p>交流,思考和反馈</p>
+<ul>
+<li>充分交流,确定需求</li>
+<li>依赖反馈,注重实时的反馈,充分利用思考和反馈,这是敏捷的核心之一</li>
+<li>不要屈服于工具或者模型的虚假权威,没有什么能代替思考</li>
+</ul>
+</li>
+<li><p>通过观察和模仿学习</p>
+<ul>
+<li>模仿,吸收,创新</li>
+<li>通过模仿好的项目来学习,然后再应用到自己的代码中</li>
+</ul>
+</li>
+</ul>
+<h4 id="我"><a href="#我" class="headerlink" title="我"></a>我</h4><ul>
+<li><p>需求分析阶段</p>
+<ul>
+<li>需要更多的交流和反馈,需要用户化和产品化思维</li>
+<li>需要考虑上下层的交互</li>
+<li>需要全局依赖考虑</li>
+</ul>
+</li>
+<li><p>开发模型抽象,以提高开发效率</p>
+</li>
+<li>通过观察和模仿学习</li>
 </ul>
 
       
@@ -432,12 +502,6 @@
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/scala/" rel="tag"># scala</a>
-          
-        </div>
-      
 
       
       
@@ -447,8 +511,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/10/06/StrictnessAndLaziness/" rel="next" title="StrictnessAndLaziness">
-                <i class="fa fa-chevron-left"></i> StrictnessAndLaziness
+              <a href="/2017/10/03/ProgmaticProgrammer/" rel="next" title="Progmatic Programmer读书笔记">
+                <i class="fa fa-chevron-left"></i> Progmatic Programmer读书笔记
               </a>
             
           </div>
@@ -457,8 +521,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/10/08/databloodBaseHql/" rel="prev" title="基于Hql的表级数据血缘">
-                基于Hql的表级数据血缘 <i class="fa fa-chevron-right"></i>
+              <a href="/2017/10/04/PurelyFunctionalState/" rel="prev" title="scala函数式编程:纯函数式状态读书笔记">
+                scala函数式编程:纯函数式状态读书笔记 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -611,7 +675,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#scala函数式编程：不使用异常进行错误处理笔记"><span class="nav-number">1.</span> <span class="nav-text">scala函数式编程：不使用异常进行错误处理笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#异常"><span class="nav-number">1.1.</span> <span class="nav-text">异常</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#不使用异常的方案"><span class="nav-number">1.2.</span> <span class="nav-text">不使用异常的方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#函数提升"><span class="nav-number">1.3.</span> <span class="nav-text">函数提升</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#for推导"><span class="nav-number">1.4.</span> <span class="nav-text">for推导</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Either"><span class="nav-number">1.5.</span> <span class="nav-text">Either</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#习题4-7"><span class="nav-number">1.6.</span> <span class="nav-text">习题4.7</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#得雷夫斯技能获取模型"><span class="nav-number">1.</span> <span class="nav-text">得雷夫斯技能获取模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#概述"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#具体模型"><span class="nav-number">1.2.</span> <span class="nav-text">具体模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#成为专家"><span class="nav-number">1.3.</span> <span class="nav-text">成为专家</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#我"><span class="nav-number">1.4.</span> <span class="nav-text">我</span></a></li></ol></li></ol></div>
             
 
           </div>
