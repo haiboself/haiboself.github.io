@@ -272,7 +272,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://journeyman.top/2018/01/21/StreamByJava/">
+    <link itemprop="mainEntityOfPage" href="http://journeyman.top/2018/01/27/StreamByJava/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Ji Lian">
@@ -291,7 +291,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/01/21/StreamByJava/" itemprop="url">使用Java实现Stream</a></h1>
+                <a class="post-title-link" href="/2018/01/27/StreamByJava/" itemprop="url">使用Java实现Stream</a></h1>
         
 
         <div class="post-meta">
@@ -303,8 +303,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-21T16:41:59+08:00">
-                2018-01-21
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-27T21:41:59+08:00">
+                2018-01-27
               </time>
             
 
@@ -365,15 +365,14 @@
       
         
           
-          使用Java实现Stream
-没有支持parallel,java.util.stream实现paralle的方式为:
-java.util.stream将数据源抽象为spliterator
-spliterator需要提供数据分片,元素访问方法
-底层再使用fork-join框架支持来实现parallel
+          使用Java实现Streamjava实现Stream的原理:
+一个Stream包括:
+数据源(抽象为Spliterator): tryAdvance(单元素访问),forEachRemaining(访问所有元素),trySplit(分割方案)
+中间操作(惰性intermediate operatio
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/21/StreamByJava/#more" rel="contents">
+            <a class="btn" href="/2018/01/27/StreamByJava/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
