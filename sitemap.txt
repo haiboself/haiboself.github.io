@@ -1,3 +1,5 @@
+http://example.com/books/index.html
+http://example.com/index.html
 http://example.com/2022/10/30/yuque/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/
 http://example.com/
 http://example.com/tags/k8s/
