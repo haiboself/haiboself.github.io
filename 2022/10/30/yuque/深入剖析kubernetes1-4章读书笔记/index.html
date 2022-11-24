@@ -17,11 +17,11 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>1-4章读书笔记-容器技术概览 | Hexo</title>
+  <title>深入剖析kubernetes 1-4章阅读总结 | Hexo</title>
   <meta name="description" content="容器的来龙去脉PaaSPaas 解决的是应用程序的托管、打包与分发问题，强调零停机时间部署、自动规模伸缩与负载均衡等功能。用户可以在云服务商租一批虚拟机，然后可以用脚本或手动的方式在上面部署应用。以 Cloud Foundry 这个 PaaS 项目为例，它的核心组件就是一套应用的打包和分发机制。  用户把应用、启动脚本等打包到一个压缩包中，上传后 Cloud Foundry 会通过调度器选择一个合">
 <meta property="og:type" content="article">
-<meta property="og:title" content="1-4章读书笔记-容器技术概览">
-<meta property="og:url" content="http://example.com/2022/10/30/yuque/1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/index.html">
+<meta property="og:title" content="深入剖析kubernetes 1-4章阅读总结">
+<meta property="og:url" content="http://example.com/2022/10/30/yuque/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="容器的来龙去脉PaaSPaas 解决的是应用程序的托管、打包与分发问题，强调零停机时间部署、自动规模伸缩与负载均衡等功能。用户可以在云服务商租一批虚拟机，然后可以用脚本或手动的方式在上面部署应用。以 Cloud Foundry 这个 PaaS 项目为例，它的核心组件就是一套应用的打包和分发机制。  用户把应用、启动脚本等打包到一个压缩包中，上传后 Cloud Foundry 会通过调度器选择一个合">
 <meta property="og:locale" content="zh_CN">
@@ -42,12 +42,16 @@
 <meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FvLPmqKa4O6wE8DCJEgAS7Rin2xh.png">
 <meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/Fr6IFeckIz1Ca5wmq17hLeSDqEUU.png">
 <meta property="article:published_time" content="2022-10-30T06:41:51.000Z">
-<meta property="article:modified_time" content="2022-11-20T13:07:38.856Z">
+<meta property="article:modified_time" content="2022-11-24T14:07:09.690Z">
 <meta property="article:author" content="John Doe">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="容器">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="云原生">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FuPjLKiFVYa-DwRncFIWBNWGuK5j.png">
   <!-- Canonical links -->
-  <link rel="canonical" href="http://example.com/2022/10/30/yuque/1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/index.html">
+  <link rel="canonical" href="http://example.com/2022/10/30/yuque/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -217,12 +221,33 @@
 
     
       
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%91%E8%AE%A1%E7%AE%97/">云计算</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
 
     
       
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/k8s/" rel="tag">k8s</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" rel="tag">云原生</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AE%B9%E5%99%A8/" rel="tag">容器</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
 
     
       
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/docker/" style="font-size: 13px;">docker</a> <a href="/tags/k8s/" style="font-size: 13px;">k8s</a> <a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 13px;">云原生</a> <a href="/tags/%E5%AE%B9%E5%99%A8/" style="font-size: 13px;">容器</a>
+    </div>
+  </div>
+
     
       
   <div class="widget">
@@ -244,10 +269,10 @@
             
             <div class="item-inner">
               <p class="item-category">
-                
+                <a class="category-link" href="/categories/%E4%BA%91%E8%AE%A1%E7%AE%97/">云计算</a>
               </p>
               <p class="item-title">
-                <a href="/2022/10/30/yuque/1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/" class="title">1-4章读书笔记-容器技术概览</a>
+                <a href="/2022/10/30/yuque/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="title">深入剖析kubernetes 1-4章阅读总结</a>
               </p>
               <p class="item-date">
                 <time datetime="2022-10-30T06:41:51.000Z" itemprop="datePublished">2022-10-30</time>
@@ -268,14 +293,14 @@
   
 <main class="main" role="main">
   <div class="content">
-  <article id="post-yuque/1-4章读书笔记-容器技术概览" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+  <article id="post-yuque/深入剖析kubernetes1-4章读书笔记" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
     
     <div class="article-header">
       
         
   
     <h1 class="article-title" itemprop="name">
-      1-4章读书笔记-容器技术概览
+      深入剖析kubernetes 1-4章阅读总结
     </h1>
   
 
@@ -283,12 +308,22 @@
       <div class="article-meta">
         <span class="article-date">
     <i class="icon icon-calendar-check"></i>
-	<a href="/2022/10/30/yuque/1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/" class="article-date">
+	<a href="/2022/10/30/yuque/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="article-date">
 	  <time datetime="2022-10-30T06:41:51.000Z" itemprop="datePublished">2022-10-30</time>
 	</a>
 </span>
         
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E4%BA%91%E8%AE%A1%E7%AE%97/">云计算</a>
+  </span>
+
         
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/docker/" rel="tag">docker</a>, <a class="article-tag-link-link" href="/tags/k8s/" rel="tag">k8s</a>, <a class="article-tag-link-link" href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" rel="tag">云原生</a>, <a class="article-tag-link-link" href="/tags/%E5%AE%B9%E5%99%A8/" rel="tag">容器</a>
+  </span>
+
 
         
 	<span class="article-read hidden-xs">
@@ -299,7 +334,7 @@
 	</span>
 
 
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/10/30/yuque/1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/#comments" class="article-comment-link">评论</a></span>
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/10/30/yuque/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/#comments" class="article-comment-link">评论</a></span>
         
       </div>
     </div>
@@ -446,7 +481,7 @@
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="http://example.com/2022/10/30/yuque/1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0-%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/" title="1-4章读书笔记-容器技术概览" target="_blank" rel="external">http://example.com/2022/10/30/yuque/1-4章读书笔记-容器技术概览/</a>
+      <a href="http://example.com/2022/10/30/yuque/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" title="深入剖析kubernetes 1-4章阅读总结" target="_blank" rel="external">http://example.com/2022/10/30/yuque/深入剖析kubernetes1-4章读书笔记/</a>
     </li>
     
     <li class="post-copyright-license">
