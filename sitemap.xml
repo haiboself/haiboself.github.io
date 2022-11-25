@@ -2,6 +2,24 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://example.com/2022/10/30/yuque/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/</loc>
+    
+    <lastmod>2022-11-25</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.com/2019/11/26/Part-2-CHAPTER-8-The-Trouble-with-Distributed-Systems/</loc>
+    
+    <lastmod>2022-11-25</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://example.com/2019/12/12/Part-2-CHAPTER-9-Consistency-and-Consensus/</loc>
     
     <lastmod>2022-11-25</lastmod>
@@ -38,15 +56,6 @@
   </url>
   
   <url>
-    <loc>http://example.com/2019/11/26/Part-2-CHAPTER-8-The-Trouble-with-Distributed-Systems/</loc>
-    
-    <lastmod>2022-11-25</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://example.com/2019/09/29/Part-2-CHAPTER-5-Replication/</loc>
     
     <lastmod>2022-11-25</lastmod>
@@ -75,15 +84,6 @@
   
   <url>
     <loc>http://example.com/2019/09/15/Part-1-CHAPTER-4-Encoding-and-Evolution/</loc>
-    
-    <lastmod>2022-11-25</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://example.com/2022/10/30/yuque/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/</loc>
     
     <lastmod>2022-11-25</lastmod>
     
