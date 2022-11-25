@@ -1,3 +1,4 @@
+http://example.com/about/index.html
 http://example.com/2019/12/12/Part-2-CHAPTER-9-Consistency-and-Consensus/
 http://example.com/2019/09/14/Part-1-CHAPTER-3-Storage-and-Retrieval/
 http://example.com/2019/09/15/Part-1-CHAPTER-4-Encoding-and-Evolution/
@@ -8,7 +9,6 @@ http://example.com/2019/11/26/Part-2-CHAPTER-8-The-Trouble-with-Distributed-Syst
 http://example.com/2022/10/30/yuque/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/
 http://example.com/2019/09/07/Part-1-CHAPTER-1-Reliable-Scalable-and-Maintainable-Applications/
 http://example.com/2019/09/08/Part-1-CHAPTER-2-Data-Models-and-Query-Languages/
-http://example.com/about/index.html
 http://example.com/gallery.json
 http://example.com/links.json
 http://example.com/links/index.html

@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://example.com/about/index.html</loc>
+    
+    <lastmod>2022-11-25</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://example.com/2019/12/12/Part-2-CHAPTER-9-Consistency-and-Consensus/</loc>
     
     <lastmod>2022-11-25</lastmod>
@@ -84,15 +93,6 @@
   
   <url>
     <loc>http://example.com/2019/09/08/Part-1-CHAPTER-2-Data-Models-and-Query-Languages/</loc>
-    
-    <lastmod>2022-11-25</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://example.com/about/index.html</loc>
     
     <lastmod>2022-11-25</lastmod>
     
