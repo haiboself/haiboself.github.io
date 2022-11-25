@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Part 2: CHAPTER 6 Partitioning | Hexo</title>
+  <meta name="description" content="SummaryPartition 可以结合 Replication, 每个 partition 可以有多个 Replication 以保持高可用,如图:   Partition(sharding): partitioning a large dataset into smaller subsets, that each piece of data (each record, row, or doc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Part 2: CHAPTER 6 Partitioning">
+<meta property="og:url" content="http://example.com/2019/10/27/Part-2-CHAPTER-6-Partitioning/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="SummaryPartition 可以结合 Replication, 每个 partition 可以有多个 Replication 以保持高可用,如图:   Partition(sharding): partitioning a large dataset into smaller subsets, that each piece of data (each record, row, or doc">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p47">
+<meta property="og:image" content="https://notes.shichao.io/dda/figure_6-3_600.png">
+<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p27">
+<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p40">
+<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p44">
+<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p45">
+<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p46">
+<meta property="article:published_time" content="2019-10-27T06:28:55.000Z">
+<meta property="article:modified_time" content="2022-11-25T06:37:39.461Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ddia">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p47">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://example.com/2019/10/27/Part-2-CHAPTER-6-Partitioning/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitment@0.0.3/style/default.min.css">
+  
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/haiboself" target="_blank">
+          <img class="img-circle img-rotate" src="/images/curry.png" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海博</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Fluent &amp; Low Latency</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-books">
+          <a href="/books">
+            
+            <i class="icon icon-book-fill"></i>
+            
+            <span class="menu-title">书单</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流分享~</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a><span class="category-list-count">9</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ddia/" rel="tag">ddia</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/k8s/" rel="tag">k8s</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AE%B9%E5%99%A8/" rel="tag">容器</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ddia/" style="font-size: 14px;">ddia</a> <a href="/tags/docker/" style="font-size: 13px;">docker</a> <a href="/tags/k8s/" style="font-size: 13px;">k8s</a> <a href="/tags/%E5%AE%B9%E5%99%A8/" style="font-size: 13px;">容器</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/10/30/yuque/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="title">深入剖析kubernetes 1-4章阅读总结</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-10-30T06:41:51.000Z" itemprop="datePublished">2022-10-30</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/12/12/Part-2-CHAPTER-9-Consistency-and-Consensus/" class="title">Part 2: CHAPTER 9 Consistency and Consensus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-12-12T06:35:04.000Z" itemprop="datePublished">2019-12-12</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/11/26/Part-2-CHAPTER-8-The-Trouble-with-Distributed-Systems/" class="title">Part 2: CHAPTER 8 The Trouble with Distributed Systems</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-11-26T06:33:34.000Z" itemprop="datePublished">2019-11-26</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/11/17/Part-2-CHAPTER-7-Transactions/" class="title">Part 2: CHAPTER 7 Transactions</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-11-17T06:32:47.000Z" itemprop="datePublished">2019-11-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/10/27/Part-2-CHAPTER-6-Partitioning/" class="title">Part 2: CHAPTER 6 Partitioning</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-10-27T06:28:55.000Z" itemprop="datePublished">2019-10-27</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Summary"><span class="toc-number">1.</span> <span class="toc-text">Summary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Partitionoing-of-Key-Value-Data"><span class="toc-number">2.</span> <span class="toc-text">Partitionoing of Key-Value Data</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Partitioning-by-Key-Range"><span class="toc-number">2.0.1.</span> <span class="toc-text">Partitioning by Key Range</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Partitioning-by-Hash-of-Key"><span class="toc-number">2.0.2.</span> <span class="toc-text">Partitioning by Hash of Key</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Partitioning-and-Secondary-Indexes"><span class="toc-number">3.</span> <span class="toc-text">Partitioning and Secondary Indexes</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Partitioning-Secondary-Indexes-by-Document-local-index"><span class="toc-number">3.1.</span> <span class="toc-text">Partitioning Secondary Indexes by Document(local index)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Partitioning-Secondary-Indexes-by-Term-global-index"><span class="toc-number">3.2.</span> <span class="toc-text">Partitioning Secondary Indexes by Term(global index)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Rebalancing-Partitions"><span class="toc-number">4.</span> <span class="toc-text">Rebalancing Partitions</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Strategies-for-Rebalancing"><span class="toc-number">4.1.</span> <span class="toc-text">Strategies for Rebalancing</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#hash-mod-N"><span class="toc-number">4.1.1.</span> <span class="toc-text">hash mod N</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Fixed-number-of-partitions"><span class="toc-number">4.1.2.</span> <span class="toc-text">Fixed number of partitions</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Dynamic-partitioning"><span class="toc-number">4.1.3.</span> <span class="toc-text">Dynamic partitioning</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Partitioning-proportionally-to-nodes"><span class="toc-number">4.1.4.</span> <span class="toc-text">Partitioning proportionally to nodes</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Operations-Automatic-or-Manual-Rebalancing"><span class="toc-number">4.2.</span> <span class="toc-text">Operations: Automatic or Manual Rebalancing</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Request-Routing"><span class="toc-number">5.</span> <span class="toc-text">Request Routing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Parallel-Query-Execution"><span class="toc-number">6.</span> <span class="toc-text">Parallel Query Execution</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Part-2-CHAPTER-6-Partitioning" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Part 2: CHAPTER 6 Partitioning
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/10/27/Part-2-CHAPTER-6-Partitioning/" class="article-date">
+	  <time datetime="2019-10-27T06:28:55.000Z" itemprop="datePublished">2019-10-27</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/ddia/" rel="tag">ddia</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/10/27/Part-2-CHAPTER-6-Partitioning/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>Partition 可以结合 Replication, 每个 partition 可以有多个 Replication 以保持高可用,如图:</p>
+<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p47" alt="4da1c26598524fc627da7e80bf1f53e9.png"></p>
+<blockquote>
+<p>Partition(sharding): partitioning a large dataset into smaller subsets, that each piece of data (each record, row, or document) belongs to <code>exactly one</code> partition.使用 partition 可以分散读写,可以横向扩展。</p>
+</blockquote>
+<p>The main reason for wanting to partition data is <code>scalability</code>: 数据和写入都可以分散到多个机器上去,以避免 hot spots。数据的 split 要合理,避免数据倾斜,同时要考虑 node 上下线的问题。</p>
+<p>2 种 partitioning 的方式:</p>
+<ul>
+<li><p>Key range partitioning:key are sorted,partition 中也按 key 有序存储</p>
+<ul>
+<li>优点: 高效的 range query</li>
+<li>缺点: 访问的 key 相对集中时候的热点问题</li>
+<li>rebalance 策略: dynamically by splitting the range into two subranges when a partition gets too big.</li>
+</ul>
+</li>
+<li><p>Hash partitioning: 将 key hash 到对应的 partition,key 是无的序,从而换取更均匀的数据分布</p>
+<ul>
+<li>优点: 更均匀的数据分布</li>
+<li>缺点: 低效的 range query</li>
+<li>rebalance 策略: common to create a fixed number of partitions in advance, to assign several partitions to each node, and to move entire partitions from one node to another when nodes are added or removed</li>
+</ul>
+</li>
+</ul>
+<p>可以混合 2 种 partition 方式: using one part of the key to identify the partition and another part for the sort order.</p>
+<p>Secondary index 的 2 种 partition 方式:</p>
+<ul>
+<li>Document-partitioned indexes (<code>local indexes</code>): 和主键存储在同一个 partition,所以更新时只需更新单个 partition, 但是读取时需要聚集多个 partition 的数据</li>
+<li>Term-partitioned indexes (<code>global indexes</code>): 分散在各个分区中,更新的时候需要更新多个,但是读取的时候只需要读取一个 partition</li>
+</ul>
+<h2 id="Partitionoing-of-Key-Value-Data"><a href="#Partitionoing-of-Key-Value-Data" class="headerlink" title="Partitionoing of Key-Value Data"></a>Partitionoing of Key-Value Data</h2><p>Our goal with partitioning is to spread the data and the query load evenly across nodes. </p>
+<p>如果 partition 不能平均分配, 就会出现数据倾斜和 hot spot 问题。</p>
+<h4 id="Partitioning-by-Key-Range"><a href="#Partitioning-by-Key-Range" class="headerlink" title="Partitioning by Key Range"></a>Partitioning by Key Range</h4><p>One way of partitioning is to assign a continuous range of keys (from some minimum to some maximum) to each partition</p>
+<p>In order to distribute the data evenly, the partition boundaries need to adapt to the data.</p>
+<p>Within each partition, we can keep keys in sorted order (SSTables and LSM-Trees)</p>
+<p>劣势: 如果频繁访问部分 key,会造成 hot spots 问题。</p>
+<h4 id="Partitioning-by-Hash-of-Key"><a href="#Partitioning-by-Hash-of-Key" class="headerlink" title="Partitioning by Hash of Key"></a>Partitioning by Hash of Key</h4><p>使用 hash function 对 key 求 hash 值,you can assign each partition a range of hashes (rather than a range of keys), and every key whose hash falls within a partition’s range will be stored in that partition。如图:</p>
+<p><img src="https://notes.shichao.io/dda/figure_6-3_600.png" alt="image"></p>
+<p><code>优势</code>: This technique is good at distributing keys fairly among the partitions. The partition boundaries can be evenly spaced. </p>
+<p><code>劣势</code>: range query 需要读取多个 partitoin,相比于 key range parition,比较低效。</p>
+<h2 id="Partitioning-and-Secondary-Indexes"><a href="#Partitioning-and-Secondary-Indexes" class="headerlink" title="Partitioning and Secondary Indexes"></a>Partitioning and Secondary Indexes</h2><blockquote>
+<p>A secondary index usually doesn’t identify a record uniquely but rather is a way of searching for occurrences of a particular value.</p>
+</blockquote>
+<blockquote>
+<p>二级索引在关系型数据库中比较普遍。由于实现的复杂性,许多 k,v 存储(如 hbase)避免使用二级索引。搜索引擎(如 es)使用二级索引。</p>
+</blockquote>
+<p>The <code>problem</code> with secondary indexes is that they don’t map neatly to partitions.</p>
+<p>There are two main approaches to partitioning a database with secondary indexes: <code>document-based</code> partitioning and <code>term-based</code> partitioning.</p>
+<h3 id="Partitioning-Secondary-Indexes-by-Document-local-index"><a href="#Partitioning-Secondary-Indexes-by-Document-local-index" class="headerlink" title="Partitioning Secondary Indexes by Document(local index)"></a>Partitioning Secondary Indexes by Document(local index)</h3><p>In this indexing approach, each partition is completely separate: each partition maintains its own secondary indexes, covering only the documents in that partition.如图:</p>
+<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p27" alt="14f2449166cc366c4b5a60de76ddd8c6.png"></p>
+<p>优势: 实现简单,写入和更新 index 比较简单高效。<br>劣势: 读取成本高,需要读取所有 partition, Even if you query the partitions in parallel.</p>
+<h3 id="Partitioning-Secondary-Indexes-by-Term-global-index"><a href="#Partitioning-Secondary-Indexes-by-Term-global-index" class="headerlink" title="Partitioning Secondary Indexes by Term(global index)"></a>Partitioning Secondary Indexes by Term(global index)</h3><blockquote>
+<p>Term: 来自全文索引的概念,这里指的是: where the terms are all the words that occur in a document.</p>
+</blockquote>
+<p>global index that covers data in all partitions,如果所有 index 都存储在一台 node 会成为瓶颈,所以 index 也需要 partitioned,可以通过 term 自身(方便 range scan)或者 hash 的方式(可以均匀分散)对 term index 进行 partition。 如图:</p>
+<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p40" alt="a19496e312343d1bfbd4f20a28025fc0.png"></p>
+<p>好处: 使用索引可以只读取相应的 partition, 提交读取效率。<br>坏处: 因为写入的时候需要更新多个 partition 中的 index,所以写效率降低且复杂。</p>
+<p>In practice, updates to global secondary indexes are often asynchronous, 因此 index 写入后不是立即可见的, 所以需要 distributed transactioon 来保证所有写入 partition 的索引的正确和立即可见。</p>
+<h2 id="Rebalancing-Partitions"><a href="#Rebalancing-Partitions" class="headerlink" title="Rebalancing Partitions"></a>Rebalancing Partitions</h2><blockquote>
+<p>The process of moving load from one node in the cluster to another is called rebalancing.</p>
+</blockquote>
+<p>Rebalancing 需满足:</p>
+<ul>
+<li>将 load(存储,读写 load)公平的分配到集群的机器上。</li>
+<li>Rebalancing 的同时, db 可以继续提供读写服务</li>
+<li>要降低网络和磁盘 io,在 node 间只移动必要的数据。</li>
+</ul>
+<h3 id="Strategies-for-Rebalancing"><a href="#Strategies-for-Rebalancing" class="headerlink" title="Strategies for Rebalancing"></a>Strategies for Rebalancing</h3><p>We need an approach that doesn’t move data around more than necessary.</p>
+<h4 id="hash-mod-N"><a href="#hash-mod-N" class="headerlink" title="hash mod N"></a>hash mod N</h4><p>The problem with the mod N approach is that if the number of nodes N changes, most of the keys will need to be moved from one node to another</p>
+<h4 id="Fixed-number-of-partitions"><a href="#Fixed-number-of-partitions" class="headerlink" title="Fixed number of partitions"></a>Fixed number of partitions</h4><p>使用固定数量的 partitions is operationally simpler,然而选取合适的 partition 数量是非常困难的。而且在增减机器时候也有不必要的数据移动,如图:</p>
+<p>如图:</p>
+<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p44" alt="a2713cc5f32c187684c32074e2122f3f.png"></p>
+<h4 id="Dynamic-partitioning"><a href="#Dynamic-partitioning" class="headerlink" title="Dynamic partitioning"></a>Dynamic partitioning</h4><p>当 partiton 中数据量增长到一个阈值的时候,可以 split 为 2 个partiton;同时,如果有数据删除,partiiton 变小,可以合并相邻 partition。</p>
+<p><code>优势</code>: the number of partitions adapts to the total data volume</p>
+<p><code>缺陷</code>: 当数据量小的时候被分配到一个 partition 中,开始所有的读写都会打到这个 partition, 为了缓解这个问题,可以预先分配一些 partition,但这需要 know what the key distribution is going to look like。</p>
+<h4 id="Partitioning-proportionally-to-nodes"><a href="#Partitioning-proportionally-to-nodes" class="headerlink" title="Partitioning proportionally to nodes"></a>Partitioning proportionally to nodes</h4><p>在以上的 cases 中, the number of partitions is independent of the number of nodes.</p>
+<p>To have a fixed number of partitions per node, this approach also keeps the size of each partition fairly stable.这个方式可以很好的适应数据规模的变化,但是在增减机器 rebanlancing 的时候需要注意避免形成 unfailrly partition.</p>
+<h3 id="Operations-Automatic-or-Manual-Rebalancing"><a href="#Operations-Automatic-or-Manual-Rebalancing" class="headerlink" title="Operations: Automatic or Manual Rebalancing"></a>Operations: Automatic or Manual Rebalancing</h3><p>自动 rebalancing 十分方便,但是是不可预测的,同时 automation can be dangerous in combination with automatic failure detection, 可能导致级联的错误。因此让人介入 rebalance 是比较好的。</p>
+<h2 id="Request-Routing"><a href="#Request-Routing" class="headerlink" title="Request Routing"></a>Request Routing</h2><p>service discovery 问题, client 如何知道要访问哪台机器? 有 3 种方式,如图:</p>
+<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p45" alt="c0d7cd822c95ac299173b2008b7364a9.png"></p>
+<p>Many distributed data systems rely on a separate coordination service such as ZooKeeper to keep track of this cluster metadata,如图:</p>
+<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p46" alt="fb8752be8a9436d2ed221fa97a0106c5.png"></p>
+<h2 id="Parallel-Query-Execution"><a href="#Parallel-Query-Execution" class="headerlink" title="Parallel Query Execution"></a>Parallel Query Execution</h2><p>The MPP(massively parallel processing) query optimizer breaks this complex query into a number of execution stages and partitions, many of which can be executed in parallel on different nodes of the database cluster。如各种分布式计算引擎: mr, spark, presto.</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://example.com/2019/10/27/Part-2-CHAPTER-6-Partitioning/" title="Part 2: CHAPTER 6 Partitioning" target="_blank" rel="external">http://example.com/2019/10/27/Part-2-CHAPTER-6-Partitioning/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/haiboself" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/curry.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/haiboself" target="_blank"><span class="text-dark">海博</span><small class="ml-1x">Fluent &amp; Low Latency</small></a></h3>
+        <div>大数据基础架构工程师</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2019/11/17/Part-2-CHAPTER-7-Transactions/" title="Part 2: CHAPTER 7 Transactions"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2019/09/29/Part-2-CHAPTER-5-Replication/" title="Part 2: CHAPTER 5 Replication"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn   collapsed  " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+<script src="//cdn.jsdelivr.net/npm/gitment@0.0.3/dist/gitment.browser.min.js"></script>
+<script>
+var gitment = new Gitment({
+  // id默认为当前页面url，如果url后带参数或锚点，gitment要重新初始化
+  // https://github.com/imsun/gitment/issues/55
+  // 解决方案：id:window.location.pathname,或者将id设置为当前页面标题
+  id: 'Part 2: CHAPTER 6 Partitioning', 
+  owner: 'haiboself', // 可以是你的GitHub用户名，也可以是github id
+  repo: 'haiboself.github.io',
+  oauth: {
+    client_id: '5bc7d4254095d8c34248',
+    client_secret: 'c82c5c95205f7e6bdc7c9924fa0fdcda63f8411c',
+  }
+})
+gitment.render('comments')
+</script>
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Part 2: CHAPTER 5 Replication | Hexo</title>
+  <meta name="description" content="? Replication 和 partition 如何组合使用? 如何解决并发问题? 如何保证 consistency? 如何提高容错,应对如网络中断, latency spikes 问题  SummaryReplication 是什么?Each node that stores a copy of the database is called a replica. Replication 可以">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Part 2: CHAPTER 5 Replication">
+<meta property="og:url" content="http://example.com/2019/09/29/Part-2-CHAPTER-5-Replication/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="? Replication 和 partition 如何组合使用? 如何解决并发问题? 如何保证 consistency? 如何提高容错,应对如网络中断, latency spikes 问题  SummaryReplication 是什么?Each node that stores a copy of the database is called a replica. Replication 可以">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p59">
+<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p16">
+<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p17">
+<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p19">
+<meta property="article:published_time" content="2019-09-29T06:27:13.000Z">
+<meta property="article:modified_time" content="2022-11-25T06:27:53.896Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ddia">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p59">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://example.com/2019/09/29/Part-2-CHAPTER-5-Replication/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitment@0.0.3/style/default.min.css">
+  
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/haiboself" target="_blank">
+          <img class="img-circle img-rotate" src="/images/curry.png" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海博</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Fluent &amp; Low Latency</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-books">
+          <a href="/books">
+            
+            <i class="icon icon-book-fill"></i>
+            
+            <span class="menu-title">书单</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流分享~</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a><span class="category-list-count">9</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ddia/" rel="tag">ddia</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/k8s/" rel="tag">k8s</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AE%B9%E5%99%A8/" rel="tag">容器</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ddia/" style="font-size: 14px;">ddia</a> <a href="/tags/docker/" style="font-size: 13px;">docker</a> <a href="/tags/k8s/" style="font-size: 13px;">k8s</a> <a href="/tags/%E5%AE%B9%E5%99%A8/" style="font-size: 13px;">容器</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/10/30/yuque/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="title">深入剖析kubernetes 1-4章阅读总结</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-10-30T06:41:51.000Z" itemprop="datePublished">2022-10-30</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/12/12/Part-2-CHAPTER-9-Consistency-and-Consensus/" class="title">Part 2: CHAPTER 9 Consistency and Consensus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-12-12T06:35:04.000Z" itemprop="datePublished">2019-12-12</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/11/26/Part-2-CHAPTER-8-The-Trouble-with-Distributed-Systems/" class="title">Part 2: CHAPTER 8 The Trouble with Distributed Systems</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-11-26T06:33:34.000Z" itemprop="datePublished">2019-11-26</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/11/17/Part-2-CHAPTER-7-Transactions/" class="title">Part 2: CHAPTER 7 Transactions</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-11-17T06:32:47.000Z" itemprop="datePublished">2019-11-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/10/27/Part-2-CHAPTER-6-Partitioning/" class="title">Part 2: CHAPTER 6 Partitioning</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-10-27T06:28:55.000Z" itemprop="datePublished">2019-10-27</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Summary"><span class="toc-number">2.</span> <span class="toc-text">Summary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Leaders-and-Followers-single-leader"><span class="toc-number">3.</span> <span class="toc-text">Leaders and Followers(single-leader)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Syncchronous-Versus-Asynchronous-Replication"><span class="toc-number">3.1.</span> <span class="toc-text">Syncchronous Versus Asynchronous Replication</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Synchronous"><span class="toc-number">3.1.0.1.</span> <span class="toc-text">Synchronous</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Completely-Asynchronous"><span class="toc-number">3.1.0.2.</span> <span class="toc-text">Completely Asynchronous</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Setting-Up-New-Followers-%E6%89%A9%E5%AE%B9%E6%97%B6%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">3.2.</span> <span class="toc-text">Setting Up New Followers(扩容时的一致性)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Handling-Node-Outages-%E5%AE%B9%E9%94%99"><span class="toc-number">3.3.</span> <span class="toc-text">Handling Node Outages(容错)</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Follower-failure-Catch-up-recovery"><span class="toc-number">3.3.0.1.</span> <span class="toc-text">Follower failure: Catch-up recovery</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Leader-failure-Failover"><span class="toc-number">3.3.0.2.</span> <span class="toc-text">Leader failure: Failover</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Implementation-of-Replication-Logs"><span class="toc-number">3.4.</span> <span class="toc-text">Implementation of Replication Logs</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Statement-based-replication"><span class="toc-number">3.4.0.1.</span> <span class="toc-text">Statement-based replication</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Write-ahead-log-WAL-shipping"><span class="toc-number">3.4.0.2.</span> <span class="toc-text">Write-ahead log(WAL) shipping</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Logical-row-based-log-replication"><span class="toc-number">3.4.0.3.</span> <span class="toc-text">Logical(row-based) log replication</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Trigger-based-replication"><span class="toc-number">3.4.0.4.</span> <span class="toc-text">Trigger-based replication</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Problems-with-Replication-Lag"><span class="toc-number">4.</span> <span class="toc-text">Problems with Replication Lag</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Reading-Your-Own-Writes"><span class="toc-number">4.0.1.</span> <span class="toc-text">Reading Your Own Writes</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Monotonic-Reads-async-%E6%83%85%E5%86%B5%E4%B8%8B"><span class="toc-number">4.0.2.</span> <span class="toc-text">Monotonic Reads(async 情况下)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Consistent-Prefix-Reads"><span class="toc-number">4.0.3.</span> <span class="toc-text">Consistent Prefix Reads</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Solutions-for-Replication-Lag"><span class="toc-number">4.0.4.</span> <span class="toc-text">Solutions for Replication Lag</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Multi-Leader-Replication"><span class="toc-number">5.</span> <span class="toc-text">Multi-Leader Replication</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Use-Cases-for-Multi-Leader-Replication"><span class="toc-number">5.1.</span> <span class="toc-text">Use Cases for Multi-Leader Replication</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Multi-datacenter-operation"><span class="toc-number">5.1.1.</span> <span class="toc-text">Multi-datacenter operation</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Clients-with-offline-operation"><span class="toc-number">5.1.2.</span> <span class="toc-text">Clients with offline operation</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Collaborative-editing"><span class="toc-number">5.1.3.</span> <span class="toc-text">Collaborative editing</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Handling-Write-Conflicts"><span class="toc-number">5.2.</span> <span class="toc-text">Handling Write Conflicts</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Conflict-avoidance"><span class="toc-number">5.2.1.</span> <span class="toc-text">Conflict avoidance</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Converging-toward-a-consistent-state"><span class="toc-number">5.2.2.</span> <span class="toc-text">Converging toward a consistent state</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Custom-conflict-resolution-logic"><span class="toc-number">5.2.3.</span> <span class="toc-text">Custom conflict resolution logic</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Multi-Leader-Replication-Topologies"><span class="toc-number">5.3.</span> <span class="toc-text">Multi-Leader Replication Topologies</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Leaderless-Replication"><span class="toc-number">6.</span> <span class="toc-text">Leaderless Replication</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Writing-to-the-Database-When-a-Node-Is-Down"><span class="toc-number">6.1.</span> <span class="toc-text">Writing to the Database When a Node Is Down</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Read-repair-and-anti-entropy"><span class="toc-number">6.1.1.</span> <span class="toc-text">Read repair and anti-entropy</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Quorums-for-reading-and-writing"><span class="toc-number">6.1.2.</span> <span class="toc-text">Quorums for reading and writing</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Limitations-of-Quorum-Consistency"><span class="toc-number">6.1.3.</span> <span class="toc-text">Limitations of Quorum Consistency</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Sloppy-Quorums-and-Hinted-Handoff-%E8%8D%89%E7%8E%87%E7%9A%84%E5%AF%B9%E8%AF%9D%E5%92%8C%E6%9A%97%E7%A4%BA%E7%9A%84%E4%BA%A4%E6%8E%A5"><span class="toc-number">6.1.4.</span> <span class="toc-text">Sloppy Quorums and Hinted Handoff(草率的对话和暗示的交接)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Detecting-Concurrent-Writes"><span class="toc-number">7.</span> <span class="toc-text">Detecting Concurrent Writes</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Last-write-wins-discarding-concurrent-writes"><span class="toc-number">7.0.1.</span> <span class="toc-text">Last write wins(discarding concurrent writes)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Capturing-the-happens-before-relationship"><span class="toc-number">7.0.2.</span> <span class="toc-text">Capturing the happens-before relationship</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Merging-concurrently-written-values"><span class="toc-number">7.0.3.</span> <span class="toc-text">Merging concurrently written values</span></a></li></ol></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Part-2-CHAPTER-5-Replication" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Part 2: CHAPTER 5 Replication
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/09/29/Part-2-CHAPTER-5-Replication/" class="article-date">
+	  <time datetime="2019-09-29T06:27:13.000Z" itemprop="datePublished">2019-09-29</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/ddia/" rel="tag">ddia</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/09/29/Part-2-CHAPTER-5-Replication/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id=""><a href="#" class="headerlink" title="?"></a>?</h2><ul>
+<li>Replication 和 partition 如何组合使用?</li>
+<li>如何解决<code>并发</code>问题?</li>
+<li>如何保证 <code>consistency</code>?</li>
+<li>如何提高<code>容错</code>,应对如网络中断, latency spikes 问题</li>
+</ul>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p><strong>Replication 是什么?</strong><br>Each node that stores a copy of the database is called a replica.</p>
+<p><strong>Replication 可以解决什么问题?</strong></p>
+<ul>
+<li>High availability</li>
+<li>Disconnected operation: Allowing an application to continue working when there is a network interruption</li>
+<li>Latency: datacenter</li>
+<li>Scalability: 副本所提供的大量的<code>读</code>能力</li>
+</ul>
+<p><strong>主要面临的问题</strong></p>
+<ul>
+<li>容错和并发: It requires carefully thinking about <code>concurrency</code> and about all the things that can go wrong, and dealing with the consequences of those faults.</li>
+<li>并发下的数据<code>一致</code>性</li>
+</ul>
+<p><strong>Three main approaches to replication:</strong></p>
+<ul>
+<li>Single-leader replication: 简单,不需要处理数据冲突</li>
+<li>Multi-leader replication</li>
+<li>Leaderless replication: 和 Multi-leader 容错更好,但是只能提供 <code>very week consistency guarantees</code></li>
+</ul>
+<p><strong>如何解决<code>容错</code>和<code>一致</code>性?</strong></p>
+<p>Replication can be synchronous or asynchronous,which has a profound effect on the system behavior when there is a fault. 比如在 lag increases 和 servers fail 时如何处理?</p>
+<p>一些 <code>consistency model</code> which are helpful for deciding how an application should behave under <code>replication lag</code>:</p>
+<ul>
+<li>Read-after-write consistency</li>
+<li>Monotonic reads</li>
+<li>Consistent prefix reads</li>
+</ul>
+<h2 id="Leaders-and-Followers-single-leader"><a href="#Leaders-and-Followers-single-leader" class="headerlink" title="Leaders and Followers(single-leader)"></a>Leaders and Followers(single-leader)</h2><p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p59" alt="c274c0e68e7967560857917925462113.png"></p>
+<p>使用 leader-based replication(master–slave replication) 来解决 replication 写入问题的流程:</p>
+<ol>
+<li>进行选主(elect leader)</li>
+<li>leader 写入时,会将数据以 replication log 或者 change stream 的形式发送给 followers, follower 更新本地 replication</li>
+<li>writes are only accepted on the leader (the followers are read-only from the client’s point of view).</li>
+</ol>
+<blockquote>
+<p>This mode of replication is a built-in feature of many relational databases<br>Leader-based replication is not restricted to only databases, 如消息队列也会使用</p>
+</blockquote>
+<h3 id="Syncchronous-Versus-Asynchronous-Replication"><a href="#Syncchronous-Versus-Asynchronous-Replication" class="headerlink" title="Syncchronous Versus Asynchronous Replication"></a>Syncchronous Versus Asynchronous Replication</h3><h5 id="Synchronous"><a href="#Synchronous" class="headerlink" title="Synchronous"></a>Synchronous</h5><p><code>优势</code>(保证数据一致性):<br>The follower is guaranteed to have an up-to-date copy of the data that is consistent with the leader.</p>
+<p><code>劣势</code>(系统可用性差):<br>如果有 follower 无法响应(如遇到网络问题),那么 the write cannot be processed. The leader must block all writes and wait until the synchronous replica is available again.</p>
+<p>所以所有 followers 都是同步是不现实的,一般使用如 semi-synchronous 方式,至少保证系统中一个 follower 是 sync 的,其他 follower 则是 async 的,This guarantees that you have an up-to-date copy of the data on at least two nodes</p>
+<h5 id="Completely-Asynchronous"><a href="#Completely-Asynchronous" class="headerlink" title="Completely Asynchronous"></a>Completely Asynchronous</h5><p><code>如何在并发场景下保证数据一致?</code></p>
+<p><code>优势</code>(可用性高): The leader can continue processing writes, even if all of its followers have fallen behind.</p>
+<p><code>劣势</code>:</p>
+<ul>
+<li><code>写丢失</code>: If the leader fails and is not recoverable, any writes that have not yet been replicated to followers are lost.</li>
+<li><code>不保证写入</code>: A write is not guaranteed to be durable, even if it has been confirmed to the client</li>
+</ul>
+<p>尽管如此,全异步还是被广泛使用,尤其在 there are many followers or if they are geo‐graphically distributed.</p>
+<h3 id="Setting-Up-New-Followers-扩容时的一致性"><a href="#Setting-Up-New-Followers-扩容时的一致性" class="headerlink" title="Setting Up New Followers(扩容时的一致性)"></a>Setting Up New Followers(扩容时的一致性)</h3><p>set up 新 follower 时,如何保证 the <code>new follower</code> has an <code>accurate copy</code> of the leader’s data?</p>
+<ol>
+<li>Take <code>a consistent snapshot</code> of the leader’s database at some point in time—if possible, without taking a lock on the entire database.</li>
+<li>Copy the snapshot to the new follower node.</li>
+<li>The follower connects to the leader and requests <code>all the data changes that have happened since the snapshot</code> was taken.</li>
+</ol>
+<h3 id="Handling-Node-Outages-容错"><a href="#Handling-Node-Outages-容错" class="headerlink" title="Handling Node Outages(容错)"></a>Handling Node Outages(容错)</h3><p>其实就是如何保证 High Availability: Thus, our goal is to keep the system as a whole running despite individual node failures, and to keep the impact of a node outage as small as possible.</p>
+<p><code>所以如何在处理机器不可用问题,以保证高可用?</code></p>
+<h5 id="Follower-failure-Catch-up-recovery"><a href="#Follower-failure-Catch-up-recovery" class="headerlink" title="Follower failure: Catch-up recovery"></a>Follower failure: Catch-up recovery</h5><p>follower 本地保存 <code>data chanage log</code>(received from leader), 可以从 log 中进行恢复, 然后再从 leader 拿到停止时间内的 log 进行重建</p>
+<blockquote>
+<p>the follower can connect to the leader and request all the data changes that occurred during the time when the follower was disconnected</p>
+</blockquote>
+<h5 id="Leader-failure-Failover"><a href="#Leader-failure-Failover" class="headerlink" title="Leader failure: Failover"></a>Leader failure: Failover</h5><p>如何处理?</p>
+<ol>
+<li>重新选主</li>
+<li>followers 从新主获取数据</li>
+<li>client 和新 leader 交互</li>
+</ol>
+<p>ha 机制:</p>
+<ol>
+<li><p>Determining that the leader has failed</p>
+</li>
+<li><p>Choosing a new leader:The best candidate for leadership is usually the replica with the <code>most up-to-date data changes from the old leader</code> (to minimize any data loss). Getting all the nodes to agree on a new leader is a <code>consensus problem</code></p>
+</li>
+<li><p>Reconfiguring the system to use the new leader:<br>The system needs to ensure that the old leader becomes a follower and recognizes the new leader.</p>
+</li>
+</ol>
+<p>一些问题:</p>
+<ul>
+<li><p>如果使用异步 replication, new leader 和 old leader 之间可能存在 write 数据的差异, 此时 common solution 是 old leader 丢弃这些 writes. </p>
+</li>
+<li><p>丢弃写入可能会导致和其他外部存储系统数据不一致</p>
+</li>
+<li><p>split brain(有多个 node 认为自己是 leader): data is likely to be lost or corrupted; you can end up with both nodes being shut down</p>
+</li>
+<li><p>合理的 leader 失效 timeout 设置? load spike, network glitch 这些情况需要被综合考虑</p>
+</li>
+</ul>
+<blockquote>
+<p>node failures; unreliable networks; trade-offs around replica consistency, durability, availability and latency are in fact fundamental problems in distributed systems</p>
+</blockquote>
+<h3 id="Implementation-of-Replication-Logs"><a href="#Implementation-of-Replication-Logs" class="headerlink" title="Implementation of Replication Logs"></a>Implementation of Replication Logs</h3><p>the log is an append-only sequence of bytes containing all writes to the database</p>
+<p>leader 将 log 写到本地,同时发送给 followers, follower 执行 log 来建立和 leader 相同的 replication</p>
+<h5 id="Statement-based-replication"><a href="#Statement-based-replication" class="headerlink" title="Statement-based replication"></a>Statement-based replication</h5><p>最简单的情况:<br>leader logs <code>every write request(statement)</code> that it executes and sends that statement log to its followers</p>
+<p>缺点:</p>
+<ul>
+<li><code>nondeterministic function</code>(like now()) is likely to generate a different value on each replica.</li>
+<li>they must be executed in exactly the <code>same order</code> on each replica, or else they may have a different effect. This can be limiting when there are multiple concurrently executing transactions.</li>
+<li>Statements that have <code>side effects</code>, unless the side effects are absolutely deterministic.</li>
+</ul>
+<p>以上问题是可以绕过的</p>
+<h5 id="Write-ahead-log-WAL-shipping"><a href="#Write-ahead-log-WAL-shipping" class="headerlink" title="Write-ahead log(WAL) shipping"></a>Write-ahead log(WAL) shipping</h5><p>这是什么? 如何实现?</p>
+<p>Describes the data on a very low level: a WAL contains details of which bytes were changed in which disk blocks。</p>
+<p>因此难以适应数据存储格式的变化,但是可以解决 statement-based 的问题。</p>
+<h5 id="Logical-row-based-log-replication"><a href="#Logical-row-based-log-replication" class="headerlink" title="Logical(row-based) log replication"></a>Logical(row-based) log replication</h5><p>Logical log: 使用和 storage engine 不同的存储格式, 以便于解耦 log 和 storage engine</p>
+<p>优点:</p>
+<ul>
+<li>因为解耦所以 it can more easily be kept backward compatible, allowing the leader and the follower to run different versions of the database software, or even different storage engines.</li>
+<li>A logical log format is also easier for external applications to parse</li>
+</ul>
+<h5 id="Trigger-based-replication"><a href="#Trigger-based-replication" class="headerlink" title="Trigger-based replication"></a>Trigger-based replication</h5><p>move replication up to the application layer.</p>
+<blockquote>
+<p>An alternative is to use features that are available in many relational databases: <code>triggers</code> and stored procedures. </p>
+</blockquote>
+<blockquote>
+<p>A trigger lets you register custom application code that is automatically executed when a data change (write transaction) occurs in a database system. The trigger has the opportunity to log this change into a separate table, from which it can be read by an external process. That external process can then apply any necessary application logic and replicate the data change to another system.<br>it can nevertheless be useful due to its flexibility.</p>
+</blockquote>
+<p>优点是灵活,缺点是 is more prone to bugs and limitations than the database’s built-in replication</p>
+<h2 id="Problems-with-Replication-Lag"><a href="#Problems-with-Replication-Lag" class="headerlink" title="Problems with Replication Lag"></a>Problems with Replication Lag</h2><blockquote>
+<p>Replication Lag: the delay between a write happening on the leader and being reflected on a follower</p>
+</blockquote>
+<blockquote>
+<p>In this <code>read-scaling architecture(Leader-based)</code>, this approach only realistically works with asynchronous replication, <code>why?</code>: synchronously 会导致系统不可用的几率变高 so a fully synchronous configuration would be very unreliable.如果使用异步系统,又会面临数据一致性问题。</p>
+</blockquote>
+<p><code>所以本节主要介绍导致 lag 过长的场景和解决这些问题的方法.</code></p>
+<h4 id="Reading-Your-Own-Writes"><a href="#Reading-Your-Own-Writes" class="headerlink" title="Reading Your Own Writes"></a>Reading Your Own Writes</h4><blockquote>
+<p>read-after-write consistency(read-your-writes consistency): 保证写入方写入后立即可见,但对其他 user 不进行保证</p>
+</blockquote>
+<p>一些解决方案:</p>
+<ul>
+<li><p>When reading something that the user may have modified, read it from the leader; otherwise, read it from a follower, 但是当一个用户对系统进行大量读写的话,这个方式就会变得低效</p>
+</li>
+<li><p>client 端可以记录 write 的时间戳,向系统请求的时候带上时间戳,系统根据时间戳来判断当前 replica 是否可以提供服务,如果不行,就尝试其他的 replica, 否则一直等待直到收到数据写入,可以服务</p>
+</li>
+<li><p>If your replicas are distributed across multiple datacenters (for geographical proximity to users or for availability), there is additional complexity. Any request that needs to be served by the leader must be routed to the datacenter that contains the leader.</p>
+</li>
+</ul>
+<p>保证 Cross-device read-after-write consistency 的问题:</p>
+<ol>
+<li>remembering the timestamp of the user’s last update become more difficult</li>
+<li>If your replicas are distributed across different datacenters,there is no guarantee that connections from different devices will be routed to the same datacenter</li>
+</ol>
+<h4 id="Monotonic-Reads-async-情况下"><a href="#Monotonic-Reads-async-情况下" class="headerlink" title="Monotonic Reads(async 情况下)"></a>Monotonic Reads(async 情况下)</h4><p>对于 async followers 来说,由于 lag 不同,用户可能从不同的 follower 读到不同的数据,有些是过时的。</p>
+<p>Monotonic reads 保证不读到<code>过时</code>的数据. It’s a lesser guarantee than strong consistency, but a stronger guarantee than eventual consistency.</p>
+<blockquote>
+<p>If one user makes several reads in sequence, they will not see time go backward</p>
+</blockquote>
+<p>One way of achieving monotonic reads is to make sure that each user always makes their reads from the same replica</p>
+<h4 id="Consistent-Prefix-Reads"><a href="#Consistent-Prefix-Reads" class="headerlink" title="Consistent Prefix Reads"></a>Consistent Prefix Reads</h4><p>consistent prefix reads:  This guarantee says that if a sequence of writes happens in a certain order, then anyone reading those writes will see them appear in the same order.</p>
+<p>This is a particular problem in <code>partitioned (sharded) databases</code>。in many distributed,databases, different partitions operate independently, so there is no global ordering of writes</p>
+<p>一种解决方式事保证互相关联的写入被写入到同一个 partition.</p>
+<h4 id="Solutions-for-Replication-Lag"><a href="#Solutions-for-Replication-Lag" class="headerlink" title="Solutions for Replication Lag"></a>Solutions for Replication Lag</h4><p>在 eventually consisten system 中 lag 不断增长怎么办?<br>provide a stronger guarantee, such as read-after-write</p>
+<p>但是 Eventual consistency 是不够的, db 需要 <code>Transactions</code> 来提供强一致性保证。</p>
+<h2 id="Multi-Leader-Replication"><a href="#Multi-Leader-Replication" class="headerlink" title="Multi-Leader Replication"></a>Multi-Leader Replication</h2><p>可用性高,但是会面临 write conflicts 的问题,如何解决数据一致性问题?</p>
+<p>是什么: </p>
+<p>Multi-leader configuration (also known as master–master or active&#x2F;active replication). In this setup, each leader simultaneously acts as a follower to the other leaders. 如 akka cluster</p>
+<h3 id="Use-Cases-for-Multi-Leader-Replication"><a href="#Use-Cases-for-Multi-Leader-Replication" class="headerlink" title="Use Cases for Multi-Leader Replication"></a>Use Cases for Multi-Leader Replication</h3><p>不适应于创建 datacenter</p>
+<h4 id="Multi-datacenter-operation"><a href="#Multi-datacenter-operation" class="headerlink" title="Multi-datacenter operation"></a>Multi-datacenter operation</h4><p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p16" alt="254534cc66a43b11f4f636b0cab2e63b.png"></p>
+<p>相比于 single-leader 方案的<code>优势</code>:</p>
+<ul>
+<li><p>去中心化,write request 分散到各个 leader, which means the perceived performance may be better.</p>
+</li>
+<li><p>Tolerance of datacenter outages: 不需要重新选举 leader</p>
+</li>
+<li><p>Tolerance of network problems: A multi-leader configuration with <code>asynchronous</code> replication can usually tolerate network problems better: a temporary network interruption does not prevent writes being processed</p>
+</li>
+</ul>
+<p>缺点: the same data may be concurrently modified in two different datacenters, and those <code>write conflicts</code> must be resolved </p>
+<p>一些使用 multi-leader 的系统:</p>
+<ul>
+<li>Tungsten Replicator for MySQL</li>
+<li>BDR for PostgreSQL</li>
+<li>GoldenGate for Oracle</li>
+</ul>
+<h4 id="Clients-with-offline-operation"><a href="#Clients-with-offline-operation" class="headerlink" title="Clients with offline operation"></a>Clients with offline operation</h4><p>if you have an application that needs to continue to work while it is disconnected from the internet. 怎么解决？</p>
+<p>比如在多个设备上使用同一个app, every device has a local database that acts as a leader (it accepts write requests), and there is an asynchronous multi-leader replication process (sync) between the replicas of your app on all of your devices</p>
+<p>CouchDB is designed for this mode of operation</p>
+<h4 id="Collaborative-editing"><a href="#Collaborative-editing" class="headerlink" title="Collaborative editing"></a>Collaborative editing</h4><p>Real-time collaborative editing applications allow several people to edit a document simultaneously</p>
+<p>会有啥问题? 怎么解决?</p>
+<p>如果加锁的话就 is equivalent to single-leader replication with transactions on the leader.</p>
+<p>如果想避免枷锁,就会带来 challenges of multi-leader replication, including requiring conflict resolution </p>
+<h3 id="Handling-Write-Conflicts"><a href="#Handling-Write-Conflicts" class="headerlink" title="Handling Write Conflicts"></a>Handling Write Conflicts</h3><p>The biggest problem with multi-leader replication is that <code>write conflicts</code> can occur. 比如对同一份数据的修改请求到不同的 leader.</p>
+<p>在 Multi-leader 情况下,只能异步的进行冲突检测,it may be too late to ask the user to resolve the conflict.</p>
+<h4 id="Conflict-avoidance"><a href="#Conflict-avoidance" class="headerlink" title="Conflict avoidance"></a>Conflict avoidance</h4><p>avoid them: if the application can ensure that all writes for a particular record go through the same leader, then conflicts cannot occur.</p>
+<h4 id="Converging-toward-a-consistent-state"><a href="#Converging-toward-a-consistent-state" class="headerlink" title="Converging toward a consistent state"></a>Converging toward a consistent state</h4><p>In a multi-leader configuration, there is <code>no defined ordering of writes</code>, so it’s not clear what the final value should be. 所以 all replicas must arrive at the same final value when all changes have been replicated.</p>
+<p>4 种常用解决 write conflict 的方法:</p>
+<ul>
+<li>Give <code>each write a unique ID</code>,比如 <code>last write wins方式</code>:冲突时,选择最新的一条,但是这会有丢数据的风险</li>
+<li>Give <code>each replica a unique ID</code>,ID越高则其对应的数据也有更高优先级，不过也意味着某些数据的无条件丢失。</li>
+<li>合并：将冲突的值排序并连接起来, 如“你很漂亮&#x2F;帅”</li>
+<li>Record the conflict in an explicit data structure that preserves all information, and write application code that <code>resolves the conflict at some later time</code></li>
+</ul>
+<h4 id="Custom-conflict-resolution-logic"><a href="#Custom-conflict-resolution-logic" class="headerlink" title="Custom conflict resolution logic"></a>Custom conflict resolution logic</h4><p>用户编写冲突处理逻辑, That code may be executed on write or on read:</p>
+<p>On write: 修改数据时若检测到了冲突，则立即调用conflict handler处理。</p>
+<p>On read: 存储所有有冲突的写入,读取时给出所有版本数据,用户自己进行数据选择。</p>
+<blockquote>
+<p>Note that conflict resolution usually applies at the level of an individual row or document, not for an entire transaction</p>
+</blockquote>
+<blockquote>
+<p><code>Automatic conflict resolution</code> could make multi-leader data synchronization much simpler for applications to deal with.</p>
+</blockquote>
+<h3 id="Multi-Leader-Replication-Topologies"><a href="#Multi-Leader-Replication-Topologies" class="headerlink" title="Multi-Leader Replication Topologies"></a>Multi-Leader Replication Topologies</h3><p><code>各个拓扑的介绍和优缺点?</code></p>
+<blockquote>
+<p>replication topology: 如图,描述 writes request 在所有 nodes 间的传递轨迹。</p>
+</blockquote>
+<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p17" alt="7e3188d1f6c822d488f4f5241f7807e0.png"></p>
+<p>Circular 和 star 的问题在于如果有 node down 掉, it can interrupt the flow of replication messages between other nodes. all-to-all 可以通过其他传递路径来避免这个问题.</p>
+<p>all-to-all 缺点: 网络速度差异会导致 the result that some replication messages may “overtake” others</p>
+<h2 id="Leaderless-Replication"><a href="#Leaderless-Replication" class="headerlink" title="Leaderless Replication"></a>Leaderless Replication</h2><p>Allowing any replica to directly accept writes from clients. 写的时候发送 write 到多个 replica, 多数成功则成功。读的时候也从多个 replica 读取,通过版本对比采纳最新的那份数据。</p>
+<blockquote>
+<p>In some leaderless implementations, the client directly sends its writes to several replicas, while in others, a <code>coordinator node does this on behalf of the client</code>. However, unlike a leader database, that coordinator does not enforce a particular ordering of writes</p>
+</blockquote>
+<blockquote>
+<p>Leaderless replication is also suitable for multi-datacenter operation, since it is designed to <code>tolerate conflicting concurrent writes</code>, <code>network interruptions</code>, and <code>latency spikes</code>.</p>
+</blockquote>
+<h3 id="Writing-to-the-Database-When-a-Node-Is-Down"><a href="#Writing-to-the-Database-When-a-Node-Is-Down" class="headerlink" title="Writing to the Database When a Node Is Down"></a>Writing to the Database When a Node Is Down</h3><p>不存在 failover, client 直接忽略写失败的 replica, 写会同步请求多个 node,Version numbers are used to determine which value is newer</p>
+<h4 id="Read-repair-and-anti-entropy"><a href="#Read-repair-and-anti-entropy" class="headerlink" title="Read repair and anti-entropy"></a>Read repair and anti-entropy</h4><p>当 down 掉的机器恢复后,如何恢复缺失的数据呢,有 2 种常用方式:</p>
+<ul>
+<li><p>Read repair: 读取的时候检测 stale value 并 recover, This approach works well for values that are frequently read.</p>
+</li>
+<li><p>Anti-entropy process: some datastores have a background process that constantly looks for differences in the data between replicas and copies any missing data from one replica to another</p>
+</li>
+</ul>
+<p><code>没有顺序如何保证写入的因果关系?</code></p>
+<h4 id="Quorums-for-reading-and-writing"><a href="#Quorums-for-reading-and-writing" class="headerlink" title="Quorums for reading and writing"></a>Quorums for reading and writing</h4><p>设想:<br>n: replica 数量<br>w: 每个 write 都要保证 w 个节点写成功<br>r: 读取的时候至少从 r 个节点读取数据<br>所以只要 w + r &gt; n, 这样读取的时候一定会读取到 w 中至少一个节点的数据,所以可以读到最新的数据。</p>
+<p>A common choice is to make n an odd number (typically 3 or 5) and to set w &#x3D; r &#x3D; (n + 1) &#x2F; 2 (rounded up). 可概以根据应用的读写情况对参数做调整.</p>
+<p>The quorum condition, w + r &gt; n, allows the system to tolerate unavailable nodes as follows:</p>
+<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p19" alt="80e62fa44d8d83fbea8d5ebe8e260653.png"></p>
+<h4 id="Limitations-of-Quorum-Consistency"><a href="#Limitations-of-Quorum-Consistency" class="headerlink" title="Limitations of Quorum Consistency"></a>Limitations of Quorum Consistency</h4><p>即使 w + r &gt; n, 也是无法完全保证数据强一致性的.<br>Stronger guarantees generally require <code>transactions</code> or consensus.</p>
+<h4 id="Sloppy-Quorums-and-Hinted-Handoff-草率的对话和暗示的交接"><a href="#Sloppy-Quorums-and-Hinted-Handoff-草率的对话和暗示的交接" class="headerlink" title="Sloppy Quorums and Hinted Handoff(草率的对话和暗示的交接)"></a>Sloppy Quorums and Hinted Handoff(草率的对话和暗示的交接)</h4><p>leader-less dababase 可以提供 high availability and low latency, and that can tolerate occasional stale reads. </p>
+<p>有些 quorums 并不能提供良好的 fault-toleratn,比如当发生网络split 时,一些 client 会离开集群,一些新的 client 可能会加入集群.此时如果保证 w 写入,但是 read 可能会读取到新加入的 client,从而无法拿到最新的数据.</p>
+<h2 id="Detecting-Concurrent-Writes"><a href="#Detecting-Concurrent-Writes" class="headerlink" title="Detecting Concurrent Writes"></a>Detecting Concurrent Writes</h2><p>The problem is that events may arrive in a different order at different nodes, due to variable network delays and partial failures</p>
+<p>当数据对写入顺序有要求(如聊微信)时,如何保证 eventually consisteny</p>
+<h4 id="Last-write-wins-discarding-concurrent-writes"><a href="#Last-write-wins-discarding-concurrent-writes" class="headerlink" title="Last write wins(discarding concurrent writes)"></a>Last write wins(discarding concurrent writes)</h4><p>可以在多个冲突的写入中间选取最难 <code>recent</code> 的那个,如 LWW,其他的写入则被丢弃</p>
+<blockquote>
+<p>The only safe way of using a database with LWW is to ensure that a key is only written once and thereafter treated as immutable, thus avoiding any concurrent updates to the same key.</p>
+</blockquote>
+<h4 id="Capturing-the-happens-before-relationship"><a href="#Capturing-the-happens-before-relationship" class="headerlink" title="Capturing the happens-before relationship"></a>Capturing the happens-before relationship</h4><p>可以在 write request 中加入版本号,server 通过版本号来确定 2 个操作是不是并发(2个操作没有依赖关系)执行。</p>
+<p>When a write includes the version number from a prior read, that tells us which previous state the write is based on.</p>
+<h4 id="Merging-concurrently-written-values"><a href="#Merging-concurrently-written-values" class="headerlink" title="Merging concurrently written values"></a>Merging concurrently written values</h4><p>As merging siblings in application code is complex and error-prone, there are some efforts to design data structures that can perform this merging <code>automatically</code>。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://example.com/2019/09/29/Part-2-CHAPTER-5-Replication/" title="Part 2: CHAPTER 5 Replication" target="_blank" rel="external">http://example.com/2019/09/29/Part-2-CHAPTER-5-Replication/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/haiboself" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/curry.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/haiboself" target="_blank"><span class="text-dark">海博</span><small class="ml-1x">Fluent &amp; Low Latency</small></a></h3>
+        <div>大数据基础架构工程师</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2019/10/27/Part-2-CHAPTER-6-Partitioning/" title="Part 2: CHAPTER 6 Partitioning"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2019/09/15/Part-1-CHAPTER-4-Encoding-and-Evolution/" title="Part 1: CHAPTER 4 Encoding and Evolution"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn   collapsed  " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+<script src="//cdn.jsdelivr.net/npm/gitment@0.0.3/dist/gitment.browser.min.js"></script>
+<script>
+var gitment = new Gitment({
+  // id默认为当前页面url，如果url后带参数或锚点，gitment要重新初始化
+  // https://github.com/imsun/gitment/issues/55
+  // 解决方案：id:window.location.pathname,或者将id设置为当前页面标题
+  id: 'Part 2: CHAPTER 5 Replication', 
+  owner: 'haiboself', // 可以是你的GitHub用户名，也可以是github id
+  repo: 'haiboself.github.io',
+  oauth: {
+    client_id: '5bc7d4254095d8c34248',
+    client_secret: 'c82c5c95205f7e6bdc7c9924fa0fdcda63f8411c',
+  }
+})
+gitment.render('comments')
+</script>
+
+
+
+
+
+
+
+
+
+</body>
+</html>

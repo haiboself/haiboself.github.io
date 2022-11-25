@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Part 1: CHAPTER 2 Data Models and Query Languages | Hexo</title>
+  <meta name="description" content="? 有哪些 data model? 它们之间的区别和联系是什么? 各自解决了什么场景下的问题? 如何融合? 每个 data model 对应的 query language 是什么? 有什么特点? 关系型和文档型之间的差异是什么? it’s just a question of whether the schema is explicit (enforced on write) or implic">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Part 1: CHAPTER 2 Data Models and Query Languages">
+<meta property="og:url" content="http://example.com/2019/09/08/Part-1-CHAPTER-2-Data-Models-and-Query-Languages/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="? 有哪些 data model? 它们之间的区别和联系是什么? 各自解决了什么场景下的问题? 如何融合? 每个 data model 对应的 query language 是什么? 有什么特点? 关系型和文档型之间的差异是什么? it’s just a question of whether the schema is explicit (enforced on write) or implic">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://www.dlsweb.rmit.edu.au/Toolbox/knowmang/content/models/images/multiple_owner.gif">
+<meta property="og:image" content="https://www.dlsweb.rmit.edu.au/Toolbox/knowmang/content/models/images/relational_schema.gif">
+<meta property="og:image" content="https://s3.amazonaws.com/dev.assets.neo4j.com/wp-content/uploads/graph-database-connected-data-diaspora.png">
+<meta property="article:published_time" content="2019-09-08T05:58:07.000Z">
+<meta property="article:modified_time" content="2022-11-25T06:26:45.205Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ddia">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://www.dlsweb.rmit.edu.au/Toolbox/knowmang/content/models/images/multiple_owner.gif">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://example.com/2019/09/08/Part-1-CHAPTER-2-Data-Models-and-Query-Languages/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitment@0.0.3/style/default.min.css">
+  
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/haiboself" target="_blank">
+          <img class="img-circle img-rotate" src="/images/curry.png" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海博</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Fluent &amp; Low Latency</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-books">
+          <a href="/books">
+            
+            <i class="icon icon-book-fill"></i>
+            
+            <span class="menu-title">书单</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流分享~</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a><span class="category-list-count">9</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ddia/" rel="tag">ddia</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/k8s/" rel="tag">k8s</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AE%B9%E5%99%A8/" rel="tag">容器</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ddia/" style="font-size: 14px;">ddia</a> <a href="/tags/docker/" style="font-size: 13px;">docker</a> <a href="/tags/k8s/" style="font-size: 13px;">k8s</a> <a href="/tags/%E5%AE%B9%E5%99%A8/" style="font-size: 13px;">容器</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/10/30/yuque/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="title">深入剖析kubernetes 1-4章阅读总结</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-10-30T06:41:51.000Z" itemprop="datePublished">2022-10-30</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/12/12/Part-2-CHAPTER-9-Consistency-and-Consensus/" class="title">Part 2: CHAPTER 9 Consistency and Consensus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-12-12T06:35:04.000Z" itemprop="datePublished">2019-12-12</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/11/26/Part-2-CHAPTER-8-The-Trouble-with-Distributed-Systems/" class="title">Part 2: CHAPTER 8 The Trouble with Distributed Systems</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-11-26T06:33:34.000Z" itemprop="datePublished">2019-11-26</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/11/17/Part-2-CHAPTER-7-Transactions/" class="title">Part 2: CHAPTER 7 Transactions</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-11-17T06:32:47.000Z" itemprop="datePublished">2019-11-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/10/27/Part-2-CHAPTER-6-Partitioning/" class="title">Part 2: CHAPTER 6 Partitioning</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-10-27T06:28:55.000Z" itemprop="datePublished">2019-10-27</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Overview"><span class="toc-number">2.</span> <span class="toc-text">Overview</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Relational-Model-Versus-Document-Model"><span class="toc-number">3.</span> <span class="toc-text">Relational Model Versus Document Model</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Relational-Model"><span class="toc-number">3.1.</span> <span class="toc-text">Relational Model</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Document-Model"><span class="toc-number">3.2.</span> <span class="toc-text">Document Model</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Many-to-One-and-Many-to-Many-Relationships"><span class="toc-number">3.2.1.</span> <span class="toc-text">Many-to-One and Many-to-Many Relationships</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Data-locality-for-queryies"><span class="toc-number">3.2.2.</span> <span class="toc-text">Data locality for queryies</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Convergence-of-document-and-relational-databases"><span class="toc-number">3.2.3.</span> <span class="toc-text">Convergence of document and relational databases</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Query-languages-for-data"><span class="toc-number">4.</span> <span class="toc-text">Query languages for data</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Sql"><span class="toc-number">4.0.1.</span> <span class="toc-text">Sql</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#MapReduce-Querying"><span class="toc-number">4.0.2.</span> <span class="toc-text">MapReduce Querying</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Graph-Like-Data-Models"><span class="toc-number">5.</span> <span class="toc-text">Graph-Like Data Models</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#property-graph-model"><span class="toc-number">5.0.1.</span> <span class="toc-text">property graph model</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#The-Cypher-Query-Language"><span class="toc-number">5.0.2.</span> <span class="toc-text">The Cypher Query Language</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Triple-store-model"><span class="toc-number">5.0.3.</span> <span class="toc-text">Triple-store model</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#The-semantic-web"><span class="toc-number">5.0.3.1.</span> <span class="toc-text">The semantic web</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Graph-Databases-Compared-to-the-Network-Model"><span class="toc-number">5.0.4.</span> <span class="toc-text">Graph Databases Compared to the Network Model</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#The-Foundation-Datalog"><span class="toc-number">5.0.5.</span> <span class="toc-text">The Foundation: Datalog</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Summary"><span class="toc-number">6.</span> <span class="toc-text">Summary</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Part-1-CHAPTER-2-Data-Models-and-Query-Languages" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Part 1: CHAPTER 2 Data Models and Query Languages
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/09/08/Part-1-CHAPTER-2-Data-Models-and-Query-Languages/" class="article-date">
+	  <time datetime="2019-09-08T05:58:07.000Z" itemprop="datePublished">2019-09-08</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/ddia/" rel="tag">ddia</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/09/08/Part-1-CHAPTER-2-Data-Models-and-Query-Languages/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id=""><a href="#" class="headerlink" title="?"></a>?</h2><ul>
+<li>有哪些 data model? 它们之间的区别和联系是什么? 各自解决了什么场景下的问题? 如何融合?</li>
+<li>每个 data model 对应的 query language 是什么? 有什么特点?</li>
+<li>关系型和文档型之间的差异是什么?</li>
+<li>it’s just a question of whether the schema is explicit (enforced on write) or implicit (handled on read)?</li>
+<li>关系型数据库的限制?什么导致了这些限制?如何打破这些限制?</li>
+</ul>
+<h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>许多应用都由分层的 data-model 组成,上层屏蔽下层的复杂性,data-model 决定我们解决问题的思维模式.本节介绍 <code>relational model, document model, graph-based model</code> 3 种 data-model 和其对应的 query language。</p>
+<p>Relational model 解决数据之间 <code>many-to-many</code> 关系的问题,但是无法适应所有应用场景,于是 <code>NoSQL datastore</code> 应运而生,主要分为 2 大类:</p>
+<ol>
+<li><p><code>Doucument database</code>: Document databases target use cases where data comes in <code>self-contained</code> documents and relationships between one document and another are rare.</p>
+</li>
+<li><p><code>Graph databases</code>: Graph databases go in the opposite direction, targeting use cases where anything is potentially related to everything.</p>
+</li>
+</ol>
+<p>适应于一个 data-model 的数据也可以用其他的 data-model 来组织,比如: graph data can be represented in a relational database。用不合适的 data-model 来组织数据会使得数据变得难以使用, That’s why we have different systems for different purposes, not a single one-size-fits-all solution.</p>
+<p>定义数据存储格式 -&gt; 在其上定义查询语言.</p>
+<h2 id="Relational-Model-Versus-Document-Model"><a href="#Relational-Model-Versus-Document-Model" class="headerlink" title="Relational Model Versus Document Model"></a>Relational Model Versus Document Model</h2><h3 id="Relational-Model"><a href="#Relational-Model" class="headerlink" title="Relational Model"></a>Relational Model</h3><p>Relational Model 由 row(tuple) 组成 table(relation),主要的 use case 是 <code>transaction processing</code> 和 <code>batch processing</code>。其屏蔽了底层存储的实现细节,对外提供 sql 这种声明式的 query language.</p>
+<p>Object-oriented 和 relational model 之间存在差异,需要 orm(mybatis 等), 但是也无法完全屏蔽这种差异.</p>
+<p>A key insight of the relational model was this: you only need to build a query optimizer once, and then all applications that use the database can benefit from it</p>
+<h3 id="Document-Model"><a href="#Document-Model" class="headerlink" title="Document Model"></a>Document Model</h3><p>适用于数据之间 one-to-many 的关系,对 join 支持比较弱.</p>
+<p>NoSql(Not Only SQL) 产生驱动因素: </p>
+<ul>
+<li>A need for greater scalability than relational databases can easily achieve, including very large datasets or very high write throughput</li>
+<li>开源优势</li>
+<li>Specialized query operations that are not well supported by the relational model</li>
+<li>Frustration with the restrictiveness of relational schemas, and a desire for a more dynamic and expressive data model</li>
+</ul>
+<p><strong>Schema flexibility in the document model:</strong></p>
+<ul>
+<li>schema-on-read (the structure of the data is implicit, and only interpreted when the data is read),</li>
+<li>schema-on-write(the traditional approach of relational databases, where the schema is explicit and the database ensures all written data conforms to it)</li>
+</ul>
+<p>schema-on-read approach is advantageous if the items in the collection don’t all have the same structure for some reason</p>
+<h4 id="Many-to-One-and-Many-to-Many-Relationships"><a href="#Many-to-One-and-Many-to-Many-Relationships" class="headerlink" title="Many-to-One and Many-to-Many Relationships"></a>Many-to-One and Many-to-Many Relationships</h4><p>Removing such duplication is the key idea behind normalization in databases.</p>
+<ul>
+<li>Relational model 通过外键来组织 one-to-many 的数据关系,通过 join 来查询数据,这种效率比较低。document model 对 one-to-many 支持良好, In document databases, joins are not needed for one-to-many tree structures, and support for joins is often weak.但是如果数据库不支持 join, 就需要自己在代码层面实现数据的 join 逻辑.</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://www.dlsweb.rmit.edu.au/Toolbox/knowmang/content/models/network_model.htm">The network model</a>: 树形结构,通过 link(类似指针而非外键), 支持多对多和多对一<br>The only way of accessing a record was to follow a path from a root record along these chains of links. This was called an access path.</p>
+<p><img src="http://www.dlsweb.rmit.edu.au/Toolbox/knowmang/content/models/images/multiple_owner.gif" alt="img"></p>
+<p><a target="_blank" rel="noopener" href="https://www.dlsweb.rmit.edu.au/Toolbox/knowmang/content/models/relational_model.htm">The relational model</a>:</p>
+<ul>
+<li>数据被组织为表,没有嵌套的结构,可以在表上增删改查</li>
+<li>查询路径由数据库的查询优化器自己选取,无需手动指定</li>
+</ul>
+<p><img src="https://www.dlsweb.rmit.edu.au/Toolbox/knowmang/content/models/images/relational_schema.gif" alt="img"></p>
+<p>在 many to one 和 many to many 上 2 者没有本质差异,Relationl 使用外键,Document 使用 <code>document reference</code></p>
+<p><strong>主要优势比较</strong>:</p>
+<ul>
+<li><p><code>Document model</code>: schema flexibility, better performance due to locality, for some applications it is closer to the data structures used by the application</p>
+</li>
+<li><p><code>Relational model</code>: better support joins, many-to-one and many-to-many</p>
+</li>
+</ul>
+<h4 id="Data-locality-for-queryies"><a href="#Data-locality-for-queryies" class="headerlink" title="Data locality for queryies"></a>Data locality for queryies</h4><p>document 被连续存储,查询性能比较好; 如果被 split 为多个 table, 查询的开销更大<br>数据本地化的策略被大量使用,比如 column-family</p>
+<h4 id="Convergence-of-document-and-relational-databases"><a href="#Convergence-of-document-and-relational-databases" class="headerlink" title="Convergence of document and relational databases"></a>Convergence of document and relational databases</h4><p>A hybrid of the relational and document models is a good route for databases to take in the future. 比如 <code>sql-on-elasticsearch</code>, <code>Phoenix</code></p>
+<h2 id="Query-languages-for-data"><a href="#Query-languages-for-data" class="headerlink" title="Query languages for data"></a>Query languages for data</h2><h4 id="Sql"><a href="#Sql" class="headerlink" title="Sql"></a>Sql</h4><p>Sql 基于 relatinoal algebra, 是声明式语言,它:</p>
+<ol>
+<li>sql 将查询逻辑和数据库实现解耦,使得 2 者之间可以独立的变化. it gives the database much more room for automatic optimizations.</li>
+<li>sql 只是指明了查询模式,对执行顺序没有要求,所以可以方便的并行. because it specifies instructions that must be performed in a particular order. Declarative languages have a better chance of getting faster in parallel execution because they specify only the pattern of the results, not the algorithm that is used to determine the results</li>
+</ol>
+<h4 id="MapReduce-Querying"><a href="#MapReduce-Querying" class="headerlink" title="MapReduce Querying"></a>MapReduce Querying</h4><p>一些 NoSql DB 如 Manogo 使用 MR querying。MapReduce is neither a declarative query language nor a fully imperative query API, but somewhere in between.</p>
+<p>The map and reduce functions are <code>somewhat restricted</code> in what they are allowed to do. They must be pure functions,</p>
+<p>写 mr 程序比写 query 是要难的,A usability problem with MapReduce is that you have to write two carefully coordinated JavaScript functions, which is often harder than writing a single query</p>
+<h2 id="Graph-Like-Data-Models"><a href="#Graph-Like-Data-Models" class="headerlink" title="Graph-Like Data Models"></a>Graph-Like Data Models</h2><p>适用于 many-to-many 模型,由 vertices 和 edges 组成, vertex 和 edge 不需要固定的 schema. graph 的 vertex 和 edge 不一定需要都是同一类,不同的 vertex 和 edge 之间可能会有各种个样的关系, 而且要在这些 vertex 和 edge 上进行各种关联查询. 如果用 Relational model 来表示,会不直观,比如查询需要写大量的 join,不同的 vertex 需要存储到不同表,且有严格的 schema 限制.</p>
+<p><strong>构建灵活,利于演进:</strong></p>
+<ul>
+<li><p>Graphs are not limited to such homogeneous data: an equally powerful use of graphs is to provide a consistent way of storing completely different types of objects in a single datastore</p>
+</li>
+<li><p>Graphs are good for evolvability: as you add features to your application, a graph can easily be extended to accommodate changes in your application’s data structures.</p>
+</li>
+</ul>
+<p><img src="https://s3.amazonaws.com/dev.assets.neo4j.com/wp-content/uploads/graph-database-connected-data-diaspora.png" alt="img"></p>
+<h4 id="property-graph-model"><a href="#property-graph-model" class="headerlink" title="property graph model"></a>property graph model</h4><p>those features vive graphs a great deal of flexibility for data modeling</p>
+<ol>
+<li>没有 schema 限制类型</li>
+<li>可以有效的查询一个顶点的出边和入边</li>
+<li>可以存储额外的信息来描述边</li>
+</ol>
+<p>In the property graph model, each vertex consists of:</p>
+<ul>
+<li>A unique identifier</li>
+<li>A set of outgoing edges</li>
+<li>A set of incoming edges</li>
+<li>A collection of properties (key-value pairs)</li>
+</ul>
+<p>Each edge consists of:</p>
+<ul>
+<li>A unique identifier</li>
+<li>The vertex at which the edge starts (the tail vertex)</li>
+</ul>
+<h4 id="The-Cypher-Query-Language"><a href="#The-Cypher-Query-Language" class="headerlink" title="The Cypher Query Language"></a>The Cypher Query Language</h4><p>Cypher is a declarative query language for property graphs, created for the Neo4j graph database </p>
+<p>如果用关系型 model 来表示图,用 sql 来进行图上的操作, sql 会异常复杂</p>
+<h4 id="Triple-store-model"><a href="#Triple-store-model" class="headerlink" title="Triple-store model"></a>Triple-store model</h4><p>The triple-store model is mostly equivalent to the property graph model, using different words to describe the same ideas</p>
+<p>In a triple-store, all information is stored in the form of very simple three-part state‐ments: <code>(subject, predicate, object)</code>.</p>
+<p>but fortunately you can use semicolons to say multiple things about the same subject. This makes the Turtle format quite nice and readable:</p>
+<h5 id="The-semantic-web"><a href="#The-semantic-web" class="headerlink" title="The semantic web"></a><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/19550885">The semantic web</a></h5><p>RDF is designed for internet-wide data exchange,The Resource Description Framework (RDF) was intended as a mechanism for different web‐sites to publish data in a consistent format, allowing data from different websites to be automatically combined into a web of data—a kind of internet-wide “database of everything.”</p>
+<p>RDF doesn’t distinguish between properties and edges but just uses predicates for both</p>
+<p>Cypher’s pattern matching is borrowed from <code>SPARQL</code>.</p>
+<h4 id="Graph-Databases-Compared-to-the-Network-Model"><a href="#Graph-Databases-Compared-to-the-Network-Model" class="headerlink" title="Graph Databases Compared to the Network Model"></a>Graph Databases Compared to the Network Model</h4><ol>
+<li>Network 规定了 link 的类型,类似 <code>java: Type link</code>, 而 graph vertex 可以和任意 vertex 建立联系,类似 <code>java: T link</code>,This gives much greater flexibility for applications to adapt to changing requirements.</li>
+<li>在 network 中必须沿着 access path 进行数据查找. graph 中 you can refer directly to any vertex by its unique ID, or you can use an index to find vertices with a particular value</li>
+<li>Network 中 the children of a record were an ordered set, so the database had to maintain that ordering, Graph 中 . In a graph database, vertices and edges are not ordered (you can only sort the results when making a query).</li>
+<li>Network 中  all queries were imperative, Graph 支持 high-level, declarative query languages such as Cypher or SPARQL</li>
+</ol>
+<h4 id="The-Foundation-Datalog"><a href="#The-Foundation-Datalog" class="headerlink" title="The Foundation: Datalog"></a>The Foundation: Datalog</h4><p>古老的 language, it provides the foundation that later query languages build upon. Cascalog 是其一种实现,用来查询 hadoop 上的数据集.</p>
+<p>Dtalog 定义 data model 为: predicate(subject, object)</p>
+<p>Cypher and SPARQL jump in right away with SELECT, but Datalog takes a small step at a time.But it’s a very powerful approach, because rules can be combined and reused in different queries. It’s less convenient for simple one-off queries, but it can cope better if your data is complex.</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>每种 model 适应于不同的场景,趋势是不同的 model 之间也在相互融合。</p>
+<p>Relation model: </p>
+<ul>
+<li>适应于 many-to-many 和 many-to-one 的模式</li>
+<li>良好的 join 支持, schema on write</li>
+<li>Declarative query language: Sql, 解耦查询逻辑和数据库实现,使得查询优化器得以实现</li>
+<li>对于 one-to-many 关系将数据 split 到多个 table 中,通过 join 查询降低数据的获取效率</li>
+<li>用 join 来进行 graph 的查询难以理解且费时费力</li>
+<li>和 OO 的设计之间存在差异,需要通过 ORM 来弥补</li>
+</ul>
+<p>Document model</p>
+<ul>
+<li>适应于 one-to-many, join 支持不够</li>
+<li>灵活的 schema(schema on read)</li>
+<li>data locality 带来的查询效率</li>
+<li>Declarative query language: MR</li>
+</ul>
+<p>Graph model</p>
+<ul>
+<li>允许任意类型的 vertex 建立任意的 edge,灵活的 schema 非常便于应用扩展演进 </li>
+<li>Declarative query language: Cypher, SPARQL</li>
+<li>支持 graph 上的各种查询</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://example.com/2019/09/08/Part-1-CHAPTER-2-Data-Models-and-Query-Languages/" title="Part 1: CHAPTER 2 Data Models and Query Languages" target="_blank" rel="external">http://example.com/2019/09/08/Part-1-CHAPTER-2-Data-Models-and-Query-Languages/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/haiboself" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/curry.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/haiboself" target="_blank"><span class="text-dark">海博</span><small class="ml-1x">Fluent &amp; Low Latency</small></a></h3>
+        <div>大数据基础架构工程师</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2019/09/14/Part-1-CHAPTER-3-Storage-and-Retrieval/" title="Part 1: CHAPTER 3 Storage and Retrieval"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2019/09/07/Part-1-CHAPTER-1-Reliable-Scalable-and-Maintainable-Applications/" title="Part 1: CHAPTER 1 Reliable, Scalable, and Maintainable Applications"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn   collapsed  " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+<script src="//cdn.jsdelivr.net/npm/gitment@0.0.3/dist/gitment.browser.min.js"></script>
+<script>
+var gitment = new Gitment({
+  // id默认为当前页面url，如果url后带参数或锚点，gitment要重新初始化
+  // https://github.com/imsun/gitment/issues/55
+  // 解决方案：id:window.location.pathname,或者将id设置为当前页面标题
+  id: 'Part 1: CHAPTER 2 Data Models and Query Languages', 
+  owner: 'haiboself', // 可以是你的GitHub用户名，也可以是github id
+  repo: 'haiboself.github.io',
+  oauth: {
+    client_id: '5bc7d4254095d8c34248',
+    client_secret: 'c82c5c95205f7e6bdc7c9924fa0fdcda63f8411c',
+  }
+})
+gitment.render('comments')
+</script>
+
+
+
+
+
+
+
+
+
+</body>
+</html>
