@@ -25,19 +25,19 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="SummaryPartition 可以结合 Replication, 每个 partition 可以有多个 Replication 以保持高可用,如图:   Partition(sharding): partitioning a large dataset into smaller subsets, that each piece of data (each record, row, or doc">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p47">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/B65EBC05-2A7A-4764-9515-A0D946454A9E.png">
 <meta property="og:image" content="https://notes.shichao.io/dda/figure_6-3_600.png">
-<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p27">
-<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p40">
-<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p44">
-<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p45">
-<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p46">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/21AFCB67-0511-422C-AA5B-CC76FE4CD395.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/B4D250E9-FE8E-4F89-B1A5-5521449682D9.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/743CB2F8-3E20-46F3-8365-5DC8BCBC0815.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/6DE043F8-04D4-4053-B839-7D6CDB105CBD.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/6053C3EB-2A04-4132-947F-B298C0DAC021.png">
 <meta property="article:published_time" content="2019-10-27T06:28:55.000Z">
-<meta property="article:modified_time" content="2022-11-25T06:37:39.461Z">
+<meta property="article:modified_time" content="2022-11-25T13:51:01.766Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ddia">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p47">
+<meta name="twitter:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/B65EBC05-2A7A-4764-9515-A0D946454A9E.png">
   <!-- Canonical links -->
   <link rel="canonical" href="http://example.com/2019/10/27/Part-2-CHAPTER-6-Partitioning/index.html">
   
@@ -368,7 +368,7 @@
     <div class="article-entry marked-body" itemprop="articleBody">
       
         <h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>Partition 可以结合 Replication, 每个 partition 可以有多个 Replication 以保持高可用,如图:</p>
-<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p47" alt="4da1c26598524fc627da7e80bf1f53e9.png"></p>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/B65EBC05-2A7A-4764-9515-A0D946454A9E.png"></p>
 <blockquote>
 <p>Partition(sharding): partitioning a large dataset into smaller subsets, that each piece of data (each record, row, or document) belongs to <code>exactly one</code> partition.使用 partition 可以分散读写,可以横向扩展。</p>
 </blockquote>
@@ -415,13 +415,13 @@
 <p>The <code>problem</code> with secondary indexes is that they don’t map neatly to partitions.</p>
 <p>There are two main approaches to partitioning a database with secondary indexes: <code>document-based</code> partitioning and <code>term-based</code> partitioning.</p>
 <h3 id="Partitioning-Secondary-Indexes-by-Document-local-index"><a href="#Partitioning-Secondary-Indexes-by-Document-local-index" class="headerlink" title="Partitioning Secondary Indexes by Document(local index)"></a>Partitioning Secondary Indexes by Document(local index)</h3><p>In this indexing approach, each partition is completely separate: each partition maintains its own secondary indexes, covering only the documents in that partition.如图:</p>
-<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p27" alt="14f2449166cc366c4b5a60de76ddd8c6.png"></p>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/21AFCB67-0511-422C-AA5B-CC76FE4CD395.png"></p>
 <p>优势: 实现简单,写入和更新 index 比较简单高效。<br>劣势: 读取成本高,需要读取所有 partition, Even if you query the partitions in parallel.</p>
 <h3 id="Partitioning-Secondary-Indexes-by-Term-global-index"><a href="#Partitioning-Secondary-Indexes-by-Term-global-index" class="headerlink" title="Partitioning Secondary Indexes by Term(global index)"></a>Partitioning Secondary Indexes by Term(global index)</h3><blockquote>
 <p>Term: 来自全文索引的概念,这里指的是: where the terms are all the words that occur in a document.</p>
 </blockquote>
 <p>global index that covers data in all partitions,如果所有 index 都存储在一台 node 会成为瓶颈,所以 index 也需要 partitioned,可以通过 term 自身(方便 range scan)或者 hash 的方式(可以均匀分散)对 term index 进行 partition。 如图:</p>
-<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p40" alt="a19496e312343d1bfbd4f20a28025fc0.png"></p>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/B4D250E9-FE8E-4F89-B1A5-5521449682D9.png"></p>
 <p>好处: 使用索引可以只读取相应的 partition, 提交读取效率。<br>坏处: 因为写入的时候需要更新多个 partition 中的 index,所以写效率降低且复杂。</p>
 <p>In practice, updates to global secondary indexes are often asynchronous, 因此 index 写入后不是立即可见的, 所以需要 distributed transactioon 来保证所有写入 partition 的索引的正确和立即可见。</p>
 <h2 id="Rebalancing-Partitions"><a href="#Rebalancing-Partitions" class="headerlink" title="Rebalancing Partitions"></a>Rebalancing Partitions</h2><blockquote>
@@ -437,7 +437,7 @@
 <h4 id="hash-mod-N"><a href="#hash-mod-N" class="headerlink" title="hash mod N"></a>hash mod N</h4><p>The problem with the mod N approach is that if the number of nodes N changes, most of the keys will need to be moved from one node to another</p>
 <h4 id="Fixed-number-of-partitions"><a href="#Fixed-number-of-partitions" class="headerlink" title="Fixed number of partitions"></a>Fixed number of partitions</h4><p>使用固定数量的 partitions is operationally simpler,然而选取合适的 partition 数量是非常困难的。而且在增减机器时候也有不必要的数据移动,如图:</p>
 <p>如图:</p>
-<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p44" alt="a2713cc5f32c187684c32074e2122f3f.png"></p>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/743CB2F8-3E20-46F3-8365-5DC8BCBC0815.png"></p>
 <h4 id="Dynamic-partitioning"><a href="#Dynamic-partitioning" class="headerlink" title="Dynamic partitioning"></a>Dynamic partitioning</h4><p>当 partiton 中数据量增长到一个阈值的时候,可以 split 为 2 个partiton;同时,如果有数据删除,partiiton 变小,可以合并相邻 partition。</p>
 <p><code>优势</code>: the number of partitions adapts to the total data volume</p>
 <p><code>缺陷</code>: 当数据量小的时候被分配到一个 partition 中,开始所有的读写都会打到这个 partition, 为了缓解这个问题,可以预先分配一些 partition,但这需要 know what the key distribution is going to look like。</p>
@@ -445,9 +445,9 @@
 <p>To have a fixed number of partitions per node, this approach also keeps the size of each partition fairly stable.这个方式可以很好的适应数据规模的变化,但是在增减机器 rebanlancing 的时候需要注意避免形成 unfailrly partition.</p>
 <h3 id="Operations-Automatic-or-Manual-Rebalancing"><a href="#Operations-Automatic-or-Manual-Rebalancing" class="headerlink" title="Operations: Automatic or Manual Rebalancing"></a>Operations: Automatic or Manual Rebalancing</h3><p>自动 rebalancing 十分方便,但是是不可预测的,同时 automation can be dangerous in combination with automatic failure detection, 可能导致级联的错误。因此让人介入 rebalance 是比较好的。</p>
 <h2 id="Request-Routing"><a href="#Request-Routing" class="headerlink" title="Request Routing"></a>Request Routing</h2><p>service discovery 问题, client 如何知道要访问哪台机器? 有 3 种方式,如图:</p>
-<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p45" alt="c0d7cd822c95ac299173b2008b7364a9.png"></p>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/6DE043F8-04D4-4053-B839-7D6CDB105CBD.png"></p>
 <p>Many distributed data systems rely on a separate coordination service such as ZooKeeper to keep track of this cluster metadata,如图:</p>
-<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p46" alt="fb8752be8a9436d2ed221fa97a0106c5.png"></p>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/6053C3EB-2A04-4132-947F-B298C0DAC021.png"></p>
 <h2 id="Parallel-Query-Execution"><a href="#Parallel-Query-Execution" class="headerlink" title="Parallel Query Execution"></a>Parallel Query Execution</h2><p>The MPP(massively parallel processing) query optimizer breaks this complex query into a number of execution stages and partitions, many of which can be executed in parallel on different nodes of the database cluster。如各种分布式计算引擎: mr, spark, presto.</p>
 
       

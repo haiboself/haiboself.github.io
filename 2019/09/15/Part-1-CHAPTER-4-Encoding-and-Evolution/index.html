@@ -26,9 +26,9 @@
 <meta property="og:description" content="? Encoding 的含义是什么? 如何实现? Encoding 需要注意什么? 兼容性 Encoding 的现状和发展趋势是什么? 如何保持 forward compatibility? Protocol Buffers, Thrift, and Avro 都是什么? REST, RPC, Actors, message queue 各自的概念和区别以及应用场景? RPC 相比于 REST 的">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://martin.kleppmann.com/2012/12/protobuf.png">
-<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p25">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/7B34BE03-1A10-4153-995C-AF9985D5A05E.png">
 <meta property="article:published_time" content="2019-09-15T06:21:45.000Z">
-<meta property="article:modified_time" content="2022-11-25T06:24:25.091Z">
+<meta property="article:modified_time" content="2022-11-25T13:52:54.260Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ddia">
 <meta name="twitter:card" content="summary">
@@ -425,7 +425,7 @@
 <p>protocol buffer 没有 list 类型,list 是 mutiple single, 所以可以支持 single 和 list 间的转换</p>
 <h4 id="Avro-hadoop-的子项目"><a href="#Avro-hadoop-的子项目" class="headerlink" title="Avro: hadoop 的子项目"></a>Avro: hadoop 的子项目</h4><p>Avro also uses a schema to specify the structure of the data being encoded.</p>
 <p>encoding 数据中不包含 schema 信息,读取的时候 you go through the fields in the order that they appear in the schema and use the schema to tell you the datatype of each field.</p>
-<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p25" alt="bf15fdd316edbb8d122d88d23f3ead6c.png"></p>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/7B34BE03-1A10-4153-995C-AF9985D5A05E.png"></p>
 <h5 id="The-writer’s-schema-and-the-reader’s-schema"><a href="#The-writer’s-schema-and-the-reader’s-schema" class="headerlink" title="The writer’s schema and the reader’s schema"></a>The writer’s schema and the reader’s schema</h5><blockquote>
 <p><code>Writer&#39;s schema:</code> encodes the data using whatever version of the schema it knows about<br><code>Reader’s schema:</code> it is expecting the data to be in some schema</p>
 </blockquote>

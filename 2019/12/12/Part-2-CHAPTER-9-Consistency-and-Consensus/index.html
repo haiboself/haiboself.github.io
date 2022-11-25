@@ -18,25 +18,25 @@
   
   
   <title>Part 2: CHAPTER 9 Consistency and Consensus | Hexo</title>
-  <meta name="description" content="? It turns out that there are deep connections between ordering, linearizability, and consensus. 阐明它们之间的关系? 相比于单机事务,分布式事务有何不同?如何实现? 了解 google spanner(事务) 和 zk(consensus) 的实现 CAP 定理的理解  Summary http:">
+  <meta name="description" content="? It turns out that there are deep connections between ordering, linearizability, and consensus. 阐明它们之间的关系? 相比于单机事务,分布式事务有何不同?如何实现? 了解 google spanner(事务) 和 zk(consensus) 的实现 CAP 定理的理解  Summary http:&#x2F;&#x2F;">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Part 2: CHAPTER 9 Consistency and Consensus">
 <meta property="og:url" content="http://example.com/2019/12/12/Part-2-CHAPTER-9-Consistency-and-Consensus/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="? It turns out that there are deep connections between ordering, linearizability, and consensus. 阐明它们之间的关系? 相比于单机事务,分布式事务有何不同?如何实现? 了解 google spanner(事务) 和 zk(consensus) 的实现 CAP 定理的理解  Summary http:">
+<meta property="og:description" content="? It turns out that there are deep connections between ordering, linearizability, and consensus. 阐明它们之间的关系? 相比于单机事务,分布式事务有何不同?如何实现? 了解 google spanner(事务) 和 zk(consensus) 的实现 CAP 定理的理解  Summary http:&#x2F;&#x2F;">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p60">
-<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p61">
-<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p67">
-<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p62">
-<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p64">
-<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p65">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/3630FF3F-CEA1-4EBC-AC28-E16D1578D0E8.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/7EDDF6B2-C3C7-4D65-9824-143E81161EEB.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/64567068-D969-4E5F-A332-4B82B22E54BA.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/5AFA49E2-FF0B-47C2-89E4-58B82AE188FE.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/F9849799-8BAD-4839-A343-49FA1D2E2ED2.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/BF609444-07C3-4F7D-92BC-C59FB1496851.gif">
 <meta property="article:published_time" content="2019-12-12T06:35:04.000Z">
-<meta property="article:modified_time" content="2022-11-25T07:03:39.058Z">
+<meta property="article:modified_time" content="2022-11-25T13:55:35.559Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ddia">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p60">
+<meta name="twitter:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/3630FF3F-CEA1-4EBC-AC28-E16D1578D0E8.png">
   <!-- Canonical links -->
   <link rel="canonical" href="http://example.com/2019/12/12/Part-2-CHAPTER-9-Consistency-and-Consensus/index.html">
   
@@ -366,9 +366,7 @@
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <!-- toc -->
-
-<h2 id=""><a href="#" class="headerlink" title="?"></a>?</h2><ul>
+        <h2 id=""><a href="#" class="headerlink" title="?"></a>?</h2><ul>
 <li>It turns out that there are deep connections between ordering, linearizability, and consensus. 阐明它们之间的关系?</li>
 <li>相比于单机事务,分布式事务有何不同?如何实现?</li>
 <li>了解 google spanner(事务) 和 zk(consensus) 的实现</li>
@@ -404,8 +402,8 @@
 <ul>
 <li>providing an “outsourced” consensus</li>
 <li>failure detection</li>
-<li>membership service</li>
 </ul>
+<p>membership service</p>
 <h2 id="Consistency-Guaranteess"><a href="#Consistency-Guaranteess" class="headerlink" title="Consistency Guaranteess"></a>Consistency Guaranteess</h2><p>分布式 db 中,由于网络等因素,数据不一致一定会发生,因此 Most replicated databases provide at least <code>eventual consistency</code>。</p>
 <p><strong>eventual consistency:</strong> 所有 replicas 的数据最终会达到一致。</p>
 <ol>
@@ -450,10 +448,11 @@
 </li>
 </ul>
 <p>简单的使用 quorums,即使满足 w + r &gt; n, 也不一定是 linearizable, 如:</p>
-<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p60" alt="84bad03c89d979d3cab000ce7b8e47c2.png"></p>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/3630FF3F-CEA1-4EBC-AC28-E16D1578D0E8.png"></p>
 <h3 id="The-Cost-of-Linearizability"><a href="#The-Cost-of-Linearizability" class="headerlink" title="The Cost of Linearizability"></a>The Cost of Linearizability</h3><p><strong>The CAP theorem:</strong><br>一般来说，分区容错无法避免，因此可以认为 CAP 的 P 总是成立。CAP 定理告诉我们，剩下的 C 和 A 无法同时做到。</p>
 <p>CAP 的定义比较局限,The CAP theorem as formally defined is of very narrow scope: it only considers one consistency model (namely linearizability) and one kind of fault (network partitions,vi or nodes that are alive but disconnected from each other). It doesn’t say anything about network delays, dead nodes, or other trade-offs. </p>
-<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p61" alt="c6731ccbcc5f3584f627b3015ae85e29.png"></p>
+<img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/7EDDF6B2-C3C7-4D65-9824-143E81161EEB.png" width="50%" height="50%" />
+
 <p><strong>Linearizability and network delays:</strong><br>A faster algorithm for linearizability does not exist, but weaker consistency models can be much faster, so this trade-off is important for latency-sensitive systems.</p>
 <h2 id="Ordering-Guarantees"><a href="#Ordering-Guarantees" class="headerlink" title="Ordering Guarantees"></a>Ordering Guarantees</h2><p>It turns out that there are deep connections between ordering, linearizability, and consensus.</p>
 <h3 id="Ordering-and-Causality"><a href="#Ordering-and-Causality" class="headerlink" title="Ordering and Causality"></a>Ordering and Causality</h3><p>Ordering helps preserve causality:</p>
@@ -474,7 +473,7 @@
 <p>In order to determine the causal ordering, the database needs to know which version of the data was read by the application</p>
 <h3 id="Sequence-Number-Ordering"><a href="#Sequence-Number-Ordering" class="headerlink" title="Sequence Number Ordering"></a>Sequence Number Ordering</h3><p>使用 logical clock 给 event 编号,we can use sequence numbers or timestamps to order events, and they provide a total order.</p>
 <p>We can create equence numbers in a total order that is consistent with causality,先发生的 event 的 number 更小.</p>
-<h5 id="Lamport-timestamps-保证-causality"><a href="#Lamport-timestamps-保证-causality" class="headerlink" title="Lamport timestamps: 保证 causality"></a>Lamport timestamps: 保证 causality</h5><p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p67" alt="f3de2710d844f15e67fb2f831eadcf2b.png"></p>
+<h5 id="Lamport-timestamps-保证-causality"><a href="#Lamport-timestamps-保证-causality" class="headerlink" title="Lamport timestamps: 保证 causality"></a>Lamport timestamps: 保证 causality</h5><p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/64567068-D969-4E5F-A332-4B82B22E54BA.png"></p>
 <p>Each node has a <code>unique identifier</code>,and each node keeps a <code>counter</code> of the number of operations it has processed. The Lamport timestamp is then simply a pair of (counter, node ID). <strong>It provides total ordering.</strong></p>
 <p>原理解释: </p>
 <ul>
@@ -504,10 +503,10 @@
 <li>投票阶段(voting phase): 参与者将操作结果通知协调者；</li>
 <li>提交阶段(commit phase): 收到参与者的通知后，协调者再向参与者发出通知，根据反馈情况决定各参与者是否要提交还是回.</li>
 </ul>
-<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p62" alt="5251bd138b3207f607f3ee80702d1180.png"></p>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/5AFA49E2-FF0B-47C2-89E4-58B82AE188FE.png"></p>
 <p>Much of the performance cost inherent in two-phase commit is due to the additional disk forcing (fsync) that is required for crash recovery, and the additional network round-trips.</p>
 <h4 id="Coordinator-failure"><a href="#Coordinator-failure" class="headerlink" title="Coordinator failure"></a>Coordinator failure</h4><p>2PC can become stuck waiting for the coordinator to recover.</p>
-<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p64" alt="0120482c7ee1cfc25bee2e7e35f012b7.png"></p>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/F9849799-8BAD-4839-A343-49FA1D2E2ED2.png"></p>
 <p>The only way 2PC can complete is by waiting for the coordinator to recover. This is why the coordinator must write its commit or abort decision to a transaction log on disk before sending commit or abort requests to participants:when the coordinator recovers, it determines the status of all in-doubt transactions by reading its transaction log. Any transactions that don’t have a commit record in the coordinator’s log are aborted. Thus, the commit point of 2PC comes down to a regular single-node atomic commit on the coordinator.</p>
 <h3 id="Distributed-Transactions-in-Practice"><a href="#Distributed-Transactions-in-Practice" class="headerlink" title="Distributed Transactions in Practice"></a>Distributed Transactions in Practice</h3><p>Two types of distributed transactions are often conflated:</p>
 <ul>
@@ -516,7 +515,7 @@
 </ul>
 <h4 id="Exactly-once-message-processing"><a href="#Exactly-once-message-processing" class="headerlink" title="Exactly-once message processing"></a>Exactly-once message processing</h4><p>Thus, by atomically committing the message and the side effects of its processing, we can ensure that the message is effectively processed <code>exactly once</code>, even if it required a few retries before it succeeded.</p>
 <p>Such a distributed transaction is only possible if all systems affected by the transaction are able to use the same atomic commit protocol.</p>
-<h4 id="XA-transaction"><a href="#XA-transaction" class="headerlink" title="XA transaction"></a>XA transaction</h4><p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p65" alt="f91a083d126ff81782b10b138c9080f9.gif"></p>
+<h4 id="XA-transaction"><a href="#XA-transaction" class="headerlink" title="XA transaction"></a>XA transaction</h4><p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/BF609444-07C3-4F7D-92BC-C59FB1496851.gif"></p>
 <p>The transaction coordinator implements the XA API.</p>
 <h4 id="Holding-locks-while-in-doubt"><a href="#Holding-locks-while-in-doubt" class="headerlink" title="Holding locks while in doubt"></a>Holding locks while in doubt</h4><p>The database cannot release those locks until the transaction commits or aborts, Therefore, when using two-phase commit, a transaction must hold onto the locks throughout the time it is in doubt.</p>
 <p>This can cause large parts of your application to become unavailable until the in-doubt transaction is resolved.</p>

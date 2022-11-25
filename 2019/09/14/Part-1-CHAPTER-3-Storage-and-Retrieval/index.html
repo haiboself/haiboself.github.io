@@ -30,9 +30,9 @@
 <meta property="og:image" content="https://panoply.io/uploads/versions/diagram4---x----750-328x---.jpg">
 <meta property="og:image" content="https://i.ytimg.com/vi/KUwOcip7Zzc/maxresdefault.jpg">
 <meta property="og:image" content="https://www.tutorialspoint.com/dwh/images/snowflake.jpg">
-<meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p9">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/B9E87FFB-1A56-4A17-8EBF-E0B2A71D0322.png">
 <meta property="article:published_time" content="2019-09-14T06:19:32.000Z">
-<meta property="article:modified_time" content="2022-11-25T06:26:13.604Z">
+<meta property="article:modified_time" content="2022-11-25T13:53:18.688Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ddia">
 <meta name="twitter:card" content="summary">
@@ -549,7 +549,7 @@
 </blockquote>
 <p>A big bottleneck is the bandwidth for getting data from disk into memory</p>
 <p>Developers of analytical databases also worry about efficiently using the bandwidth from main memory into the CPU cache</p>
-<h3 id="Sort-Order-in-Column-Storage"><a href="#Sort-Order-in-Column-Storage" class="headerlink" title="Sort Order in Column Storage"></a>Sort Order in Column Storage</h3><p>在列存中顺序无关紧要,存储按照 insert 顺序来就好了.但是仍然可以类似 SSTable 指定顺序用来实现索引</p>
+<h3 id="Sort-Order-in-Column-Storage"><a href="#Sort-Order-in-Column-Storage" class="headerlink" title="Sort Order in Column Storage"></a>Sort Order in Column Storage</h3><p>在列存中顺序无关紧要,存储按照 insert 顺序来就好了.但是仍然可以类似 SSTable 指定顺序用来实现索引:</p>
 <p>Rather, the data needs to be sorted an entire row at a time, even though it is stored by column.</p>
 <p>A second column can determine the sort order of any rows that have the same value in the first column. </p>
 <p>Another advantage of sorted order is that it can help with compression of columns</p>
@@ -558,7 +558,7 @@
 <h3 id="Aggregation-Data-Cubes-and-Materialized-Views"><a href="#Aggregation-Data-Cubes-and-Materialized-Views" class="headerlink" title="Aggregation: Data Cubes and Materialized Views"></a>Aggregation: Data Cubes and Materialized Views</h3><p><code>Materialized view:</code> is and actual copy of the query results, written to disk,When the underlying data changes, a materialized view needs to be updated</p>
 <p>A common special case of a materialized view is known as a data cube or OLAP cube, It is a grid of aggregates grouped by different dimensions.</p>
 <p>The disadvantage is that a data cube doesn’t have the same flexibility as querying the raw data</p>
-<p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p9" alt="facfdccc444fa2a500ba5c3791022f35.png"></p>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/B9E87FFB-1A56-4A17-8EBF-E0B2A71D0322.png"></p>
 
       
     </div>
