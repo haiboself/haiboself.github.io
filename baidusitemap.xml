@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://example.com/2019/10/27/Part-2-CHAPTER-6-Partitioning/</loc>
+    <loc>http://example.com/2019/12/12/Part-2-CHAPTER-9-Consistency-and-Consensus/</loc>
     <lastmod>2022-11-25</lastmod>
   </url>
   <url>
-    <loc>http://example.com/2019/12/12/Part-2-CHAPTER-9-Consistency-and-Consensus/</loc>
+    <loc>http://example.com/2019/09/07/Part-1-CHAPTER-1-Reliable-Scalable-and-Maintainable-Applications/</loc>
+    <lastmod>2022-11-25</lastmod>
+  </url>
+  <url>
+    <loc>http://example.com/2019/10/27/Part-2-CHAPTER-6-Partitioning/</loc>
     <lastmod>2022-11-25</lastmod>
   </url>
   <url>
@@ -34,10 +38,6 @@
   </url>
   <url>
     <loc>http://example.com/2022/10/30/yuque/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/</loc>
-    <lastmod>2022-11-25</lastmod>
-  </url>
-  <url>
-    <loc>http://example.com/2019/09/07/Part-1-CHAPTER-1-Reliable-Scalable-and-Maintainable-Applications/</loc>
     <lastmod>2022-11-25</lastmod>
   </url>
 </urlset> 

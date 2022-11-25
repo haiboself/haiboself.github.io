@@ -18,12 +18,12 @@
   
   
   <title>Part 2: CHAPTER 9 Consistency and Consensus | Hexo</title>
-  <meta name="description" content="[TOC] ? It turns out that there are deep connections between ordering, linearizability, and consensus. 阐明它们之间的关系? 相比于单机事务,分布式事务有何不同?如何实现? 了解 google spanner(事务) 和 zk(consensus) 的实现 CAP 定理的理解  Summary h">
+  <meta name="description" content="? Summary Consistent Consensus   Consistency Guaranteess Linearizability: Implementing Linearizable System The Cost of Linearizability   Ordering Guarantees Ordering and Causality Sequence Number O">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Part 2: CHAPTER 9 Consistency and Consensus">
 <meta property="og:url" content="http://example.com/2019/12/12/Part-2-CHAPTER-9-Consistency-and-Consensus/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="[TOC] ? It turns out that there are deep connections between ordering, linearizability, and consensus. 阐明它们之间的关系? 相比于单机事务,分布式事务有何不同?如何实现? 了解 google spanner(事务) 和 zk(consensus) 的实现 CAP 定理的理解  Summary h">
+<meta property="og:description" content="? Summary Consistent Consensus   Consistency Guaranteess Linearizability: Implementing Linearizable System The Cost of Linearizability   Ordering Guarantees Ordering and Causality Sequence Number O">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p60">
 <meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p61">
@@ -32,7 +32,7 @@
 <meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p64">
 <meta property="og:image" content="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p65">
 <meta property="article:published_time" content="2019-12-12T06:35:04.000Z">
-<meta property="article:modified_time" content="2022-11-25T06:35:33.823Z">
+<meta property="article:modified_time" content="2022-11-25T07:03:39.058Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ddia">
 <meta name="twitter:card" content="summary">
@@ -344,7 +344,7 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Summary"><span class="toc-number">2.</span> <span class="toc-text">Summary</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Consistent"><span class="toc-number">2.0.1.</span> <span class="toc-text">Consistent</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Consensus"><span class="toc-number">2.0.2.</span> <span class="toc-text">Consensus</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Consistency-Guaranteess"><span class="toc-number">3.</span> <span class="toc-text">Consistency Guaranteess</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Linearizability"><span class="toc-number">4.</span> <span class="toc-text">Linearizability:</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Implementing-Linearizable-System"><span class="toc-number">4.1.</span> <span class="toc-text">Implementing Linearizable System</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Cost-of-Linearizability"><span class="toc-number">4.2.</span> <span class="toc-text">The Cost of Linearizability</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ordering-Guarantees"><span class="toc-number">5.</span> <span class="toc-text">Ordering Guarantees</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Ordering-and-Causality"><span class="toc-number">5.1.</span> <span class="toc-text">Ordering and Causality</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#The-causal-order-is-not-a-total-order"><span class="toc-number">5.1.0.1.</span> <span class="toc-text">The causal order is not a total order</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Linearizability-is-stronger-than-causal-consistency"><span class="toc-number">5.1.0.2.</span> <span class="toc-text">Linearizability is stronger than causal consistency</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Capturing-causal-dependencies"><span class="toc-number">5.1.0.3.</span> <span class="toc-text">Capturing causal dependencies</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Sequence-Number-Ordering"><span class="toc-number">5.2.</span> <span class="toc-text">Sequence Number Ordering</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Lamport-timestamps-%E4%BF%9D%E8%AF%81-causality"><span class="toc-number">5.2.0.1.</span> <span class="toc-text">Lamport timestamps: 保证 causality</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Total-Order-Broadcast"><span class="toc-number">5.3.</span> <span class="toc-text">Total Order Broadcast</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Distributed-Transactions-and-Consensus"><span class="toc-number">6.</span> <span class="toc-text">Distributed Transactions and Consensus</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Atomic-Commit-and-Two-Phase-Commit-2PC"><span class="toc-number">6.1.</span> <span class="toc-text">Atomic Commit and Two-Phase Commit(2PC)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#From-single-node-to-distributed-atomic-commit"><span class="toc-number">6.1.1.</span> <span class="toc-text">From single-node to distributed atomic commit</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Introduction-to-two-phase-cmmit"><span class="toc-number">6.1.2.</span> <span class="toc-text">Introduction to two-phase cmmit</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Coordinator-failure"><span class="toc-number">6.1.3.</span> <span class="toc-text">Coordinator failure</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Distributed-Transactions-in-Practice"><span class="toc-number">6.2.</span> <span class="toc-text">Distributed Transactions in Practice</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Exactly-once-message-processing"><span class="toc-number">6.2.1.</span> <span class="toc-text">Exactly-once message processing</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#XA-transaction"><span class="toc-number">6.2.2.</span> <span class="toc-text">XA transaction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Holding-locks-while-in-doubt"><span class="toc-number">6.2.3.</span> <span class="toc-text">Holding locks while in doubt</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Recovering-from-coordinator-failure"><span class="toc-number">6.2.4.</span> <span class="toc-text">Recovering from coordinator failure</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Limitations-of-distributed-transactions"><span class="toc-number">6.2.5.</span> <span class="toc-text">Limitations of distributed transactions</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Fault-Tolerant-Consensus"><span class="toc-number">6.3.</span> <span class="toc-text">Fault-Tolerant Consensus</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Consensus-algorithm-and-total-order-broadcast"><span class="toc-number">6.3.1.</span> <span class="toc-text">Consensus algorithm and total order broadcast</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E9%80%89%E4%B8%BE-leader"><span class="toc-number">6.3.1.1.</span> <span class="toc-text">如何选举 leader:</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Limitations-of-consensus"><span class="toc-number">6.3.2.</span> <span class="toc-text">Limitations of consensus</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Membership-and-Coordination-Services"><span class="toc-number">6.4.</span> <span class="toc-text">Membership and Coordination Services</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">Summary</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">2.0.1.</span> <span class="toc-text">Consistent</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">2.0.2.</span> <span class="toc-text">Consensus</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">Consistency Guaranteess</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">4.</span> <span class="toc-text">Linearizability:</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">4.1.</span> <span class="toc-text">Implementing Linearizable System</span></a></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">4.2.</span> <span class="toc-text">The Cost of Linearizability</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">5.</span> <span class="toc-text">Ordering Guarantees</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">5.1.</span> <span class="toc-text">Ordering and Causality</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link"><span class="toc-number">5.1.0.1.</span> <span class="toc-text">The causal order is not a total order</span></a></li><li class="toc-item toc-level-5"><a class="toc-link"><span class="toc-number">5.1.0.2.</span> <span class="toc-text">Linearizability is stronger than causal consistency</span></a></li><li class="toc-item toc-level-5"><a class="toc-link"><span class="toc-number">5.1.0.3.</span> <span class="toc-text">Capturing causal dependencies</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">5.2.</span> <span class="toc-text">Sequence Number Ordering</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link"><span class="toc-number">5.2.0.1.</span> <span class="toc-text">Lamport timestamps: 保证 causality</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">5.3.</span> <span class="toc-text">Total Order Broadcast</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">6.</span> <span class="toc-text">Distributed Transactions and Consensus</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">6.1.</span> <span class="toc-text">Atomic Commit and Two-Phase Commit(2PC)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">6.1.1.</span> <span class="toc-text">From single-node to distributed atomic commit</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">6.1.2.</span> <span class="toc-text"></span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">6.1.3.</span> <span class="toc-text">Coordinator failure</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">6.2.</span> <span class="toc-text">Distributed Transactions in Practice</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">6.2.1.</span> <span class="toc-text">Exactly-once message processing</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">6.2.2.</span> <span class="toc-text">XA transaction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">6.2.3.</span> <span class="toc-text">Holding locks while in doubt</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">6.2.4.</span> <span class="toc-text">Recovering from coordinator failure</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">6.2.5.</span> <span class="toc-text">Limitations of distributed transactions</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">6.3.</span> <span class="toc-text">Fault-Tolerant Consensus</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">6.3.1.</span> <span class="toc-text">Consensus algorithm and total order broadcast</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link"><span class="toc-number">6.3.1.1.</span> <span class="toc-text">如何选举 leader:</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">6.3.2.</span> <span class="toc-text">Limitations of consensus</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">6.4.</span> <span class="toc-text">Membership and Coordination Services</span></a></li></ol></li></ol>
     </nav>
   </div>
 </aside>
@@ -398,17 +398,63 @@
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <p>[TOC]</p>
-<h2 id=""><a href="#" class="headerlink" title="?"></a>?</h2><ul>
+        <!-- toc -->
+
+<ul>
+<li><a href="#">?</a></li>
+<li><a href="#summary">Summary</a><ul>
+<li><a href="#consistent">Consistent</a></li>
+<li><a href="#consensus">Consensus</a></li>
+</ul>
+</li>
+<li><a href="#consistency-guaranteess">Consistency Guaranteess</a></li>
+<li><a href="#linearizability">Linearizability:</a><ul>
+<li><a href="#implementing-linearizable-system">Implementing Linearizable System</a></li>
+<li><a href="#the-cost-of-linearizability">The Cost of Linearizability</a></li>
+</ul>
+</li>
+<li><a href="#ordering-guarantees">Ordering Guarantees</a><ul>
+<li><a href="#ordering-and-causality">Ordering and Causality</a></li>
+<li><a href="#sequence-number-ordering">Sequence Number Ordering</a></li>
+<li><a href="#total-order-broadcast">Total Order Broadcast</a></li>
+</ul>
+</li>
+<li><a href="#distributed-transactions-and-consensus">Distributed Transactions and Consensus</a><ul>
+<li><a href="#atomic-commit-and-two-phase-commit2pc">Atomic Commit and Two-Phase Commit(2PC)</a><ul>
+<li><a href="#from-single-node-to-distributed-atomic-commit">From single-node to distributed atomic commit</a></li>
+<li><a href="#introduction-to-two-phase-cmmithttpswwww3cschoolcnarchitectroadarchitectroad-two-phase-commithtml">Introduction to two-phase cmmit</a></li>
+<li><a href="#coordinator-failure">Coordinator failure</a></li>
+</ul>
+</li>
+<li><a href="#distributed-transactions-in-practice">Distributed Transactions in Practice</a><ul>
+<li><a href="#exactly-once-message-processing">Exactly-once message processing</a></li>
+<li><a href="#xa-transaction">XA transaction</a></li>
+<li><a href="#holding-locks-while-in-doubt">Holding locks while in doubt</a></li>
+<li><a href="#recovering-from-coordinator-failure">Recovering from coordinator failure</a></li>
+<li><a href="#limitations-of-distributed-transactions">Limitations of distributed transactions</a></li>
+</ul>
+</li>
+<li><a href="#fault-tolerant-consensus">Fault-Tolerant Consensus</a><ul>
+<li><a href="#consensus-algorithm-and-total-order-broadcast">Consensus algorithm and total order broadcast</a></li>
+<li><a href="#limitations-of-consensus">Limitations of consensus</a></li>
+</ul>
+</li>
+<li><a href="#membership-and-coordination-services">Membership and Coordination Services</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id>?</span></h2><ul>
 <li>It turns out that there are deep connections between ordering, linearizability, and consensus. 阐明它们之间的关系?</li>
 <li>相比于单机事务,分布式事务有何不同?如何实现?</li>
 <li>了解 google spanner(事务) 和 zk(consensus) 的实现</li>
 <li>CAP 定理的理解</li>
 </ul>
-<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><blockquote>
+<h2><span id="summary">Summary</span></h2><blockquote>
 <p><a target="_blank" rel="noopener" href="http://www.bailis.org/blog/linearizability-versus-serializability">http://www.bailis.org/blog/linearizability-versus-serializability</a></p>
 </blockquote>
-<h4 id="Consistent"><a href="#Consistent" class="headerlink" title="Consistent"></a>Consistent</h4><p><strong>Linearizability</strong>: 提供 <code>stronger consistency</code>, make replicated data appear as though there were <code>only a single copy</code>, and to make all operations act on it <code>atomically</code></p>
+<h4><span id="consistent">Consistent</span></h4><p><strong>Linearizability</strong>: 提供 <code>stronger consistency</code>, make replicated data appear as though there were <code>only a single copy</code>, and to make all operations act on it <code>atomically</code></p>
 <ul>
 <li>优点: 易于理解</li>
 <li>缺点: 对网络问题敏感,性能慢</li>
@@ -418,7 +464,7 @@
 <li>优点: 对网络问题不敏感</li>
 <li>使用场景受限</li>
 </ul>
-<h4 id="Consensus"><a href="#Consensus" class="headerlink" title="Consensus"></a>Consensus</h4><blockquote>
+<h4><span id="consensus">Consensus</span></h4><blockquote>
 <p>Consensus algorithms are a huge breakthrough for distributed systems: they bring concrete <code>safety properties</code> (agreement, integrity, and validity) to systems where everything else is uncertain, and they nevertheless remain <code>fault-tolerant</code> (able to make progress as long as a majority of nodes are working and reachable). They provide <code>total order broadcast</code>, and therefore they can also implement linearizable atomic operations in a fault-tolerant way.</p>
 </blockquote>
 <p>定义: Deciding something in such a way that all nodes agree on what was decided, and such that the decision is irrevocable.</p>
@@ -437,7 +483,7 @@
 <li>failure detection</li>
 <li>membership service</li>
 </ul>
-<h2 id="Consistency-Guaranteess"><a href="#Consistency-Guaranteess" class="headerlink" title="Consistency Guaranteess"></a>Consistency Guaranteess</h2><p>分布式 db 中,由于网络等因素,数据不一致一定会发生,因此 Most replicated databases provide at least <code>eventual consistency</code>。</p>
+<h2><span id="consistency-guaranteess">Consistency Guaranteess</span></h2><p>分布式 db 中,由于网络等因素,数据不一致一定会发生,因此 Most replicated databases provide at least <code>eventual consistency</code>。</p>
 <p><strong>eventual consistency:</strong> 所有 replicas 的数据最终会达到一致。</p>
 <ol>
 <li>this is a very weak guarantee—it doesn’t say anything about <code>when</code> the replicas will converge</li>
@@ -451,7 +497,7 @@
 <blockquote>
 <p>distributed consistency is mostly about <code>coordinating</code> the state of replicas in the face of delays and faults.</p>
 </blockquote>
-<h2 id="Linearizability"><a href="#Linearizability" class="headerlink" title="Linearizability:"></a>Linearizability:</h2><p><strong>3 个特质:</strong></p>
+<h2><span id="linearizability">Linearizability:</span></h2><p><strong>3 个特质:</strong></p>
 <ul>
 <li>Recency gurantee</li>
 <li>single operations on singel object</li>
@@ -469,7 +515,7 @@
 <li>Constraints and uniqueness guarantees</li>
 <li>Cross-channel timing dependencies</li>
 </ul>
-<h3 id="Implementing-Linearizable-System"><a href="#Implementing-Linearizable-System" class="headerlink" title="Implementing Linearizable System"></a>Implementing Linearizable System</h3><p>The most common approach to making a system fault-tolerant is to use replication? <code>怎么说</code></p>
+<h3><span id="implementing-linearizable-system">Implementing Linearizable System</span></h3><p>The most common approach to making a system fault-tolerant is to use replication? <code>怎么说</code></p>
 <ul>
 <li><p>Single-leader replication(potentially linearizable): If you make reads from the leader, or from synchronously updated followers, they have the potential to be linearizable.</p>
 </li>
@@ -482,12 +528,12 @@
 </ul>
 <p>简单的使用 quorums,即使满足 w + r &gt; n, 也不一定是 linearizable, 如:</p>
 <p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p60" alt="84bad03c89d979d3cab000ce7b8e47c2.png"></p>
-<h3 id="The-Cost-of-Linearizability"><a href="#The-Cost-of-Linearizability" class="headerlink" title="The Cost of Linearizability"></a>The Cost of Linearizability</h3><p><strong>The CAP theorem:</strong><br>一般来说，分区容错无法避免，因此可以认为 CAP 的 P 总是成立。CAP 定理告诉我们，剩下的 C 和 A 无法同时做到。</p>
+<h3><span id="the-cost-of-linearizability">The Cost of Linearizability</span></h3><p><strong>The CAP theorem:</strong><br>一般来说，分区容错无法避免，因此可以认为 CAP 的 P 总是成立。CAP 定理告诉我们，剩下的 C 和 A 无法同时做到。</p>
 <p>CAP 的定义比较局限,The CAP theorem as formally defined is of very narrow scope: it only considers one consistency model (namely linearizability) and one kind of fault (network partitions,vi or nodes that are alive but disconnected from each other). It doesn’t say anything about network delays, dead nodes, or other trade-offs. </p>
 <p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p61" alt="c6731ccbcc5f3584f627b3015ae85e29.png"></p>
 <p><strong>Linearizability and network delays:</strong><br>A faster algorithm for linearizability does not exist, but weaker consistency models can be much faster, so this trade-off is important for latency-sensitive systems.</p>
-<h2 id="Ordering-Guarantees"><a href="#Ordering-Guarantees" class="headerlink" title="Ordering Guarantees"></a>Ordering Guarantees</h2><p>It turns out that there are deep connections between ordering, linearizability, and consensus.</p>
-<h3 id="Ordering-and-Causality"><a href="#Ordering-and-Causality" class="headerlink" title="Ordering and Causality"></a>Ordering and Causality</h3><p>Ordering helps preserve causality:</p>
+<h2><span id="ordering-guarantees">Ordering Guarantees</span></h2><p>It turns out that there are deep connections between ordering, linearizability, and consensus.</p>
+<h3><span id="ordering-and-causality">Ordering and Causality</span></h3><p>Ordering helps preserve causality:</p>
 <ul>
 <li>causal dependency: 比如事件的依赖顺序</li>
 <li>happened before relationship</li>
@@ -495,24 +541,24 @@
 <li>…</li>
 </ul>
 <p><code>Causality imposes an ordering</code> on events,These chains of causally dependent operations define the causal order in the system—i.e., what happened before what.</p>
-<h5 id="The-causal-order-is-not-a-total-order"><a href="#The-causal-order-is-not-a-total-order" class="headerlink" title="The causal order is not a total order"></a>The causal order is not a total order</h5><p><code>Causality:</code> 在 Casual 中没有依赖的操作可以并发执行,因此这些操作无法比较,所以 Casual 是 partial order(偏序关系).</p>
+<h5><span id="the-causal-order-is-not-a-total-order">The causal order is not a total order</span></h5><p><code>Causality:</code> 在 Casual 中没有依赖的操作可以并发执行,因此这些操作无法比较,所以 Casual 是 partial order(偏序关系).</p>
 <p><code>Linearizability:</code> In a linearizable system, we have a total order of operations. Therefore, according to this definition, there are no concurrent operations in a linearizable datastore.</p>
-<h5 id="Linearizability-is-stronger-than-causal-consistency"><a href="#Linearizability-is-stronger-than-causal-consistency" class="headerlink" title="Linearizability is stronger than causal consistency"></a>Linearizability is stronger than causal consistency</h5><p><code>Linearizability implies causality</code> is what makes linearizable systems simple to understand and appealing.</p>
+<h5><span id="linearizability-is-stronger-than-causal-consistency">Linearizability is stronger than causal consistency</span></h5><p><code>Linearizability implies causality</code> is what makes linearizable systems simple to understand and appealing.</p>
 <p><code>Causal consistency</code> is the strongest possible consistency model that does not slow down due to network delays, and remains available in the face of network failures.</p>
-<h5 id="Capturing-causal-dependencies"><a href="#Capturing-causal-dependencies" class="headerlink" title="Capturing causal dependencies"></a>Capturing causal dependencies</h5><p>In order to maintain causality, you need to know which operation happened before which other operation.</p>
+<h5><span id="capturing-causal-dependencies">Capturing causal dependencies</span></h5><p>In order to maintain causality, you need to know which operation happened before which other operation.</p>
 <p>In order to determine causal dependencies, we need some way of describing the “knowledge” of a node in the system.</p>
 <p>Causal consistency goes further: it needs to track causal dependencies across the entire database, not just for a single key</p>
 <p>In order to determine the causal ordering, the database needs to know which version of the data was read by the application</p>
-<h3 id="Sequence-Number-Ordering"><a href="#Sequence-Number-Ordering" class="headerlink" title="Sequence Number Ordering"></a>Sequence Number Ordering</h3><p>使用 logical clock 给 event 编号,we can use sequence numbers or timestamps to order events, and they provide a total order.</p>
+<h3><span id="sequence-number-ordering">Sequence Number Ordering</span></h3><p>使用 logical clock 给 event 编号,we can use sequence numbers or timestamps to order events, and they provide a total order.</p>
 <p>We can create equence numbers in a total order that is consistent with causality,先发生的 event 的 number 更小.</p>
-<h5 id="Lamport-timestamps-保证-causality"><a href="#Lamport-timestamps-保证-causality" class="headerlink" title="Lamport timestamps: 保证 causality"></a>Lamport timestamps: 保证 causality</h5><p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p67" alt="f3de2710d844f15e67fb2f831eadcf2b.png"></p>
+<h5><span id="lamport-timestamps-保证-causality">Lamport timestamps: 保证 causality</span></h5><p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p67" alt="f3de2710d844f15e67fb2f831eadcf2b.png"></p>
 <p>Each node has a <code>unique identifier</code>,and each node keeps a <code>counter</code> of the number of operations it has processed. The Lamport timestamp is then simply a pair of (counter, node ID). <strong>It provides total ordering.</strong></p>
 <p>原理解释: </p>
 <ul>
 <li>[<a target="_blank" rel="noopener" href="https://jameshfisher.com/2017/02/12/what-are-lamport-timestamps/]">https://jameshfisher.com/2017/02/12/what-are-lamport-timestamps/]</a></li>
 <li>[<a target="_blank" rel="noopener" href="https://www.cnblogs.com/bangerlee/p/5448766.html]">https://www.cnblogs.com/bangerlee/p/5448766.html]</a></li>
 </ul>
-<h3 id="Total-Order-Broadcast"><a href="#Total-Order-Broadcast" class="headerlink" title="Total Order Broadcast"></a>Total Order Broadcast</h3><blockquote>
+<h3><span id="total-order-broadcast">Total Order Broadcast</span></h3><blockquote>
 <p>This idea of knowing when your total order is <code>finalized</code> is captured in the topic of total order broadcast.</p>
 </blockquote>
 <p>Total order broadcast is usually described as a <code>protocol for exchanging messages</code> between nodes, Two safety properties always be satisfied:</p>
@@ -523,12 +569,12 @@
 <blockquote>
 <p>This is no coincidence: it can be proved that a linearizable compare-and-set (or increment-and-get) register and total order broadcast are both equivalent to consensus. That is, if you can solve one of these problems, you can transform it into a solution for the others. This is quite a profound and surprising insight!</p>
 </blockquote>
-<h2 id="Distributed-Transactions-and-Consensus"><a href="#Distributed-Transactions-and-Consensus" class="headerlink" title="Distributed Transactions and Consensus"></a>Distributed Transactions and Consensus</h2><p>Atomic commit,即保证分布式事务的原子性,需要依赖 consensus algo,2PC is a kind of consensus algorithm, which solving atomic commit.  </p>
-<h3 id="Atomic-Commit-and-Two-Phase-Commit-2PC"><a href="#Atomic-Commit-and-Two-Phase-Commit-2PC" class="headerlink" title="Atomic Commit and Two-Phase Commit(2PC)"></a>Atomic Commit and Two-Phase Commit(2PC)</h3><p>Atomicity prevents failed transactions from littering the database with half-finished results and half-updated state. </p>
-<h4 id="From-single-node-to-distributed-atomic-commit"><a href="#From-single-node-to-distributed-atomic-commit" class="headerlink" title="From single-node to distributed atomic commit"></a>From single-node to distributed atomic commit</h4><p><code>存储硬件层面保证:</code> Thus, it is a single device (the controller of one particular disk drive, attached to one particular node) that makes the commit atomic.</p>
+<h2><span id="distributed-transactions-and-consensus">Distributed Transactions and Consensus</span></h2><p>Atomic commit,即保证分布式事务的原子性,需要依赖 consensus algo,2PC is a kind of consensus algorithm, which solving atomic commit.  </p>
+<h3><span id="atomic-commit-and-two-phase-commit2pc">Atomic Commit and Two-Phase Commit(2PC)</span></h3><p>Atomicity prevents failed transactions from littering the database with half-finished results and half-updated state. </p>
+<h4><span id="from-single-node-to-distributed-atomic-commit">From single-node to distributed atomic commit</span></h4><p><code>存储硬件层面保证:</code> Thus, it is a single device (the controller of one particular disk drive, attached to one particular node) that makes the commit atomic.</p>
 <p><code>节点层面保证:</code> A node must only commit once it is certain that all other nodes in the transaction are also going to commit, A transaction commit must be irrevocable。</p>
 <p><code>应用层面保证:</code> However, from the database’s point of view this is a separate transaction, and thus any <code>cross-transaction correctness</code> requirements are the application’s problem</p>
-<h4 id="Introduction-to-two-phase-cmmit"><a href="#Introduction-to-two-phase-cmmit" class="headerlink" title="Introduction to two-phase cmmit"></a><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/architectroad/architectroad-two-phase-commit.html">Introduction to two-phase cmmit</a></h4><p>Two-phase commit is an algorithm for achieving atomic transaction commit across multiple nodes—i.e., to ensure that either all nodes commit or all nodes abort.</p>
+<h4><span id="introduction-to-two-phase-cmmit"></span></h4><p>Two-phase commit is an algorithm for achieving atomic transaction commit across multiple nodes—i.e., to ensure that either all nodes commit or all nodes abort.</p>
 <p>在分布式系统里，每个节点都可以知晓自己操作的成功或者失败，却无法知道其他节点操作的成功或失败。当一个事务跨多个节点时，为了保持事务的原子性与一致性，需要引入一个协调(Coordinator)来统一掌控所有参与者(Participant)的操作结果，并指示它们是否要把操作结果进行真正的提交或者回滚.</p>
 <p>2PC顾名思义分为两个阶段，其实施思路可概括为：</p>
 <ul>
@@ -537,24 +583,24 @@
 </ul>
 <p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p62" alt="5251bd138b3207f607f3ee80702d1180.png"></p>
 <p>Much of the performance cost inherent in two-phase commit is due to the additional disk forcing (fsync) that is required for crash recovery, and the additional network round-trips.</p>
-<h4 id="Coordinator-failure"><a href="#Coordinator-failure" class="headerlink" title="Coordinator failure"></a>Coordinator failure</h4><p>2PC can become stuck waiting for the coordinator to recover.</p>
+<h4><span id="coordinator-failure">Coordinator failure</span></h4><p>2PC can become stuck waiting for the coordinator to recover.</p>
 <p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p64" alt="0120482c7ee1cfc25bee2e7e35f012b7.png"></p>
 <p>The only way 2PC can complete is by waiting for the coordinator to recover. This is why the coordinator must write its commit or abort decision to a transaction log on disk before sending commit or abort requests to participants:when the coordinator recovers, it determines the status of all in-doubt transactions by reading its transaction log. Any transactions that don’t have a commit record in the coordinator’s log are aborted. Thus, the commit point of 2PC comes down to a regular single-node atomic commit on the coordinator.</p>
-<h3 id="Distributed-Transactions-in-Practice"><a href="#Distributed-Transactions-in-Practice" class="headerlink" title="Distributed Transactions in Practice"></a>Distributed Transactions in Practice</h3><p>Two types of distributed transactions are often conflated:</p>
+<h3><span id="distributed-transactions-in-practice">Distributed Transactions in Practice</span></h3><p>Two types of distributed transactions are often conflated:</p>
 <ul>
 <li>Database-internal distributed transactions: work well as usual</li>
 <li>Heterogeneous distributed transactions: more challenge</li>
 </ul>
-<h4 id="Exactly-once-message-processing"><a href="#Exactly-once-message-processing" class="headerlink" title="Exactly-once message processing"></a>Exactly-once message processing</h4><p>Thus, by atomically committing the message and the side effects of its processing, we can ensure that the message is effectively processed <code>exactly once</code>, even if it required a few retries before it succeeded.</p>
+<h4><span id="exactly-once-message-processing">Exactly-once message processing</span></h4><p>Thus, by atomically committing the message and the side effects of its processing, we can ensure that the message is effectively processed <code>exactly once</code>, even if it required a few retries before it succeeded.</p>
 <p>Such a distributed transaction is only possible if all systems affected by the transaction are able to use the same atomic commit protocol.</p>
-<h4 id="XA-transaction"><a href="#XA-transaction" class="headerlink" title="XA transaction"></a>XA transaction</h4><p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p65" alt="f91a083d126ff81782b10b138c9080f9.gif"></p>
+<h4><span id="xa-transaction">XA transaction</span></h4><p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p65" alt="f91a083d126ff81782b10b138c9080f9.gif"></p>
 <p>The transaction coordinator implements the XA API.</p>
-<h4 id="Holding-locks-while-in-doubt"><a href="#Holding-locks-while-in-doubt" class="headerlink" title="Holding locks while in doubt"></a>Holding locks while in doubt</h4><p>The database cannot release those locks until the transaction commits or aborts, Therefore, when using two-phase commit, a transaction must hold onto the locks throughout the time it is in doubt.</p>
+<h4><span id="holding-locks-while-in-doubt">Holding locks while in doubt</span></h4><p>The database cannot release those locks until the transaction commits or aborts, Therefore, when using two-phase commit, a transaction must hold onto the locks throughout the time it is in doubt.</p>
 <p>This can cause large parts of your application to become unavailable until the in-doubt transaction is resolved.</p>
-<h4 id="Recovering-from-coordinator-failure"><a href="#Recovering-from-coordinator-failure" class="headerlink" title="Recovering from coordinator failure"></a>Recovering from coordinator failure</h4><p>Orphaned in-doubt transactions(如transaction log lost) cannot be resolved automatically, so they sit forever in the database, holding locks and blocking other transactions,只能通过管理员手动解决.</p>
+<h4><span id="recovering-from-coordinator-failure">Recovering from coordinator failure</span></h4><p>Orphaned in-doubt transactions(如transaction log lost) cannot be resolved automatically, so they sit forever in the database, holding locks and blocking other transactions,只能通过管理员手动解决.</p>
 <p>Many XA implementations have an emergency escape hatch called heuristic decisions: allowing a participant to unilaterally decide to abort or commit an in-doubt transaction without a definitive decision from the coordinator.</p>
-<h4 id="Limitations-of-distributed-transactions"><a href="#Limitations-of-distributed-transactions" class="headerlink" title="Limitations of distributed transactions"></a>Limitations of distributed transactions</h4><p>对于 XA transactions, the key realization is that the transaction coordinator is itself a kind of database (in which transaction outcomes are stored), and so it needs to be approached with the same care as any other important database.</p>
-<h3 id="Fault-Tolerant-Consensus"><a href="#Fault-Tolerant-Consensus" class="headerlink" title="Fault-Tolerant Consensus"></a>Fault-Tolerant Consensus</h3><p><strong>思想:</strong> Everyone decides on the same outcome, and once you have decided, you cannot change your mind, a consensus algorithm must satisfy the following properties:</p>
+<h4><span id="limitations-of-distributed-transactions">Limitations of distributed transactions</span></h4><p>对于 XA transactions, the key realization is that the transaction coordinator is itself a kind of database (in which transaction outcomes are stored), and so it needs to be approached with the same care as any other important database.</p>
+<h3><span id="fault-tolerant-consensus">Fault-Tolerant Consensus</span></h3><p><strong>思想:</strong> Everyone decides on the same outcome, and once you have decided, you cannot change your mind, a consensus algorithm must satisfy the following properties:</p>
 <ul>
 <li>Uniform agreement: No two nodes decide differently</li>
 <li>Integrity: No node decides twice.</li>
@@ -567,22 +613,22 @@
 <li>为保证 termination, 可以使用 <code>quorum</code> 来允许部分 node crash.</li>
 <li>系统一定保证 safety properties,所以 Termination 不满足(如大量 node crash)也不会使系统做出错误的决策。</li>
 </ul>
-<h4 id="Consensus-algorithm-and-total-order-broadcast"><a href="#Consensus-algorithm-and-total-order-broadcast" class="headerlink" title="Consensus algorithm and total order broadcast"></a>Consensus algorithm and total order broadcast</h4><p>Consensu algorithm: vsr, paxos, raft, zab…</p>
+<h4><span id="consensus-algorithm-and-total-order-broadcast">Consensus algorithm and total order broadcast</span></h4><p>Consensu algorithm: vsr, paxos, raft, zab…</p>
 <p>这些算法不直接使用上述 Consensus 模型,而是 they decide on a <code>sequence of values</code>, which makes them <code>total order broadcast</code> algorithms.</p>
 <p>So, total order broadcast is equivalent to <code>repeated rounds of consensus</code> (each consensus decision corresponding to one message delivery).</p>
 <p>例子: [<a target="_blank" rel="noopener" href="https://www.cnblogs.com/j-well/p/7061091.html]">https://www.cnblogs.com/j-well/p/7061091.html]</a></p>
-<h5 id="如何选举-leader"><a href="#如何选举-leader" class="headerlink" title="如何选举 leader:"></a>如何选举 leader:</h5><p>Consensus algo 使用 leader,但是不保证 leader 唯一,所以需要解决选主问题:</p>
+<h5><span id="如何选举-leader">如何选举 leader:</span></h5><p>Consensus algo 使用 leader,但是不保证 leader 唯一,所以需要解决选主问题:</p>
 <p>当有多个 leader 时候,use a leader in some form or another, but they don’t guarantee that the leader is unique.</p>
 <p>Node 为了确定自己是 leader,每次操作前需要举行投票确认自己的身份,因此 we have two rounds of voting: once to choose a leader, and a second time to vote on a leader’s proposal.</p>
 <p>Consensus algorithms define a recovery process by which nodes can get into a consistent state after a new leader is elected, ensuring that the safety properties are always met.</p>
-<h4 id="Limitations-of-consensus"><a href="#Limitations-of-consensus" class="headerlink" title="Limitations of consensus"></a>Limitations of consensus</h4><ul>
+<h4><span id="limitations-of-consensus">Limitations of consensus</span></h4><ul>
 <li>每次 proposal votes is a kind of synchronous replication. <code>影响性能</code></li>
 <li>因为要进行 majority votes,所以对机器数量有要求(如:the remaining two out of three form a majority),如果发生 split brain,部分机器就会变得不可用。</li>
 <li>Most consensus algorithms assume a fixed set of nodes that participate in voting, which means that you can’t just add or remove nodes in the cluster.</li>
 <li>Consensus systems generally rely on timeouts to detect failed nodes. 在网络不好时候可能导致频繁的选主.</li>
 <li>Sometimes, consensus algorithms are particularly sensitive to network problems.</li>
 </ul>
-<h3 id="Membership-and-Coordination-Services"><a href="#Membership-and-Coordination-Services" class="headerlink" title="Membership and Coordination Services"></a>Membership and Coordination Services</h3><p>ZooKeeper 使用场景: </p>
+<h3><span id="membership-and-coordination-services">Membership and Coordination Services</span></h3><p>ZooKeeper 使用场景: </p>
 <ul>
 <li>Linearizable atomic operations</li>
 <li>total order broadcast</li>
