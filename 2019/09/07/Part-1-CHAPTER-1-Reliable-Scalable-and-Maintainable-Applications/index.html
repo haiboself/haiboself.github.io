@@ -18,12 +18,12 @@
   
   
   <title>Part 1: CHAPTER 1 Reliable, Scalable, and Maintainable Applications | Hexo</title>
-  <meta name="description" content="? Thinking about data system Reliability(可靠&#x2F;用性) hardware faults software errors human errors   Scalability describing Load and performance(描述问题) approaches for coping with load(解决问题)   Maintai">
+  <meta name="description" content="? how we think of reliaility, scalability, maintainability? how to achieve reliaility, scalability, maintainability?  Thinking about data system 数据系统的特点是什么?一方面,传统的数据系统都为了解决某个特定领域和场景的问题,而现在,这种界限在变得模糊">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Part 1: CHAPTER 1 Reliable, Scalable, and Maintainable Applications">
 <meta property="og:url" content="http://example.com/2019/09/07/Part-1-CHAPTER-1-Reliable-Scalable-and-Maintainable-Applications/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="? Thinking about data system Reliability(可靠&#x2F;用性) hardware faults software errors human errors   Scalability describing Load and performance(描述问题) approaches for coping with load(解决问题)   Maintai">
+<meta property="og:description" content="? how we think of reliaility, scalability, maintainability? how to achieve reliaility, scalability, maintainability?  Thinking about data system 数据系统的特点是什么?一方面,传统的数据系统都为了解决某个特定领域和场景的问题,而现在,这种界限在变得模糊">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2019-09-07T05:58:07.000Z">
 <meta property="article:modified_time" content="2022-11-25T07:02:35.753Z">
@@ -317,7 +317,7 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">Thinking about data system</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">Reliability(可靠&#x2F;用性)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">3.0.1.</span> <span class="toc-text">hardware faults</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">3.0.2.</span> <span class="toc-text">software errors</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">3.0.3.</span> <span class="toc-text">human errors</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">4.</span> <span class="toc-text">Scalability</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">4.0.1.</span> <span class="toc-text">describing Load and performance(描述问题)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">4.0.2.</span> <span class="toc-text">approaches for coping with load(解决问题)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">5.</span> <span class="toc-text">Maintainability</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Thinking-about-data-system"><span class="toc-number">2.</span> <span class="toc-text">Thinking about data system</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reliability-%E5%8F%AF%E9%9D%A0-x2F-%E7%94%A8%E6%80%A7"><span class="toc-number">3.</span> <span class="toc-text">Reliability(可靠&#x2F;用性)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#hardware-faults"><span class="toc-number">3.0.1.</span> <span class="toc-text">hardware faults</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#software-errors"><span class="toc-number">3.0.2.</span> <span class="toc-text">software errors</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#human-errors"><span class="toc-number">3.0.3.</span> <span class="toc-text">human errors</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Scalability"><span class="toc-number">4.</span> <span class="toc-text">Scalability</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#describing-Load-and-performance-%E6%8F%8F%E8%BF%B0%E9%97%AE%E9%A2%98"><span class="toc-number">4.0.1.</span> <span class="toc-text">describing Load and performance(描述问题)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#approaches-for-coping-with-load-%E8%A7%A3%E5%86%B3%E9%97%AE%E9%A2%98"><span class="toc-number">4.0.2.</span> <span class="toc-text">approaches for coping with load(解决问题)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Maintainability"><span class="toc-number">5.</span> <span class="toc-text">Maintainability</span></a></li></ol>
     </nav>
   </div>
 </aside>
@@ -373,41 +373,23 @@
       
         <!-- toc -->
 
-<ul>
-<li><a href="#">?</a></li>
-<li><a href="#thinking-about-data-system">Thinking about data system</a></li>
-<li><a href="#reliability%E5%8F%AF%E9%9D%A0%E7%94%A8%E6%80%A7">Reliability(可靠&#x2F;用性)</a><ul>
-<li><a href="#hardware-faults">hardware faults</a></li>
-<li><a href="#software-errors">software errors</a></li>
-<li><a href="#human-errors">human errors</a></li>
-</ul>
-</li>
-<li><a href="#scalability">Scalability</a><ul>
-<li><a href="#describing-load-and-performance%E6%8F%8F%E8%BF%B0%E9%97%AE%E9%A2%98">describing Load and performance(描述问题)</a></li>
-<li><a href="#approaches-for-coping-with-load%E8%A7%A3%E5%86%B3%E9%97%AE%E9%A2%98">approaches for coping with load(解决问题)</a></li>
-</ul>
-</li>
-<li><a href="#maintainability">Maintainability</a></li>
-</ul>
-<!-- tocstop -->
-
-<h2><span id>?</span></h2><ul>
+<h2 id=""><a href="#" class="headerlink" title="?"></a>?</h2><ul>
 <li>how we think of reliaility, scalability, maintainability?</li>
 <li>how to achieve reliaility, scalability, maintainability?</li>
 </ul>
-<h2><span id="thinking-about-data-system">Thinking about data system</span></h2><ul>
+<h2 id="Thinking-about-data-system"><a href="#Thinking-about-data-system" class="headerlink" title="Thinking about data system"></a>Thinking about data system</h2><ul>
 <li><p>数据系统的特点是什么?<br>一方面,传统的数据系统都为了解决某个特定领域和场景的问题,而现在,这种界限在变得模糊,比如<a target="_blank" rel="noopener" href="http://blog.rodeo.io/2016/01/24/kudu-as-a-more-flexible-kafka.html">将 kudu 用作消息队列</a>; 另一方面,为满足更多的需求,数据系统在变得复杂,需要组合多种组件来完成系统构建;</p>
 </li>
 <li><p>需要着重考虑和解决什么问题?<br>数据系统设计需要考虑人,技术等诸多因素,我们可以抽象出 3 个比较重要的关注点: Reliability, Scalability, Maintainability</p>
 </li>
 </ul>
-<h2><span id="reliability可靠x2f用性">Reliability(可靠&#x2F;用性)</span></h2><p>Reliability 指的是当有 fault 发生,系统仍可以正常执行的能力,这称为 <code>fault-tolerant 或者 resilient</code>。fault(异常,会<code>导致failure</code>) 不同于 failure(失败,不可用), fault <code>无法完全避免</code>,所以需要构建容错机制,来 <code>cure fault,prevent failure</code>。Reliability 十分重要,对于 hardware faults, software errors and human errors 有不同的应对方法</p>
-<h4><span id="hardware-faults">hardware faults</span></h4><p>它的特点如下,一般使用<code>硬件冗余</code>来解决问题,然而大规模的数据应用加剧了这个问题,需要引入软件容错</p>
+<h2 id="Reliability-可靠-x2F-用性"><a href="#Reliability-可靠-x2F-用性" class="headerlink" title="Reliability(可靠&#x2F;用性)"></a>Reliability(可靠&#x2F;用性)</h2><p>Reliability 指的是当有 fault 发生,系统仍可以正常执行的能力,这称为 <code>fault-tolerant 或者 resilient</code>。fault(异常,会<code>导致failure</code>) 不同于 failure(失败,不可用), fault <code>无法完全避免</code>,所以需要构建容错机制,来 <code>cure fault,prevent failure</code>。Reliability 十分重要,对于 hardware faults, software errors and human errors 有不同的应对方法</p>
+<h4 id="hardware-faults"><a href="#hardware-faults" class="headerlink" title="hardware faults"></a>hardware faults</h4><p>它的特点如下,一般使用<code>硬件冗余</code>来解决问题,然而大规模的数据应用加剧了这个问题,需要引入软件容错</p>
 <ul>
 <li>MTTF &#x3D; 10~50 年,规模大了以后,硬件故障概率很高</li>
 <li>随机发生和机器之间独立发生(random and independent)</li>
 </ul>
-<h4><span id="software-errors">software errors</span></h4><ul>
+<h4 id="software-errors"><a href="#software-errors" class="headerlink" title="software errors"></a>software errors</h4><ul>
 <li>特点: <ul>
 <li>并非独立,难以预测</li>
 <li>There is no quick solution to the problem of systematic faults in software</li>
@@ -420,20 +402,20 @@
 </ul>
 </li>
 </ul>
-<h4><span id="human-errors">human errors</span></h4><ul>
+<h4 id="human-errors"><a href="#human-errors" class="headerlink" title="human errors"></a>human errors</h4><ul>
 <li>特点: 人的行为会导致很多错误,但是对人的行为管控严格的系统又缺乏灵活性,这需要做出权衡</li>
 <li>solve: 权限管控&#x2F;灵活性(权衡), 快速恢复错误, 单元测试&#x2F;集成测试, 监控指标, 良好的管理实践与充分的培训</li>
 </ul>
-<h2><span id="scalability">Scalability</span></h2><p>Scalability means having strategies for keeping performance good, even when load increases.</p>
-<h4><span id="describing-load-and-performance描述问题">describing Load and performance(描述问题)</span></h4><p>为了描述 scalability,我们需要描述系统的 load 和 performance,具体的 load 指标取决一个系统。描述 load 和 performance 之间的关系需要阐明 2 个问题:</p>
+<h2 id="Scalability"><a href="#Scalability" class="headerlink" title="Scalability"></a>Scalability</h2><p>Scalability means having strategies for keeping performance good, even when load increases.</p>
+<h4 id="describing-Load-and-performance-描述问题"><a href="#describing-Load-and-performance-描述问题" class="headerlink" title="describing Load and performance(描述问题)"></a>describing Load and performance(描述问题)</h4><p>为了描述 scalability,我们需要描述系统的 load 和 performance,具体的 load 指标取决一个系统。描述 load 和 performance 之间的关系需要阐明 2 个问题:</p>
 <ul>
 <li>保持资源不变的情况下,提高 load, 对系统有何影响?</li>
 <li>load 提高后,如果要保持 performance, 如何增加资源?</li>
 </ul>
 <p>对于 performance 的描述,平均值并不准确,这无法反映用户的实际体验,应该使用分布比率(percentile)来进行衡量,如 P50</p>
-<h4><span id="approaches-for-coping-with-load解决问题">approaches for coping with load(解决问题)</span></h4><p>how do we maintain good performance even when our load parameters increase by some amount?</p>
+<h4 id="approaches-for-coping-with-load-解决问题"><a href="#approaches-for-coping-with-load-解决问题" class="headerlink" title="approaches for coping with load(解决问题)"></a>approaches for coping with load(解决问题)</h4><p>how do we maintain good performance even when our load parameters increase by some amount?</p>
 <p>将有状态服务扩展到多个节点上是困难的,但是趋势如此。load 增长,需要改变系统架构: scale-up(vertical使用大型机) or scale-out(horizontal加机器) 或者 2 者进行结合,架构的扩展性设计基于应用的 load parameters, 但是也有一些通用的原则和设计,之后会进行讨论</p>
-<h2><span id="maintainability">Maintainability</span></h2><p>软件的最大成本在于后学维护,可维护性系统的 3 个设计原则:</p>
+<h2 id="Maintainability"><a href="#Maintainability" class="headerlink" title="Maintainability"></a>Maintainability</h2><p>软件的最大成本在于后学维护,可维护性系统的 3 个设计原则:</p>
 <ul>
 <li>Operability: 容易运维,这需要系统有良好的监控系统,完善的文档等来保证</li>
 <li>Simplicity: 系统易于理解和使用,这需要系统设计具备良好的抽象性</li>

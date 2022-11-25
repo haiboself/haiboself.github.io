@@ -325,7 +325,7 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">Summary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">Partitionoing of Key-Value Data</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">2.0.1.</span> <span class="toc-text">Partitioning by Key Range</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">2.0.2.</span> <span class="toc-text">Partitioning by Hash of Key</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">Partitioning and Secondary Indexes</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">3.1.</span> <span class="toc-text">Partitioning Secondary Indexes by Document(local index)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">3.2.</span> <span class="toc-text">Partitioning Secondary Indexes by Term(global index)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">4.</span> <span class="toc-text">Rebalancing Partitions</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">4.1.</span> <span class="toc-text">Strategies for Rebalancing</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">4.1.1.</span> <span class="toc-text">hash mod N</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">4.1.2.</span> <span class="toc-text">Fixed number of partitions</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">4.1.3.</span> <span class="toc-text">Dynamic partitioning</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">4.1.4.</span> <span class="toc-text">Partitioning proportionally to nodes</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">4.2.</span> <span class="toc-text">Operations: Automatic or Manual Rebalancing</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">5.</span> <span class="toc-text">Request Routing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">6.</span> <span class="toc-text">Parallel Query Execution</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Summary"><span class="toc-number">1.</span> <span class="toc-text">Summary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Partitionoing-of-Key-Value-Data"><span class="toc-number">2.</span> <span class="toc-text">Partitionoing of Key-Value Data</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Partitioning-by-Key-Range"><span class="toc-number">2.0.1.</span> <span class="toc-text">Partitioning by Key Range</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Partitioning-by-Hash-of-Key"><span class="toc-number">2.0.2.</span> <span class="toc-text">Partitioning by Hash of Key</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Partitioning-and-Secondary-Indexes"><span class="toc-number">3.</span> <span class="toc-text">Partitioning and Secondary Indexes</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Partitioning-Secondary-Indexes-by-Document-local-index"><span class="toc-number">3.1.</span> <span class="toc-text">Partitioning Secondary Indexes by Document(local index)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Partitioning-Secondary-Indexes-by-Term-global-index"><span class="toc-number">3.2.</span> <span class="toc-text">Partitioning Secondary Indexes by Term(global index)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Rebalancing-Partitions"><span class="toc-number">4.</span> <span class="toc-text">Rebalancing Partitions</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Strategies-for-Rebalancing"><span class="toc-number">4.1.</span> <span class="toc-text">Strategies for Rebalancing</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#hash-mod-N"><span class="toc-number">4.1.1.</span> <span class="toc-text">hash mod N</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Fixed-number-of-partitions"><span class="toc-number">4.1.2.</span> <span class="toc-text">Fixed number of partitions</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Dynamic-partitioning"><span class="toc-number">4.1.3.</span> <span class="toc-text">Dynamic partitioning</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Partitioning-proportionally-to-nodes"><span class="toc-number">4.1.4.</span> <span class="toc-text">Partitioning proportionally to nodes</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Operations-Automatic-or-Manual-Rebalancing"><span class="toc-number">4.2.</span> <span class="toc-text">Operations: Automatic or Manual Rebalancing</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Request-Routing"><span class="toc-number">5.</span> <span class="toc-text">Request Routing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Parallel-Query-Execution"><span class="toc-number">6.</span> <span class="toc-text">Parallel Query Execution</span></a></li></ol>
     </nav>
   </div>
 </aside>
@@ -379,7 +379,7 @@
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <h2><span id="summary">Summary</span></h2><p>Partition 可以结合 Replication, 每个 partition 可以有多个 Replication 以保持高可用,如图:</p>
+        <h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>Partition 可以结合 Replication, 每个 partition 可以有多个 Replication 以保持高可用,如图:</p>
 <p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p47" alt="4da1c26598524fc627da7e80bf1f53e9.png"></p>
 <blockquote>
 <p>Partition(sharding): partitioning a large dataset into smaller subsets, that each piece of data (each record, row, or document) belongs to <code>exactly one</code> partition.使用 partition 可以分散读写,可以横向扩展。</p>
@@ -408,17 +408,17 @@
 <li>Document-partitioned indexes (<code>local indexes</code>): 和主键存储在同一个 partition,所以更新时只需更新单个 partition, 但是读取时需要聚集多个 partition 的数据</li>
 <li>Term-partitioned indexes (<code>global indexes</code>): 分散在各个分区中,更新的时候需要更新多个,但是读取的时候只需要读取一个 partition</li>
 </ul>
-<h2><span id="partitionoing-of-key-value-data">Partitionoing of Key-Value Data</span></h2><p>Our goal with partitioning is to spread the data and the query load evenly across nodes. </p>
+<h2 id="Partitionoing-of-Key-Value-Data"><a href="#Partitionoing-of-Key-Value-Data" class="headerlink" title="Partitionoing of Key-Value Data"></a>Partitionoing of Key-Value Data</h2><p>Our goal with partitioning is to spread the data and the query load evenly across nodes. </p>
 <p>如果 partition 不能平均分配, 就会出现数据倾斜和 hot spot 问题。</p>
-<h4><span id="partitioning-by-key-range">Partitioning by Key Range</span></h4><p>One way of partitioning is to assign a continuous range of keys (from some minimum to some maximum) to each partition</p>
+<h4 id="Partitioning-by-Key-Range"><a href="#Partitioning-by-Key-Range" class="headerlink" title="Partitioning by Key Range"></a>Partitioning by Key Range</h4><p>One way of partitioning is to assign a continuous range of keys (from some minimum to some maximum) to each partition</p>
 <p>In order to distribute the data evenly, the partition boundaries need to adapt to the data.</p>
 <p>Within each partition, we can keep keys in sorted order (SSTables and LSM-Trees)</p>
 <p>劣势: 如果频繁访问部分 key,会造成 hot spots 问题。</p>
-<h4><span id="partitioning-by-hash-of-key">Partitioning by Hash of Key</span></h4><p>使用 hash function 对 key 求 hash 值,you can assign each partition a range of hashes (rather than a range of keys), and every key whose hash falls within a partition’s range will be stored in that partition。如图:</p>
+<h4 id="Partitioning-by-Hash-of-Key"><a href="#Partitioning-by-Hash-of-Key" class="headerlink" title="Partitioning by Hash of Key"></a>Partitioning by Hash of Key</h4><p>使用 hash function 对 key 求 hash 值,you can assign each partition a range of hashes (rather than a range of keys), and every key whose hash falls within a partition’s range will be stored in that partition。如图:</p>
 <p><img src="https://notes.shichao.io/dda/figure_6-3_600.png" alt="image"></p>
 <p><code>优势</code>: This technique is good at distributing keys fairly among the partitions. The partition boundaries can be evenly spaced. </p>
 <p><code>劣势</code>: range query 需要读取多个 partitoin,相比于 key range parition,比较低效。</p>
-<h2><span id="partitioning-and-secondary-indexes">Partitioning and Secondary Indexes</span></h2><blockquote>
+<h2 id="Partitioning-and-Secondary-Indexes"><a href="#Partitioning-and-Secondary-Indexes" class="headerlink" title="Partitioning and Secondary Indexes"></a>Partitioning and Secondary Indexes</h2><blockquote>
 <p>A secondary index usually doesn’t identify a record uniquely but rather is a way of searching for occurrences of a particular value.</p>
 </blockquote>
 <blockquote>
@@ -426,17 +426,17 @@
 </blockquote>
 <p>The <code>problem</code> with secondary indexes is that they don’t map neatly to partitions.</p>
 <p>There are two main approaches to partitioning a database with secondary indexes: <code>document-based</code> partitioning and <code>term-based</code> partitioning.</p>
-<h3><span id="partitioning-secondary-indexes-by-documentlocal-index">Partitioning Secondary Indexes by Document(local index)</span></h3><p>In this indexing approach, each partition is completely separate: each partition maintains its own secondary indexes, covering only the documents in that partition.如图:</p>
+<h3 id="Partitioning-Secondary-Indexes-by-Document-local-index"><a href="#Partitioning-Secondary-Indexes-by-Document-local-index" class="headerlink" title="Partitioning Secondary Indexes by Document(local index)"></a>Partitioning Secondary Indexes by Document(local index)</h3><p>In this indexing approach, each partition is completely separate: each partition maintains its own secondary indexes, covering only the documents in that partition.如图:</p>
 <p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p27" alt="14f2449166cc366c4b5a60de76ddd8c6.png"></p>
 <p>优势: 实现简单,写入和更新 index 比较简单高效。<br>劣势: 读取成本高,需要读取所有 partition, Even if you query the partitions in parallel.</p>
-<h3><span id="partitioning-secondary-indexes-by-termglobal-index">Partitioning Secondary Indexes by Term(global index)</span></h3><blockquote>
+<h3 id="Partitioning-Secondary-Indexes-by-Term-global-index"><a href="#Partitioning-Secondary-Indexes-by-Term-global-index" class="headerlink" title="Partitioning Secondary Indexes by Term(global index)"></a>Partitioning Secondary Indexes by Term(global index)</h3><blockquote>
 <p>Term: 来自全文索引的概念,这里指的是: where the terms are all the words that occur in a document.</p>
 </blockquote>
 <p>global index that covers data in all partitions,如果所有 index 都存储在一台 node 会成为瓶颈,所以 index 也需要 partitioned,可以通过 term 自身(方便 range scan)或者 hash 的方式(可以均匀分散)对 term index 进行 partition。 如图:</p>
 <p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p40" alt="a19496e312343d1bfbd4f20a28025fc0.png"></p>
 <p>好处: 使用索引可以只读取相应的 partition, 提交读取效率。<br>坏处: 因为写入的时候需要更新多个 partition 中的 index,所以写效率降低且复杂。</p>
 <p>In practice, updates to global secondary indexes are often asynchronous, 因此 index 写入后不是立即可见的, 所以需要 distributed transactioon 来保证所有写入 partition 的索引的正确和立即可见。</p>
-<h2><span id="rebalancing-partitions">Rebalancing Partitions</span></h2><blockquote>
+<h2 id="Rebalancing-Partitions"><a href="#Rebalancing-Partitions" class="headerlink" title="Rebalancing Partitions"></a>Rebalancing Partitions</h2><blockquote>
 <p>The process of moving load from one node in the cluster to another is called rebalancing.</p>
 </blockquote>
 <p>Rebalancing 需满足:</p>
@@ -445,22 +445,22 @@
 <li>Rebalancing 的同时, db 可以继续提供读写服务</li>
 <li>要降低网络和磁盘 io,在 node 间只移动必要的数据。</li>
 </ul>
-<h3><span id="strategies-for-rebalancing">Strategies for Rebalancing</span></h3><p>We need an approach that doesn’t move data around more than necessary.</p>
-<h4><span id="hash-mod-n">hash mod N</span></h4><p>The problem with the mod N approach is that if the number of nodes N changes, most of the keys will need to be moved from one node to another</p>
-<h4><span id="fixed-number-of-partitions">Fixed number of partitions</span></h4><p>使用固定数量的 partitions is operationally simpler,然而选取合适的 partition 数量是非常困难的。而且在增减机器时候也有不必要的数据移动,如图:</p>
+<h3 id="Strategies-for-Rebalancing"><a href="#Strategies-for-Rebalancing" class="headerlink" title="Strategies for Rebalancing"></a>Strategies for Rebalancing</h3><p>We need an approach that doesn’t move data around more than necessary.</p>
+<h4 id="hash-mod-N"><a href="#hash-mod-N" class="headerlink" title="hash mod N"></a>hash mod N</h4><p>The problem with the mod N approach is that if the number of nodes N changes, most of the keys will need to be moved from one node to another</p>
+<h4 id="Fixed-number-of-partitions"><a href="#Fixed-number-of-partitions" class="headerlink" title="Fixed number of partitions"></a>Fixed number of partitions</h4><p>使用固定数量的 partitions is operationally simpler,然而选取合适的 partition 数量是非常困难的。而且在增减机器时候也有不必要的数据移动,如图:</p>
 <p>如图:</p>
 <p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p44" alt="a2713cc5f32c187684c32074e2122f3f.png"></p>
-<h4><span id="dynamic-partitioning">Dynamic partitioning</span></h4><p>当 partiton 中数据量增长到一个阈值的时候,可以 split 为 2 个partiton;同时,如果有数据删除,partiiton 变小,可以合并相邻 partition。</p>
+<h4 id="Dynamic-partitioning"><a href="#Dynamic-partitioning" class="headerlink" title="Dynamic partitioning"></a>Dynamic partitioning</h4><p>当 partiton 中数据量增长到一个阈值的时候,可以 split 为 2 个partiton;同时,如果有数据删除,partiiton 变小,可以合并相邻 partition。</p>
 <p><code>优势</code>: the number of partitions adapts to the total data volume</p>
 <p><code>缺陷</code>: 当数据量小的时候被分配到一个 partition 中,开始所有的读写都会打到这个 partition, 为了缓解这个问题,可以预先分配一些 partition,但这需要 know what the key distribution is going to look like。</p>
-<h4><span id="partitioning-proportionally-to-nodes">Partitioning proportionally to nodes</span></h4><p>在以上的 cases 中, the number of partitions is independent of the number of nodes.</p>
+<h4 id="Partitioning-proportionally-to-nodes"><a href="#Partitioning-proportionally-to-nodes" class="headerlink" title="Partitioning proportionally to nodes"></a>Partitioning proportionally to nodes</h4><p>在以上的 cases 中, the number of partitions is independent of the number of nodes.</p>
 <p>To have a fixed number of partitions per node, this approach also keeps the size of each partition fairly stable.这个方式可以很好的适应数据规模的变化,但是在增减机器 rebanlancing 的时候需要注意避免形成 unfailrly partition.</p>
-<h3><span id="operations-automatic-or-manual-rebalancing">Operations: Automatic or Manual Rebalancing</span></h3><p>自动 rebalancing 十分方便,但是是不可预测的,同时 automation can be dangerous in combination with automatic failure detection, 可能导致级联的错误。因此让人介入 rebalance 是比较好的。</p>
-<h2><span id="request-routing">Request Routing</span></h2><p>service discovery 问题, client 如何知道要访问哪台机器? 有 3 种方式,如图:</p>
+<h3 id="Operations-Automatic-or-Manual-Rebalancing"><a href="#Operations-Automatic-or-Manual-Rebalancing" class="headerlink" title="Operations: Automatic or Manual Rebalancing"></a>Operations: Automatic or Manual Rebalancing</h3><p>自动 rebalancing 十分方便,但是是不可预测的,同时 automation can be dangerous in combination with automatic failure detection, 可能导致级联的错误。因此让人介入 rebalance 是比较好的。</p>
+<h2 id="Request-Routing"><a href="#Request-Routing" class="headerlink" title="Request Routing"></a>Request Routing</h2><p>service discovery 问题, client 如何知道要访问哪台机器? 有 3 种方式,如图:</p>
 <p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p45" alt="c0d7cd822c95ac299173b2008b7364a9.png"></p>
 <p>Many distributed data systems rely on a separate coordination service such as ZooKeeper to keep track of this cluster metadata,如图:</p>
 <p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p46" alt="fb8752be8a9436d2ed221fa97a0106c5.png"></p>
-<h2><span id="parallel-query-execution">Parallel Query Execution</span></h2><p>The MPP(massively parallel processing) query optimizer breaks this complex query into a number of execution stages and partitions, many of which can be executed in parallel on different nodes of the database cluster。如各种分布式计算引擎: mr, spark, presto.</p>
+<h2 id="Parallel-Query-Execution"><a href="#Parallel-Query-Execution" class="headerlink" title="Parallel Query Execution"></a>Parallel Query Execution</h2><p>The MPP(massively parallel processing) query optimizer breaks this complex query into a number of execution stages and partitions, many of which can be executed in parallel on different nodes of the database cluster。如各种分布式计算引擎: mr, spark, presto.</p>
 
       
     </div>

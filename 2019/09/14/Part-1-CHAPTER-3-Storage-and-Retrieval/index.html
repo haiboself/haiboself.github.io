@@ -324,7 +324,7 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">OLTP(online transaction processing) Overview</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">2.1.</span> <span class="toc-text">Hash Indexes with append-only</span></a></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">2.2.</span> <span class="toc-text">SSTables(Sorted String Table) and LSM-Trees</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link"><span class="toc-number">2.2.0.1.</span> <span class="toc-text">Constructing and maintaining SSTables</span></a></li><li class="toc-item toc-level-5"><a class="toc-link"><span class="toc-number">2.2.0.2.</span> <span class="toc-text">LSM-tree(Log-Structured Merge-Tree)</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">2.2.1.</span> <span class="toc-text">Performance optimizations</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">2.3.</span> <span class="toc-text">B-Trees</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link"><span class="toc-number">2.3.0.1.</span> <span class="toc-text">Making B-trees reliable</span></a></li><li class="toc-item toc-level-5"><a class="toc-link"><span class="toc-number">2.3.0.2.</span> <span class="toc-text">B-tree optimizations</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">2.4.</span> <span class="toc-text">Comparing B-Trees and LSM-Trees</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">2.4.1.</span> <span class="toc-text">Advantages of LSM-trees</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">2.4.2.</span> <span class="toc-text">Downsides of LSM-trees:写入时空间换时间</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">2.5.</span> <span class="toc-text">Other Indexing Structures</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">2.5.1.</span> <span class="toc-text">Storing values within the index</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">2.5.2.</span> <span class="toc-text">Multi-column indexes</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">2.5.3.</span> <span class="toc-text">Full-text search and fuzzy indexes</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">2.5.4.</span> <span class="toc-text">Keeping everything in memory</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">2.6.</span> <span class="toc-text">Summary</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">2.6.1.</span> <span class="toc-text">Log-structured storage engine</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">2.6.2.</span> <span class="toc-text">Page-orientated storage engine</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-number">2.6.3.</span> <span class="toc-text">else</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">OLAP(online analytic processing ) Overview</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">3.1.</span> <span class="toc-text">Data Warehousing</span></a></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">3.2.</span> <span class="toc-text">Stars and Snowflakes: Schemas for Analytics</span></a></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">3.3.</span> <span class="toc-text">Column-Oriented Storage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">3.4.</span> <span class="toc-text">Column Compression</span></a></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">3.5.</span> <span class="toc-text">Sort Order in Column Storage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">3.6.</span> <span class="toc-text">Writing to Column-Oriented Storage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link"><span class="toc-number">3.7.</span> <span class="toc-text">Aggregation: Data Cubes and Materialized Views</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#OLTP-online-transaction-processing-Overview"><span class="toc-number">2.</span> <span class="toc-text">OLTP(online transaction processing) Overview</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Hash-Indexes-with-append-only"><span class="toc-number">2.1.</span> <span class="toc-text">Hash Indexes with append-only</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SSTables-Sorted-String-Table-and-LSM-Trees"><span class="toc-number">2.2.</span> <span class="toc-text">SSTables(Sorted String Table) and LSM-Trees</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Constructing-and-maintaining-SSTables"><span class="toc-number">2.2.0.1.</span> <span class="toc-text">Constructing and maintaining SSTables</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#LSM-tree-Log-Structured-Merge-Tree"><span class="toc-number">2.2.0.2.</span> <span class="toc-text">LSM-tree(Log-Structured Merge-Tree)</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Performance-optimizations"><span class="toc-number">2.2.1.</span> <span class="toc-text">Performance optimizations</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#B-Trees"><span class="toc-number">2.3.</span> <span class="toc-text">B-Trees</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Making-B-trees-reliable"><span class="toc-number">2.3.0.1.</span> <span class="toc-text">Making B-trees reliable</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#B-tree-optimizations"><span class="toc-number">2.3.0.2.</span> <span class="toc-text">B-tree optimizations</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Comparing-B-Trees-and-LSM-Trees"><span class="toc-number">2.4.</span> <span class="toc-text">Comparing B-Trees and LSM-Trees</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Advantages-of-LSM-trees"><span class="toc-number">2.4.1.</span> <span class="toc-text">Advantages of LSM-trees</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Downsides-of-LSM-trees-%E5%86%99%E5%85%A5%E6%97%B6%E7%A9%BA%E9%97%B4%E6%8D%A2%E6%97%B6%E9%97%B4"><span class="toc-number">2.4.2.</span> <span class="toc-text">Downsides of LSM-trees:写入时空间换时间</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Other-Indexing-Structures"><span class="toc-number">2.5.</span> <span class="toc-text">Other Indexing Structures</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Storing-values-within-the-index"><span class="toc-number">2.5.1.</span> <span class="toc-text">Storing values within the index</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Multi-column-indexes"><span class="toc-number">2.5.2.</span> <span class="toc-text">Multi-column indexes</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Full-text-search-and-fuzzy-indexes"><span class="toc-number">2.5.3.</span> <span class="toc-text">Full-text search and fuzzy indexes</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Keeping-everything-in-memory"><span class="toc-number">2.5.4.</span> <span class="toc-text">Keeping everything in memory</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Summary"><span class="toc-number">2.6.</span> <span class="toc-text">Summary</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Log-structured-storage-engine"><span class="toc-number">2.6.1.</span> <span class="toc-text">Log-structured storage engine</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Page-orientated-storage-engine"><span class="toc-number">2.6.2.</span> <span class="toc-text">Page-orientated storage engine</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#else"><span class="toc-number">2.6.3.</span> <span class="toc-text">else</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#OLAP-online-analytic-processing-Overview"><span class="toc-number">3.</span> <span class="toc-text">OLAP(online analytic processing ) Overview</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Data-Warehousing"><span class="toc-number">3.1.</span> <span class="toc-text">Data Warehousing</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Stars-and-Snowflakes-Schemas-for-Analytics"><span class="toc-number">3.2.</span> <span class="toc-text">Stars and Snowflakes: Schemas for Analytics</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Column-Oriented-Storage"><span class="toc-number">3.3.</span> <span class="toc-text">Column-Oriented Storage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Column-Compression"><span class="toc-number">3.4.</span> <span class="toc-text">Column Compression</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Sort-Order-in-Column-Storage"><span class="toc-number">3.5.</span> <span class="toc-text">Sort Order in Column Storage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Writing-to-Column-Oriented-Storage"><span class="toc-number">3.6.</span> <span class="toc-text">Writing to Column-Oriented Storage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Aggregation-Data-Cubes-and-Materialized-Views"><span class="toc-number">3.7.</span> <span class="toc-text">Aggregation: Data Cubes and Materialized Views</span></a></li></ol></li></ol>
     </nav>
   </div>
 </aside>
@@ -378,7 +378,7 @@
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <h2><span id>?</span></h2><ol start="0">
+        <h2 id=""><a href="#" class="headerlink" title="?"></a>?</h2><ol start="0">
 <li>how databases arrange data on disk so that we can find it again efficiently?</li>
 <li>how we can store the data that we’re given(如何存储数据)?</li>
 <li>how we can find it again when we’re asked for it(如何检索数据)?</li>
@@ -388,7 +388,7 @@
 <li>内存中的结构是什么样, 磁盘的结构又是什么样? 如何从内存刷到磁盘, 又从磁盘恢复到内存?</li>
 <li>data model, index, column-oriented, encoding 之间是如何配合的,它们之间的关系是什么</li>
 </ol>
-<h2><span id="oltponline-transaction-processing-overview">OLTP(online transaction processing) Overview</span></h2><blockquote>
+<h2 id="OLTP-online-transaction-processing-Overview"><a href="#OLTP-online-transaction-processing-Overview" class="headerlink" title="OLTP(online transaction processing) Overview"></a>OLTP(online transaction processing) Overview</h2><blockquote>
 <p>A transaction needn’t necessarily have ACID (atomicity, consistency, isolation, and durability) properties. Transaction processing just means allowing clients to make low-latency reads and writes as opposed to batch processing jobs, which only run periodically (for example, once per day). </p>
 </blockquote>
 <p><code>Storage:</code> 相比随机写入顺序写入简单高效, 因此 Many databases internally use a log(an append-only sequence of records), which is an <code>append-only</code>(the simplest possible write operation) data file.</p>
@@ -396,7 +396,7 @@
 <blockquote>
 <p><code>Index:</code> Index 利用额外的存储(来自 data)来加速查询. 维持 index 会面临一些成本,尤其是当写入时,需要同步更新 index。由于 index 可以加速查询, 降低写入效率,所以索引的建立需开发人员去权衡.</p>
 </blockquote>
-<h3><span id="hash-indexes-with-append-only">Hash Indexes with append-only</span></h3><p><code>Storage:</code> 数据以 (k,v) pair 的形式存储在磁盘,以 append only 的方式进行追加<br><code>Retrieval:</code> 在内存中维护 hash index,数据追加时同步更新 index</p>
+<h3 id="Hash-Indexes-with-append-only"><a href="#Hash-Indexes-with-append-only" class="headerlink" title="Hash Indexes with append-only"></a>Hash Indexes with append-only</h3><p><code>Storage:</code> 数据以 (k,v) pair 的形式存储在磁盘,以 append only 的方式进行追加<br><code>Retrieval:</code> 在内存中维护 hash index,数据追加时同步更新 index</p>
 <p><img src="https://notes.shichao.io/dda/figure_3-1.png" alt="image"></p>
 <p><strong>以 append-only 方式追加会导致磁盘空间不足,为了解决这个问题:</strong></p>
 <ol>
@@ -423,7 +423,7 @@
 <li>The hash table must fit in memory,当 hash table 很<br>大被迫放入磁盘时,索引效率就会下降,还会面临 hash 冲突的问题.</li>
 <li>Range queries are not efficient.</li>
 </ul>
-<h3><span id="sstablessorted-string-table-and-lsm-trees">SSTables(Sorted String Table) and LSM-Trees</span></h3><blockquote>
+<h3 id="SSTables-Sorted-String-Table-and-LSM-Trees"><a href="#SSTables-Sorted-String-Table-and-LSM-Trees" class="headerlink" title="SSTables(Sorted String Table) and LSM-Trees"></a>SSTables(Sorted String Table) and LSM-Trees</h3><blockquote>
 <p><a target="_blank" rel="noopener" href="https://www.open-open.com/lib/view/open1424916275249.html">https://www.open-open.com/lib/view/open1424916275249.html</a><br><a target="_blank" rel="noopener" href="https://ggaaooppeenngg.github.io/zh-CN/2017/03/31/%E4%BB%8E%E6%9C%B4%E7%B4%A0%E8%A7%A3%E9%87%8A%E5%87%BA%E5%8F%91%E8%A7%A3%E9%87%8Aleveldb%E7%9A%84%E8%AE%BE%E8%AE%A1/">https://ggaaooppeenngg.github.io/zh-CN/2017/03/31/%E4%BB%8E%E6%9C%B4%E7%B4%A0%E8%A7%A3%E9%87%8A%E5%87%BA%E5%8F%91%E8%A7%A3%E9%87%8Aleveldb%E7%9A%84%E8%AE%BE%E8%AE%A1/</a></p>
 </blockquote>
 <p>如何使用 SSTables 来解决 hash index 的问题呢</p>
@@ -436,7 +436,7 @@
 <li>you no longer need to keep an index of all the keys in memory. 因为有序, hash table 中的一个 key 可以代表一个范围的上&#x2F;下界,通过 scan 这个小范围来检索数据</li>
 <li>it is possible to <code>group those records into a block and compress it</code> before writing it to disk. 这可以节省磁盘同时也能降低 IO 带宽</li>
 </ul>
-<h5><span id="constructing-and-maintaining-sstables">Constructing and maintaining SSTables</span></h5><p>Sorted structure on disk: LSM-tree(Log-Structured Merge-Tree)?<br>Sorted structure in memory: red-black trees or AVL trees</p>
+<h5 id="Constructing-and-maintaining-SSTables"><a href="#Constructing-and-maintaining-SSTables" class="headerlink" title="Constructing and maintaining SSTables"></a>Constructing and maintaining SSTables</h5><p>Sorted structure on disk: LSM-tree(Log-Structured Merge-Tree)?<br>Sorted structure in memory: red-black trees or AVL trees</p>
 <p><strong>Work flow:</strong></p>
 <ol>
 <li>add write to and in-memory balanced tree structure called <code>memtable</code></li>
@@ -445,12 +445,12 @@
 <li>From time to time, run a merging and compaction process in the background to combine segment files and to discard overwritten or deleted values.</li>
 </ol>
 <p><code>唯一的问题:</code> 当 database crashed, 还没刷到磁盘的 memetable 就会丢失,为了避免这个问题,写一条数据时,同时以简单的 append 方式追加到一个 log 中,便于 crash 后 memtable 的恢复</p>
-<h5><span id="lsm-treelog-structured-merge-tree">LSM-tree(Log-Structured Merge-Tree)</span></h5><p><code>写快读慢,因为顺序写入,读取的时候需要检索 memtable 和 sstable.</code></p>
+<h5 id="LSM-tree-Log-Structured-Merge-Tree"><a href="#LSM-tree-Log-Structured-Merge-Tree" class="headerlink" title="LSM-tree(Log-Structured Merge-Tree)"></a>LSM-tree(Log-Structured Merge-Tree)</h5><p><code>写快读慢,因为顺序写入,读取的时候需要检索 memtable 和 sstable.</code></p>
 <p>Storage engines that are based on this principle of merging and compacting sorted files are often called LSM storage engines.</p>
 <p>the basic idea of LSM-trees—keeping a cascade of SSTables that are merged in the background is simple and effective</p>
 <p>由于数据存储有序,所以 index 可以进行 range query,这保证了再大数据集下不错的检索性能。<br>由于顺序写入, LSM-tree 也可以支持大的写吞吐;</p>
 <p>Reads are typically slower on LSM-trees because they have to check several different data structures and SSTables at different stages of compaction.</p>
-<h4><span id="performance-optimizations">Performance optimizations</span></h4><ul>
+<h4 id="Performance-optimizations"><a href="#Performance-optimizations" class="headerlink" title="Performance optimizations"></a>Performance optimizations</h4><ul>
 <li>检索一个不存在的 key 费时费力,为了解决这个问题,常使用额外的 bloom-filter</li>
 </ul>
 <p><strong>Merge 和 compact 方式:</strong></p>
@@ -460,23 +460,23 @@
 <li><p>leveled compaction: the key range is split up into smaller SSTables and older data is moved into separate “levels,” which allows the compaction to proceed more incrementally and use less disk space</p>
 </li>
 </ul>
-<h3><span id="b-trees">B-Trees</span></h3><p><code>Storage:</code> (k,v) 按 k 有序存储,which allows efficient key-value lookups and range queries。B-trees break the database down into <code>fixed-size blocks or pages</code>, traditionally 4 KB in size (sometimes bigger), and read or write one page at a time. This design corresponds more closely to the underlying hardware, as disks are also arranged in fixed-size blocks.</p>
+<h3 id="B-Trees"><a href="#B-Trees" class="headerlink" title="B-Trees"></a>B-Trees</h3><p><code>Storage:</code> (k,v) 按 k 有序存储,which allows efficient key-value lookups and range queries。B-trees break the database down into <code>fixed-size blocks or pages</code>, traditionally 4 KB in size (sometimes bigger), and read or write one page at a time. This design corresponds more closely to the underlying hardware, as disks are also arranged in fixed-size blocks.</p>
 <blockquote>
 <p>Most databases can fit into a B-tree that is three or four levels deep, so you don’t need to follow many page references to find the page you are look‐ing for. (A four-level tree of 4 KB pages with a branching factor of 500 can store up to 256 TB.)</p>
 </blockquote>
-<h5><span id="making-b-trees-reliable">Making B-trees reliable</span></h5><p>B-tree is to overwrite a page on disk with new data. It is assumed that the overwrite does not change the location of the page;</p>
+<h5 id="Making-B-trees-reliable"><a href="#Making-B-trees-reliable" class="headerlink" title="Making B-trees reliable"></a>Making B-trees reliable</h5><p>B-tree is to overwrite a page on disk with new data. It is assumed that the overwrite does not change the location of the page;</p>
 <ul>
 <li><p><strong>fault-tolerant when database crash?</strong><br>In order to make the database resilient to crashes, it is common for B-tree implementations to include an additional data structure on disk: a <code>write-ahead log</code> (WAL, also known as a redo log).</p>
 </li>
 <li><p><code>并发问题:</code> This is typically done by protecting the tree’s data structures with latches (lightweight locks).</p>
 </li>
 </ul>
-<h5><span id="b-tree-optimizations">B-tree optimizations</span></h5><ul>
+<h5 id="B-tree-optimizations"><a href="#B-tree-optimizations" class="headerlink" title="B-tree optimizations"></a>B-tree optimizations</h5><ul>
 <li>copy-on-write</li>
 <li>……</li>
 </ul>
-<h3><span id="comparing-b-trees-and-lsm-trees">Comparing B-Trees and LSM-Trees</span></h3><p>B-tree: 写慢读快;每条数据只存在于一个地方,所以可以支持强大的事务能力<br>Lsm-tree: 写快读慢,同一个 key 可能在不同的 segment 中</p>
-<h4><span id="advantages-of-lsm-trees">Advantages of LSM-trees</span></h4><p><code>相比于 B-trees, LSM-trees 可以维持 higher write throughput:</code></p>
+<h3 id="Comparing-B-Trees-and-LSM-Trees"><a href="#Comparing-B-Trees-and-LSM-Trees" class="headerlink" title="Comparing B-Trees and LSM-Trees"></a>Comparing B-Trees and LSM-Trees</h3><p>B-tree: 写慢读快;每条数据只存在于一个地方,所以可以支持强大的事务能力<br>Lsm-tree: 写快读慢,同一个 key 可能在不同的 segment 中</p>
+<h4 id="Advantages-of-LSM-trees"><a href="#Advantages-of-LSM-trees" class="headerlink" title="Advantages of LSM-trees"></a>Advantages of LSM-trees</h4><p><code>相比于 B-trees, LSM-trees 可以维持 higher write throughput:</code></p>
 <ol>
 <li>lsm-trees have lower write amplification</li>
 <li>sequentially write compact SSTable</li>
@@ -489,24 +489,24 @@
 <li>Log-structured indexes also rewrite data multiple times due to repeated compaction and merging of SSTables</li>
 </ul>
 </blockquote>
-<h4><span id="downsides-of-lsm-trees写入时空间换时间">Downsides of LSM-trees:写入时空间换时间</span></h4><ol>
+<h4 id="Downsides-of-LSM-trees-写入时空间换时间"><a href="#Downsides-of-LSM-trees-写入时空间换时间" class="headerlink" title="Downsides of LSM-trees:写入时空间换时间"></a>Downsides of LSM-trees:写入时空间换时间</h4><ol>
 <li><p>compaction process 有时和 ongoing reads and writes process 会互相干扰</p>
 </li>
 <li><p>Another issue with compaction arises at high write throughput: the disk’s finite write bandwidth needs to be shared between the initial write (logging and flushing a memtable to disk) and the compaction threads running in the background.</p>
 </li>
 </ol>
-<h3><span id="other-indexing-structures">Other Indexing Structures</span></h3><p>二级索引</p>
-<h4><span id="storing-values-within-the-index">Storing values within the index</span></h4><p>数据存储在 heap file 中,索引处存储 heap file 的 reference,这样可以避免重复存储数据.index 中新值可以 overwrite 老值, index 无需更新; 如果空间不够需要生成新的 heapfile, 则需要更新 index。</p>
+<h3 id="Other-Indexing-Structures"><a href="#Other-Indexing-Structures" class="headerlink" title="Other Indexing Structures"></a>Other Indexing Structures</h3><p>二级索引</p>
+<h4 id="Storing-values-within-the-index"><a href="#Storing-values-within-the-index" class="headerlink" title="Storing values within the index"></a>Storing values within the index</h4><p>数据存储在 heap file 中,索引处存储 heap file 的 reference,这样可以避免重复存储数据.index 中新值可以 overwrite 老值, index 无需更新; 如果空间不够需要生成新的 heapfile, 则需要更新 index。</p>
 <p><code>clustered index(storing all row data within the index):</code> so it can be desirable to store the indexed row directly within an index. This is known as a clustered index(<code>聚集索引,比如 mysql 主键</code>).</p>
 <p><code>covering index:(比如 mysql 主键外其他键上索引)</code> which stores some of a table’s columns within the index </p>
-<h4><span id="multi-column-indexes">Multi-column indexes</span></h4><p><code>concatenated index(比如 mysql 联合唯一键):</code> simply combines several fields into one key by appending one column to another (the index definition specifies in which order the fields are concatenated)</p>
+<h4 id="Multi-column-indexes"><a href="#Multi-column-indexes" class="headerlink" title="Multi-column indexes"></a>Multi-column indexes</h4><p><code>concatenated index(比如 mysql 联合唯一键):</code> simply combines several fields into one key by appending one column to another (the index definition specifies in which order the fields are concatenated)</p>
 <p>Multi-dimensional indexes are a more general way of querying several columns at once, 比如 R 树?</p>
-<h4><span id="full-text-search-and-fuzzy-indexes">Full-text search and fuzzy indexes</span></h4><p>To cope with typos in documents or queries, Lucene is able to search text for words within a certain edit distance</p>
+<h4 id="Full-text-search-and-fuzzy-indexes"><a href="#Full-text-search-and-fuzzy-indexes" class="headerlink" title="Full-text search and fuzzy indexes"></a>Full-text search and fuzzy indexes</h4><p>To cope with typos in documents or queries, Lucene is able to search text for words within a certain edit distance</p>
 <p>but in Lucene, the in-memory index is a finite state automaton over the characters in the keys, similar to a trie </p>
-<h4><span id="keeping-everything-in-memory">Keeping everything in memory</span></h4><p>But other in-memory databases aim for durability, which can be achieved with special hardware (such as battery-powered RAM), by writing a log of changes to disk, by writing periodic snapshots to disk, or by replicating the in-memory state to other machines.</p>
+<h4 id="Keeping-everything-in-memory"><a href="#Keeping-everything-in-memory" class="headerlink" title="Keeping everything in memory"></a>Keeping everything in memory</h4><p>But other in-memory databases aim for durability, which can be achieved with special hardware (such as battery-powered RAM), by writing a log of changes to disk, by writing periodic snapshots to disk, or by replicating the in-memory state to other machines.</p>
 <p><strong>Counterintuitively, the performance advantage of in-memory databases is not due to the fact that they don’t need to read from disk.Rather, they can be faster because they can avoid the overheads of encoding in-memory data structures in a form that can be written to disk</strong></p>
 <p>Besides performance, another interesting area for in-memory databases is providing data models that are difficult to implement with disk-based indexes. </p>
-<h3><span id="summary">Summary</span></h3><h4><span id="log-structured-storage-engine">Log-structured storage engine</span></h4><p>Hash Index + append only</p>
+<h3 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h3><h4 id="Log-structured-storage-engine"><a href="#Log-structured-storage-engine" class="headerlink" title="Log-structured storage engine"></a>Log-structured storage engine</h4><p>Hash Index + append only</p>
 <ul>
 <li>log 分为 segments, 后台 merge 和 compaction, 磁盘利用率低</li>
 <li>index 受内存大小限制</li>
@@ -522,7 +522,7 @@
 <li>并发问题: 以上 2 个都是单线程写入, segment file 不可变,可以多线程读取;</li>
 </ul>
 <p>Their key idea is that they systematically <code>turn random-access writes into sequential writes on disk</code>, which enables higher write throughput due to the performance characteristics of hard drives and SSDs.</p>
-<h4><span id="page-orientated-storage-engine">Page-orientated storage engine</span></h4><p>B-Trees(update-in-place)</p>
+<h4 id="Page-orientated-storage-engine"><a href="#Page-orientated-storage-engine" class="headerlink" title="Page-orientated storage engine"></a>Page-orientated storage engine</h4><p>B-Trees(update-in-place)</p>
 <ul>
 <li>按 k 排序,会进行 update(overwrite)</li>
 <li>数据只有一份,事务支持强大</li>
@@ -532,42 +532,42 @@
 <li>二级索引,聚集索引,非聚集索引…</li>
 <li>Multi-column indexes</li>
 </ul>
-<h4><span id="else">else</span></h4><ul>
+<h4 id="else"><a href="#else" class="headerlink" title="else"></a>else</h4><ul>
 <li>全文索引</li>
 <li>模糊索引</li>
 <li>Keeping everything in memory</li>
 </ul>
-<h2><span id="olaponline-analytic-processing-overview">OLAP(online analytic processing ) Overview</span></h2><p>特点: scan 大量的数据, project 一些字段,在这些数据上进行聚合运算</p>
+<h2 id="OLAP-online-analytic-processing-Overview"><a href="#OLAP-online-analytic-processing-Overview" class="headerlink" title="OLAP(online analytic processing ) Overview"></a>OLAP(online analytic processing ) Overview</h2><p>特点: scan 大量的数据, project 一些字段,在这些数据上进行聚合运算</p>
 <p>Instead it becomes important to encode data very compactly, <code>to minimize the amount of data that the query needs to read from disk.</code> We discussed how column-oriented storage helps achieve this goal.</p>
-<h3><span id="data-warehousing">Data Warehousing</span></h3><p>通过 ETL 将 TP 系统中的数据以合适的方式收集到 data warehouse 中进行 AP 分析.DW 通常是关系模型,因此使用 sql 分析非常合适。</p>
+<h3 id="Data-Warehousing"><a href="#Data-Warehousing" class="headerlink" title="Data Warehousing"></a>Data Warehousing</h3><p>通过 ETL 将 TP 系统中的数据以合适的方式收集到 data warehouse 中进行 AP 分析.DW 通常是关系模型,因此使用 sql 分析非常合适。</p>
 <blockquote>
 <p>A data warehouse, by contrast, is a separate database that analysts can query to their hearts’ content, without affecting OLTP operations</p>
 </blockquote>
 <p>A big advantage of using a separate data warehouse, rather than querying OLTP systems directly for analytics, is that the data warehouse can be optimized for analytic access patterns.</p>
 <p><img src="https://panoply.io/uploads/versions/diagram4---x----750-328x---.jpg" alt="img"></p>
-<h3><span id="stars-and-snowflakes-schemas-for-analytics">Stars and Snowflakes: Schemas for Analytics</span></h3><p><code>Stars schema(也称维度建模):</code> 中间是事实表,其通常包含很多字段,有些是属性,有些事指向维度表的外键。</p>
+<h3 id="Stars-and-Snowflakes-Schemas-for-Analytics"><a href="#Stars-and-Snowflakes-Schemas-for-Analytics" class="headerlink" title="Stars and Snowflakes: Schemas for Analytics"></a>Stars and Snowflakes: Schemas for Analytics</h3><p><code>Stars schema(也称维度建模):</code> 中间是事实表,其通常包含很多字段,有些是属性,有些事指向维度表的外键。</p>
 <p><img src="https://i.ytimg.com/vi/KUwOcip7Zzc/maxresdefault.jpg" alt="img"></p>
 <p><code>Snowflakes schema:</code> 是 Stars 的变体,维度表维度和以被细分为更小的维度</p>
 <p><img src="https://www.tutorialspoint.com/dwh/images/snowflake.jpg" alt="img"></p>
 <blockquote>
 <p>fact table(事实表): Each row of the fact table represents an event that occurred at a particular time<br>dimension table(维度表): the dimensions represent the who, what, where, when, how, and why of the event</p>
 </blockquote>
-<h3><span id="column-oriented-storage">Column-Oriented Storage</span></h3><p>row-oriented storage 对事务支持更好, column-oriented storage 对分析支持更好.</p>
+<h3 id="Column-Oriented-Storage"><a href="#Column-Oriented-Storage" class="headerlink" title="Column-Oriented Storage"></a>Column-Oriented Storage</h3><p>row-oriented storage 对事务支持更好, column-oriented storage 对分析支持更好.</p>
 <p>The idea behind column-oriented storage is simple: don’t store all the values from one row together, but store all the values from each column together instead.</p>
 <p>The column-oriented storage layout relies on each column file containing the rows in the same order.</p>
-<h3><span id="column-compression">Column Compression</span></h3><p>we can further reduce the demands on disk throughput by compressing data</p>
+<h3 id="Column-Compression"><a href="#Column-Compression" class="headerlink" title="Column Compression"></a>Column Compression</h3><p>we can further reduce the demands on disk throughput by compressing data</p>
 <blockquote>
 <p>bitmap encoding<br>vectorized processing </p>
 </blockquote>
 <p>A big bottleneck is the bandwidth for getting data from disk into memory</p>
 <p>Developers of analytical databases also worry about efficiently using the bandwidth from main memory into the CPU cache</p>
-<h3><span id="sort-order-in-column-storage">Sort Order in Column Storage</span></h3><p>在列存中顺序无关紧要,存储按照 insert 顺序来就好了.但是仍然可以类似 SSTable 指定顺序用来实现索引</p>
+<h3 id="Sort-Order-in-Column-Storage"><a href="#Sort-Order-in-Column-Storage" class="headerlink" title="Sort Order in Column Storage"></a>Sort Order in Column Storage</h3><p>在列存中顺序无关紧要,存储按照 insert 顺序来就好了.但是仍然可以类似 SSTable 指定顺序用来实现索引</p>
 <p>Rather, the data needs to be sorted an entire row at a time, even though it is stored by column.</p>
 <p>A second column can determine the sort order of any rows that have the same value in the first column. </p>
 <p>Another advantage of sorted order is that it can help with compression of columns</p>
 <p><code>Having multiple sort orders in a column-oriented store is a bit similar to having mul‐ tiple secondary indexes in a row-oriented store.</code></p>
-<h3><span id="writing-to-column-oriented-storage">Writing to Column-Oriented Storage</span></h3><p>面向列,压缩和排序增加了写入成本。可以使用类似 LSM-trees 的方式,将数据写入 memtable 再刷到磁盘,刷到磁盘的时候生成 column-oriented 文件。只是这样以来,查询就需要合并 memtable 和磁盘文件,但是查询优化器会对用户屏蔽这些底层细节。</p>
-<h3><span id="aggregation-data-cubes-and-materialized-views">Aggregation: Data Cubes and Materialized Views</span></h3><p><code>Materialized view:</code> is and actual copy of the query results, written to disk,When the underlying data changes, a materialized view needs to be updated</p>
+<h3 id="Writing-to-Column-Oriented-Storage"><a href="#Writing-to-Column-Oriented-Storage" class="headerlink" title="Writing to Column-Oriented Storage"></a>Writing to Column-Oriented Storage</h3><p>面向列,压缩和排序增加了写入成本。可以使用类似 LSM-trees 的方式,将数据写入 memtable 再刷到磁盘,刷到磁盘的时候生成 column-oriented 文件。只是这样以来,查询就需要合并 memtable 和磁盘文件,但是查询优化器会对用户屏蔽这些底层细节。</p>
+<h3 id="Aggregation-Data-Cubes-and-Materialized-Views"><a href="#Aggregation-Data-Cubes-and-Materialized-Views" class="headerlink" title="Aggregation: Data Cubes and Materialized Views"></a>Aggregation: Data Cubes and Materialized Views</h3><p><code>Materialized view:</code> is and actual copy of the query results, written to disk,When the underlying data changes, a materialized view needs to be updated</p>
 <p>A common special case of a materialized view is known as a data cube or OLAP cube, It is a grid of aggregates grouped by different dimensions.</p>
 <p>The disadvantage is that a data cube doesn’t have the same flexibility as querying the raw data</p>
 <p><img src="evernotecid://30F90D4C-92AC-4B27-B972-0040A5A63D68/appyinxiangcom/26101857/ENResource/p9" alt="facfdccc444fa2a500ba5c3791022f35.png"></p>
