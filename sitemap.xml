@@ -184,7 +184,7 @@
 
   <url>
     <loc>http://example.com/</loc>
-    <lastmod>2022-12-04</lastmod>
+    <lastmod>2022-12-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -192,35 +192,35 @@
   
   <url>
     <loc>http://example.com/tags/ddia/</loc>
-    <lastmod>2022-12-04</lastmod>
+    <lastmod>2022-12-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://example.com/tags/starrocks/</loc>
-    <lastmod>2022-12-04</lastmod>
+    <lastmod>2022-12-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://example.com/tags/k8s/</loc>
-    <lastmod>2022-12-04</lastmod>
+    <lastmod>2022-12-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://example.com/tags/%E5%AE%B9%E5%99%A8/</loc>
-    <lastmod>2022-12-04</lastmod>
+    <lastmod>2022-12-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://example.com/tags/docker/</loc>
-    <lastmod>2022-12-04</lastmod>
+    <lastmod>2022-12-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -229,21 +229,21 @@
   
   <url>
     <loc>http://example.com/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/</loc>
-    <lastmod>2022-12-04</lastmod>
+    <lastmod>2022-12-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://example.com/categories/olap/</loc>
-    <lastmod>2022-12-04</lastmod>
+    <lastmod>2022-12-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://example.com/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/</loc>
-    <lastmod>2022-12-04</lastmod>
+    <lastmod>2022-12-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
