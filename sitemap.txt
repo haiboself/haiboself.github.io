@@ -11,7 +11,6 @@ http://example.com/2019/11/17/Part-2-CHAPTER-7-Transactions/
 http://example.com/2019/11/26/Part-2-CHAPTER-8-The-Trouble-with-Distributed-Systems/
 http://example.com/2019/09/07/Part-1-CHAPTER-1-Reliable-Scalable-and-Maintainable-Applications/
 http://example.com/2019/09/08/Part-1-CHAPTER-2-Data-Models-and-Query-Languages/
-http://example.com/gallery.json
 http://example.com/links.json
 http://example.com/links/index.html
 http://example.com/repository/index.html

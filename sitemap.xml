@@ -119,15 +119,6 @@
   </url>
   
   <url>
-    <loc>http://example.com/gallery.json</loc>
-    
-    <lastmod>2022-11-25</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://example.com/links.json</loc>
     
     <lastmod>2022-11-25</lastmod>
