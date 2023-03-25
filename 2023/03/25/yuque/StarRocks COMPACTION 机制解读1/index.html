@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta name="google-site-verification" content="NbhPDQgJdljFYVMvb8rRSB9zGMp0akcMvqQZJ3a4a0E" />
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>StarRocks COMPACTION 机制解读 1 | Hexo</title>
+  <meta name="description" content="引言StarRocks，它的计算部分借鉴了 impala[1]，存储部分借鉴了 Google Mesa[2]。而 Compaction 机制正是来源于 Google Mesa。Mesa 是一个分析型的数据仓库系统（highly scalable analytic data warehousing system），主要用于谷歌的广告业务（分析、报表）中。它非常强调“实时性”，它要支持：  Near">
+<meta property="og:type" content="article">
+<meta property="og:title" content="StarRocks COMPACTION 机制解读 1">
+<meta property="og:url" content="http://example.com/2023/03/25/yuque/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="引言StarRocks，它的计算部分借鉴了 impala[1]，存储部分借鉴了 Google Mesa[2]。而 Compaction 机制正是来源于 Google Mesa。Mesa 是一个分析型的数据仓库系统（highly scalable analytic data warehousing system），主要用于谷歌的广告业务（分析、报表）中。它非常强调“实时性”，它要支持：  Near">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FtksectCgCsVhU-CB5saLIQOPsgo.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/Fm815GVB2-XGjvrvgny25Z4GKBzr.jpeg">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FgFnyk-ppczPZa16BbIQ_QhIKbYE.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FrH8icYX2WGHO17euPk5nAAA2KfL.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FqaICLROCGOUqX_Lz01_EHzXFn59.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FkSUDPA4esYJ-02Tv5bgeyN5Qjoz.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/Fj2Tm79PYarISGhwLikp8RGjCkss.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/Fk4DxU_q1NCOsSOTDfBz4e0JEnhX.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FvHBJTwAlQ879GJX3xLkMkhB8NLj.jpeg">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FgmKEvTwju1EUHUMk4elnT1BFqjz.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FmD4KBnIajllyHkreL5ORj00zMif.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FoC2Z8UK2VosagfOdm7NWTT2SdTr.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FmR_7KX29UEaM-6bd2ZhcC_PNQEB.png">
+<meta property="article:published_time" content="2023-03-25T13:18:08.000Z">
+<meta property="article:modified_time" content="2023-03-25T13:40:00.598Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="starrocks">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FtksectCgCsVhU-CB5saLIQOPsgo.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://example.com/2023/03/25/yuque/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/haiboself" target="_blank">
+          <img class="img-circle img-rotate" src="/images/curry.png" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海博</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Fluent &amp; Low Latency</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流分享~</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/olap/">olap</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a><span class="category-list-count">9</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ddia/" style="font-size: 14px;">ddia</a> <a href="/tags/docker/" style="font-size: 13px;">docker</a> <a href="/tags/k8s/" style="font-size: 13px;">k8s</a> <a href="/tags/starrocks/" style="font-size: 13.5px;">starrocks</a> <a href="/tags/%E5%AE%B9%E5%99%A8/" style="font-size: 13px;">容器</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">三月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">十二月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/olap/">olap</a>
+              </p>
+              <p class="item-title">
+                <a href="/2023/03/25/yuque/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/" class="title">StarRocks COMPACTION 机制解读 1</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-03-25T13:18:08.000Z" itemprop="datePublished">2023-03-25</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/olap/">olap</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/04/2.2.9%E7%89%88%E6%9C%ACHive%E5%A4%96%E8%A1%A8%E5%85%83%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98%E5%88%B7%E6%96%B0%E5%8E%9F%E7%90%86/" class="title">StarRocks 2.2.9 Hive外表元数据缓存刷新原理</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-04T12:34:27.000Z" itemprop="datePublished">2022-12-04</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/10/30/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="title">深入剖析kubernetes 1-4章阅读总结</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-10-30T06:41:51.000Z" itemprop="datePublished">2022-10-30</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/12/12/Part-2-CHAPTER-9-Consistency-and-Consensus/" class="title">Part 2: CHAPTER 9 Consistency and Consensus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-12-12T06:35:04.000Z" itemprop="datePublished">2019-12-12</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/11/26/Part-2-CHAPTER-8-The-Trouble-with-Distributed-Systems/" class="title">Part 2: CHAPTER 8 The Trouble with Distributed Systems</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-11-26T06:33:34.000Z" itemprop="datePublished">2019-11-26</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.</span> <span class="toc-text">存储结构介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Rowset"><span class="toc-number">2.1.</span> <span class="toc-text">Rowset</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Segment"><span class="toc-number">2.2.</span> <span class="toc-text">Segment</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5%E6%B5%81%E7%A8%8B"><span class="toc-number">2.3.</span> <span class="toc-text">数据写入流程</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Compaction"><span class="toc-number">3.</span> <span class="toc-text">Compaction</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%88%E5%B9%B6%E6%B5%81%E7%A8%8B"><span class="toc-number">3.1.</span> <span class="toc-text">合并流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Cumulative-Compaction"><span class="toc-number">3.2.</span> <span class="toc-text">Cumulative Compaction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Base-Compaction"><span class="toc-number">3.3.</span> <span class="toc-text">Base Compaction</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Compaction-%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5"><span class="toc-number">4.</span> <span class="toc-text">Compaction 问题排查</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BC%95%E7%94%A8"><span class="toc-number">5.</span> <span class="toc-text">引用</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-yuque/StarRocks COMPACTION 机制解读1" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      StarRocks COMPACTION 机制解读 1
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2023/03/25/yuque/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/" class="article-date">
+	  <time datetime="2023-03-25T13:18:08.000Z" itemprop="datePublished">2023-03-25</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/olap/">olap</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/starrocks/" rel="tag">starrocks</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2023/03/25/yuque/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>StarRocks，它的计算部分借鉴了 impala[1]，存储部分借鉴了 Google Mesa[2]。而 Compaction 机制正是来源于 Google Mesa。<br>Mesa 是一个分析型的数据仓库系统（highly scalable analytic data warehousing system），主要用于谷歌的广告业务（分析、报表）中。它非常强调“<strong>实时性</strong>”，它要支持：</p>
+<ul>
+<li><strong>Near Real-Time Update Throughput ：实时的大批量的数据更新</strong><ul>
+<li>实时更新：must support continuous updates</li>
+<li>qps 达到几百万：millions of rows updated per second</li>
+</ul>
+</li>
+<li><strong>Query Performance：point query 的 p99 要达到几百毫秒，就是要满足这种低时延的场景</strong></li>
+<li>Atomic Update</li>
+<li>…</li>
+</ul>
+<p>所以它采用了类似 LSM-tree[3] 的这种数据结构，牺牲了一些查询性能，但是换取了写性能的提升。而这种结构就避免不了要进行数据的 <strong>“Compaction”。</strong>所以 StarRocks 会在后台通过 Compaction 机制不断将小文件合并成有序的大文件，同时也会处理数据的删除、更新等操作。</p>
+<p>备注：下图是 Lsm-tree 的 compaction，思想类似，但是 StarRocks 和 Mesa 的机制有不同之处。<br><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FtksectCgCsVhU-CB5saLIQOPsgo.png"><br>(LSM-tree compaction)</p>
+<h1 id="存储结构介绍"><a href="#存储结构介绍" class="headerlink" title="存储结构介绍"></a>存储结构介绍</h1><p>StarRocks 存储结构由 4 层结构组成。<br><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/Fm815GVB2-XGjvrvgny25Z4GKBzr.jpeg"><br><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FgFnyk-ppczPZa16BbIQ_QhIKbYE.png"></p>
+<h2 id="Rowset"><a href="#Rowset" class="headerlink" title="Rowset"></a>Rowset</h2><ul>
+<li>Rowset 是 Tablet 中<strong>一次数据变更</strong>的数据集合[4]，数据变更包括了数据导入、删除、更新等。所谓<strong>一次数据变更就是一次导入事务，</strong>比如一次 Stream Load 导入就对应一个新的 Rowset。</li>
+<li>Rowset 按<strong>版本</strong>信息进行记录。版本由 start_version、end_version 两个属性构成，维护数据变更的记录信息。通常用来表示 Rowset 的版本范围。<ul>
+<li>在一次新导入后生成一个 start_version，end_version 相等的 Rowset</li>
+<li>在 Compaction 后生成一个带范围的 Rowset 版本</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FrH8icYX2WGHO17euPk5nAAA2KfL.png"></p>
+<h2 id="Segment"><a href="#Segment" class="headerlink" title="Segment"></a>Segment</h2><ul>
+<li>表示 Rowset 中的<strong>数据分段</strong>，多个 Segment 构成一个 Rowset。Segment 文件可以有多个，一般按照大小进行分割，默认为 256MB。</li>
+<li>Segment File(类似 SSTable) 是**真正的数据文件[5]**，是一个“类 parquet” 的列存储格式。整体的文件格式分为数据区域，索引区域和 footer 三个部分，如下图所示：</li>
+</ul>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FqaICLROCGOUqX_Lz01_EHzXFn59.png"></p>
+<h2 id="数据写入流程"><a href="#数据写入流程" class="headerlink" title="数据写入流程"></a>数据写入流程</h2><p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FkSUDPA4esYJ-02Tv5bgeyN5Qjoz.png"></p>
+<ol>
+<li>当一个 Memtable 写满时(默认为 100M)，调用 RowsetWriter 将 Memtable 的数据会 flush 到磁盘上</li>
+<li>RowsetWriter 调用 SegmentWriter, 将数据和索引写入到磁盘</li>
+</ol>
+<h1 id="Compaction"><a href="#Compaction" class="headerlink" title="Compaction"></a>Compaction</h1><blockquote>
+<p><strong>To enforce update atomicity, Mesa uses a multi-versioned approach.</strong> Mesa applies updates in order by version number, ensuring atomicity by always incorporating an update entirely before moving on to the next update. Users can never see any effects from a partially incorporated update.[2]</p>
+</blockquote>
+<p>如上 Mesa 中所述，为了实现开头说的数据更新的“原子性”(Atomic Update)，数据采用了 MVCC (想想 rowset 中的版本，一次导入是一个事物，完成后形成一个版本)，实现了 snapshot isolation。但是这也带来了一些问题：</p>
+<ul>
+<li>过多的数据版本会带来<strong>更多的存储开销</strong>：一条数据如果多次更新，被存储在不同的 rowset 中，便会发生冗余的存储。</li>
+<li>过多的数据版本会带来<strong>查询时效的降低</strong>：查询采用 Merge on read 的模式，在查询时要 merge 所有版本的数据来产生最终的聚合结果。如果采用预聚合的方式（copy on write），每次更新都进行预聚合，那么成本也非常高昂。</li>
+</ul>
+<p>所以为了解决以上的问题来平衡读写，Mesa 采用了 2 级 Compaction 机制[2]，这样可以：</p>
+<ul>
+<li>合并多个数据版本，避免在读取时大量的 Merge 操作。这可以看作讲查询时进行所有 merge 的时间平摊到了一个更长的时间轴上，从而提高了查询时效。</li>
+<li>避免大量的数据版本导致的随机 I</li>
+</ul>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/Fj2Tm79PYarISGhwLikp8RGjCkss.png"><br>当然 StarRocks 借鉴了这种机制但并不完全一样：会根据一定的策略对<strong>这些 Rowset 进行合并</strong>，将小文件合并成大文件，进而提升查询性能。compaction 也是分两种：</p>
+<ul>
+<li><strong>Cumulative Compaction</strong>： cumulative compaction 主要负责将多个最新导入的 rowset 合并成较大的 rowset</li>
+<li><strong>Base Compaction</strong>：将 cumulative compaction 产生的 rowset 合入到 start version 为 0 的基线数据版本（Base Rowset）中，是一种开销较大的 compaction 操作</li>
+<li>这两种 compaction 的边界通过 <strong>cumulative point</strong> 来确定。base compaction 会将 cumulative point 之前的所有 rowset 进行合并，cumulative compaction 会在 cumulative point 之后选择<strong>相邻</strong>的数个 rowset 进行合并[6]</li>
+</ul>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/Fk4DxU_q1NCOsSOTDfBz4e0JEnhX.png"></p>
+<h2 id="合并流程"><a href="#合并流程" class="headerlink" title="合并流程"></a>合并流程</h2><p>合并流程大体分为 4 步，其中 Base Compaction 和 Cumulative Compaction 主要是<strong>第二步计算 Cumulative_point[6] 不一样。</strong><br><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FvHBJTwAlQ879GJX3xLkMkhB8NLj.jpeg"></p>
+<p>Compaction 任务的产生采用了生产者-消费者模式。<br><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FgmKEvTwju1EUHUMk4elnT1BFqjz.png"></p>
+<ul>
+<li>Compaction 任务是一个** IO 密集型**任务，为了保证其不占用过多 io 资源[8]，限制了每个磁盘上能够同时进行的 Compaction 任务数量，默认<ul>
+<li>base_compaction_num_threads_per_disk &#x3D; 1</li>
+<li>cumulative_compaction_num_threads_per_disk &#x3D; 1</li>
+</ul>
+</li>
+<li>Compaction 任务同时也是**内存密集型[8]**任务（本质是多个有序文件的多路归并排序过程），为了限制内存使用<ul>
+<li>内存使用量与本次 compaction 任务合并的文件数量有关，因此限制了每次任务包含的数据版本数，默认（singleton 其实是 mesa 中的概念[13]，对应 rowset）<ul>
+<li>max_base_compaction_num_singleton_deltas &#x3D; 100。</li>
+<li>max_cumulative_compaction_num_singleton_deltas &#x3D; 1000</li>
+</ul>
+</li>
+<li>为了调节 BE 节点 compaction 的内存使用量增加了对 compaction 任务提交的 permission 机制。</li>
+</ul>
+</li>
+<li>在一轮任务生产过程中，会从每个磁盘各选择出一个 tablet 执行 compaction 任务，目前的策略是每生成 9 个 CC 任务，生成一个 BC 任务。如何选择 Tablet 参见 [6]</li>
+</ul>
+<p><strong>这种方式其实不适合数据高频更新、高频点查的场景，比如主键模型的场景。</strong>为什么呢，因为高频更新就会生成大量的 rowset，一方面会增加 compaction 的压力；另一方面查询时就要 merge 更多的版本，查询时效受影响。所以因此 StarRocks 针对这个场景（主键模型）做了优化，见[11]。</p>
+<h2 id="Cumulative-Compaction"><a href="#Cumulative-Compaction" class="headerlink" title="Cumulative Compaction"></a>Cumulative Compaction</h2><p>cumulative compaction 不会将 delete 操作删除的数据行进行真正地删除，这部分工作会在 base compaction 中进行。Doris 的 cumulative compaction 每次会在 cumulative point 之后选择相邻的数个 rowset 进行合并，主要包含 5 个步骤<br><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FmD4KBnIajllyHkreL5ORj00zMif.png"></p>
+<h2 id="Base-Compaction"><a href="#Base-Compaction" class="headerlink" title="Base Compaction"></a>Base Compaction</h2><p>Doris 的 base compaction 会将 cumulative point 之前的所有 rowset 进行合并，base compaction 过程中会将 delete 操作删除的数据行真正地删除。<br><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FoC2Z8UK2VosagfOdm7NWTT2SdTr.png"></p>
+<h1 id="Compaction-问题排查"><a href="#Compaction-问题排查" class="headerlink" title="Compaction 问题排查"></a>Compaction 问题排查</h1><p>如图[12]：<br>这 3 种导入方式都会频繁生成大量的版本即 rowset 文件，增加 compaction 的压力</p>
+<ul>
+<li>insert into values 和 jdbc 频繁导入，每次导入都是一个事务，会形成一个 rowset。试想通过 insert into 每次导入 1 条数据，那么 100w 数据就会生成 100w 个 rowset，需要 compaction 去合并。</li>
+<li>同理，高频 stream load 可能导致 compaction 的速度跟不上导入的速度，形成导入的压力，影响查询性能，因为查询时候就得做更多版本 merge。</li>
+</ul>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FmR_7KX29UEaM-6bd2ZhcC_PNQEB.png"></p>
+<p>Compaction 出现压力时，调优可参考：[7][8][9]</p>
+<h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><ol>
+<li><a target="_blank" rel="noopener" href="https://impala.apache.org/">Impala</a></li>
+<li><a target="_blank" rel="noopener" href="https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/42851.pdf">Mesa: Geo-Replicated, Near Real-Time, Scalable Data Warehousing</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.51cto.com/u_15127582/2749141">DB 存储引擎知识系列之三：LSM-Tree 存储引擎详细分解_mob604756f33d49 的技术博客_51CTO 博客</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/xl4ePcsSVPPNQDGBw-KoKA">【Doris 全面解析】存储层设计介绍 2——写入流程、删除流程分析</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/aJ3FwDI6KprYYUwXzhl_-A">【Doris 全面解析】存储层设计介绍 1——存储结构设计解析</a></li>
+<li><a target="_blank" rel="noopener" href="https://xie.infoq.cn/article/4e5faf7ae777d47fbcd22b9d8">技术解析 | Doris Compaction 机制解析<em>百度</em>百度开发者中心_InfoQ 写作社区</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.modb.pro/db/70815">Doris 最佳实践-Compaction 调优(1) - 墨天轮</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.modb.pro/db/70491">Doris 最佳实践-Compaction 调优(2) - 墨天轮</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.modb.pro/db/70813">Doris 最佳实践-Compaction 调优(3) - 墨天轮</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.bcmeng.com/post/google-mesa.html">编程小梦|Google Mesa 论文解读</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/9Wm5piUx9xNeHD7WjYa1lA">StarRocks 技术内幕：实时更新与极速查询如何兼得</a></li>
+<li><a target="_blank" rel="noopener" href="https://forum.mirrorship.cn/t/topic/5583">2&#x2F;22 19:00 直播 | StarRocks 实战系列 Ep.2—导入优化＆问题排查（转发、打卡还可以获得积分奖品！）</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_35200943/article/details/127498751">https://blog.csdn.net/qq_35200943&#x2F;article&#x2F;details&#x2F;127498751</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.slidestalk.com/doris.apache/61900?video">https://www.slidestalk.com/doris.apache/61900?video</a></li>
+</ol>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://example.com/2023/03/25/yuque/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/" title="StarRocks COMPACTION 机制解读 1" target="_blank" rel="external">http://example.com/2023/03/25/yuque/StarRocks COMPACTION 机制解读1/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/haiboself" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/curry.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/haiboself" target="_blank"><span class="text-dark">海博</span><small class="ml-1x">Fluent &amp; Low Latency</small></a></h3>
+        <div>大数据研发工程师</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2022/12/04/2.2.9%E7%89%88%E6%9C%ACHive%E5%A4%96%E8%A1%A8%E5%85%83%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98%E5%88%B7%E6%96%B0%E5%8E%9F%E7%90%86/" title="StarRocks 2.2.9 Hive外表元数据缓存刷新原理"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: true,
+    appId: 'GRcHYS3Jka5FNZsVBbtGprIk-gzGzoHsz',
+    appKey: 'BOoClE3WSUbzE8xszYY308bu',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>
