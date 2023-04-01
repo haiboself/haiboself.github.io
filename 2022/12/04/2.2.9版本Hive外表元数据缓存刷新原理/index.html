@@ -22,7 +22,7 @@
   <meta name="description" content="1、为什么要做外表刷新StarRocks(简称 SR) 具备通过创建外表的方式来查询 hive 数据。SR fe 在生成查询计划时需要从 hive metastore 读取对应 hive 表、分区的元数据，为了获得更快的查询时效，SR 将已获取的 hive 元数据缓存在了 Fe 的内存中（使用 Guava LoadingCache 实现），从而减少对 hive metastore 的请求次数。这样">
 <meta property="og:type" content="article">
 <meta property="og:title" content="StarRocks 2.2.9 Hive外表元数据缓存刷新原理">
-<meta property="og:url" content="http://example.com/2022/12/04/2.2.9%E7%89%88%E6%9C%ACHive%E5%A4%96%E8%A1%A8%E5%85%83%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98%E5%88%B7%E6%96%B0%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:url" content="http://haiboself.cn/2022/12/04/2.2.9%E7%89%88%E6%9C%ACHive%E5%A4%96%E8%A1%A8%E5%85%83%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98%E5%88%B7%E6%96%B0%E5%8E%9F%E7%90%86/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="1、为什么要做外表刷新StarRocks(简称 SR) 具备通过创建外表的方式来查询 hive 数据。SR fe 在生成查询计划时需要从 hive metastore 读取对应 hive 表、分区的元数据，为了获得更快的查询时效，SR 将已获取的 hive 元数据缓存在了 Fe 的内存中（使用 Guava LoadingCache 实现），从而减少对 hive metastore 的请求次数。这样">
 <meta property="og:locale" content="zh_CN">
@@ -38,7 +38,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/1670150986706-314863a6-8179-484e-b037-82600513b795.jpeg">
   <!-- Canonical links -->
-  <link rel="canonical" href="http://example.com/2022/12/04/2.2.9%E7%89%88%E6%9C%ACHive%E5%A4%96%E8%A1%A8%E5%85%83%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98%E5%88%B7%E6%96%B0%E5%8E%9F%E7%90%86/index.html">
+  <link rel="canonical" href="http://haiboself.cn/2022/12/04/2.2.9%E7%89%88%E6%9C%ACHive%E5%A4%96%E8%A1%A8%E5%85%83%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98%E5%88%B7%E6%96%B0%E5%8E%9F%E7%90%86/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -446,7 +446,7 @@
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="http://example.com/2022/12/04/2.2.9%E7%89%88%E6%9C%ACHive%E5%A4%96%E8%A1%A8%E5%85%83%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98%E5%88%B7%E6%96%B0%E5%8E%9F%E7%90%86/" title="StarRocks 2.2.9 Hive外表元数据缓存刷新原理" target="_blank" rel="external">http://example.com/2022/12/04/2.2.9版本Hive外表元数据缓存刷新原理/</a>
+      <a href="http://haiboself.cn/2022/12/04/2.2.9%E7%89%88%E6%9C%ACHive%E5%A4%96%E8%A1%A8%E5%85%83%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98%E5%88%B7%E6%96%B0%E5%8E%9F%E7%90%86/" title="StarRocks 2.2.9 Hive外表元数据缓存刷新原理" target="_blank" rel="external">http://haiboself.cn/2022/12/04/2.2.9版本Hive外表元数据缓存刷新原理/</a>
     </li>
     
     <li class="post-copyright-license">
