@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta name="google-site-verification" content="NbhPDQgJdljFYVMvb8rRSB9zGMp0akcMvqQZJ3a4a0E" />
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>使用Hdfs Hedged Read机制解决Hive外表查询慢的问题 | Hexo</title>
+  <meta name="description" content="问题描述我们使用 StarRocks 的 Hive 外表来进行 Hive 的查询加速，但是发现一个问题：有一些 SQL 查询会偶发性的慢，如 SQL A 大部分时间都是 1s 完成查询，但是偶尔就会超过 30s 且马上再查就很快；经过对查询变慢时间段的监控查看，资源都是充足的。 于是进行进一步排查。 排查过程 复现慢的 SQL 后，分析 profile 文件，发现：有 2 个表 __MAX_OF_">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用Hdfs Hedged Read机制解决Hive外表查询慢的问题">
+<meta property="og:url" content="https://www.haiboself.cn/2023/06/03/yuque/%E4%BD%BF%E7%94%A8Hdfs%20Hedged%20Read%E6%9C%BA%E5%88%B6%E8%A7%A3%E5%86%B3Hive%E5%A4%96%E8%A1%A8%E6%9F%A5%E8%AF%A2%E6%85%A2%E7%9A%84%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="问题描述我们使用 StarRocks 的 Hive 外表来进行 Hive 的查询加速，但是发现一个问题：有一些 SQL 查询会偶发性的慢，如 SQL A 大部分时间都是 1s 完成查询，但是偶尔就会超过 30s 且马上再查就很快；经过对查询变慢时间段的监控查看，资源都是充足的。 于是进行进一步排查。 排查过程 复现慢的 SQL 后，分析 profile 文件，发现：有 2 个表 __MAX_OF_">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FuhW-d3eN5qVgh31tG9ccgdxAtGP.png">
+<meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FhZxdbi6FzijwVFx80qLMjK7Ig5o.png">
+<meta property="article:published_time" content="2023-06-03T13:39:05.000Z">
+<meta property="article:modified_time" content="2023-06-03T14:27:13.343Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FuhW-d3eN5qVgh31tG9ccgdxAtGP.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://www.haiboself.cn/2023/06/03/yuque/%E4%BD%BF%E7%94%A8Hdfs%20Hedged%20Read%E6%9C%BA%E5%88%B6%E8%A7%A3%E5%86%B3Hive%E5%A4%96%E8%A1%A8%E6%9F%A5%E8%AF%A2%E6%85%A2%E7%9A%84%E9%97%AE%E9%A2%98/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/haiboself" target="_blank">
+          <img class="img-circle img-rotate" src="/images/curry.png" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">海博</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Fluent &amp; Low Latency</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Beijing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流分享~</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/olap/">olap</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a><span class="category-list-count">9</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/ddia/" style="font-size: 14px;">ddia</a> <a href="/tags/docker/" style="font-size: 13px;">docker</a> <a href="/tags/k8s/" style="font-size: 13px;">k8s</a> <a href="/tags/starrocks/" style="font-size: 13px;">starrocks</a> <a href="/tags/%E5%AE%B9%E5%99%A8/" style="font-size: 13px;">容器</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">六月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">三月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/12/">十二月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/06/03/yuque/%E4%BD%BF%E7%94%A8Hdfs%20Hedged%20Read%E6%9C%BA%E5%88%B6%E8%A7%A3%E5%86%B3Hive%E5%A4%96%E8%A1%A8%E6%9F%A5%E8%AF%A2%E6%85%A2%E7%9A%84%E9%97%AE%E9%A2%98/" class="title">使用Hdfs Hedged Read机制解决Hive外表查询慢的问题</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-06-03T13:39:05.000Z" itemprop="datePublished">2023-06-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2023/03/25/yuque/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/" class="title">StarRocks COMPACTION 机制解读1</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2023-03-25T13:18:08.000Z" itemprop="datePublished">2023-03-25</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/olap/">olap</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/12/04/2.2.9%E7%89%88%E6%9C%ACHive%E5%A4%96%E8%A1%A8%E5%85%83%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98%E5%88%B7%E6%96%B0%E5%8E%9F%E7%90%86/" class="title">StarRocks 2.2.9 Hive外表元数据缓存刷新原理</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-12-04T12:34:27.000Z" itemprop="datePublished">2022-12-04</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/10/30/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90kubernetes1-4%E7%AB%A0%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="title">深入剖析kubernetes 1-4章阅读总结</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-10-30T06:41:51.000Z" itemprop="datePublished">2022-10-30</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/12/12/Part-2-CHAPTER-9-Consistency-and-Consensus/" class="title">Part 2: CHAPTER 9 Consistency and Consensus</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-12-12T06:35:04.000Z" itemprop="datePublished">2019-12-12</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-yuque/使用Hdfs Hedged Read机制解决Hive外表查询慢的问题" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      使用Hdfs Hedged Read机制解决Hive外表查询慢的问题
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2023/06/03/yuque/%E4%BD%BF%E7%94%A8Hdfs%20Hedged%20Read%E6%9C%BA%E5%88%B6%E8%A7%A3%E5%86%B3Hive%E5%A4%96%E8%A1%A8%E6%9F%A5%E8%AF%A2%E6%85%A2%E7%9A%84%E9%97%AE%E9%A2%98/" class="article-date">
+	  <time datetime="2023-06-03T13:39:05.000Z" itemprop="datePublished">2023-06-03</time>
+	</a>
+</span>
+        
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2023/06/03/yuque/%E4%BD%BF%E7%94%A8Hdfs%20Hedged%20Read%E6%9C%BA%E5%88%B6%E8%A7%A3%E5%86%B3Hive%E5%A4%96%E8%A1%A8%E6%9F%A5%E8%AF%A2%E6%85%A2%E7%9A%84%E9%97%AE%E9%A2%98/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>我们使用 StarRocks 的 Hive 外表来进行 Hive 的查询加速，但是发现一个问题：有一些 SQL 查询会偶发性的慢，如 SQL A 大部分时间都是 1s 完成查询，但是偶尔就会超过 30s 且马上再查就很快；经过对查询变慢时间段的监控查看，资源都是充足的。</p>
+<p>于是进行进一步排查。</p>
+<h1 id="排查过程"><a href="#排查过程" class="headerlink" title="排查过程"></a>排查过程</h1><ol>
+<li>复现慢的 SQL 后，分析 profile 文件，发现：有 2 个表 __MAX_OF_ScanTime 比较大</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">- ScanTime: 371.20ms</span><br><span class="line">  - __MAX_OF_ScanTime: 30s708ms</span><br><span class="line">  - __MIN_OF_ScanTime: 21.921ms</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>看起来是 Scan hdfs 文件比较慢，但是经过查看后，查询的 hdfs 文件都只有几 kb 很小，不应该花这么长时间</li>
+<li>查看 BE 节点的 be.out 日志，寻找该 SQL 读取 hdfs 文件的操作记录如下，发现读取大部分 hdfs 文件都很快，就是最后一个 hdfs 文件读的很慢。如下最后一个文件成功打开时间和倒数第二个文件刚好差了 30s，说明就是这个文件慢；</li>
+</ol>
+<p><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FuhW-d3eN5qVgh31tG9ccgdxAtGP.png"></p>
+<ol start="4">
+<li>但是最后这个文件也很小，为什么会慢呢；对比同 SQL 执行很快时的 be.out 日志，发现这个文件也是读的很快的。</li>
+<li>根据 <code>open file success</code>定位 BE 的实现代码</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Status <span class="title">HdfsScanner::open</span><span class="params">(RuntimeState* runtime_state)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (_opened) &#123;</span><br><span class="line">        <span class="keyword">return</span> Status::<span class="built_in">OK</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    _build_scanner_context();</span><br><span class="line">    <span class="keyword">auto</span> status = <span class="built_in">do_open</span>(runtime_state);</span><br><span class="line">    <span class="keyword">if</span> (status.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">        _opened = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (_scanner_params.open_limit != <span class="literal">nullptr</span>) &#123;</span><br><span class="line">            _scanner_params.open_limit-&gt;<span class="built_in">fetch_add</span>(<span class="number">1</span>, std::memory_order_relaxed);</span><br><span class="line">        &#125;</span><br><span class="line">        VLOG_FILE &lt;&lt; <span class="string">&quot;open file success: &quot;</span> &lt;&lt; _scanner_params.path;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> status;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li>查看 namenode 的 hdfs-audit.log 日志，发现 namenode 接收到读这个文件的请求是很快的，没有过多延迟；所以应该是慢再了从 hdfs 读数据上。也就是慢在了这个 do_open(runtime_state) 方法上</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Status <span class="title">HdfsParquetScanner::do_open</span><span class="params">(RuntimeState* runtime_state)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">RETURN_IF_ERROR</span>(<span class="built_in">open_random_access_file</span>());</span><br><span class="line">    <span class="comment">// create file reader</span></span><br><span class="line">    _reader = std::<span class="built_in">make_shared</span>&lt;parquet::FileReader&gt;(runtime_state-&gt;<span class="built_in">chunk_size</span>(), _file.<span class="built_in">get</span>(),</span><br><span class="line">                                                    _scanner_params.scan_ranges[<span class="number">0</span>]-&gt;file_length);</span><br><span class="line">    <span class="built_in">SCOPED_RAW_TIMER</span>(&amp;_stats.reader_init_ns);</span><br><span class="line">    <span class="built_in">RETURN_IF_ERROR</span>(_reader-&gt;<span class="built_in">init</span>(&amp;_scanner_ctx));</span><br><span class="line">    <span class="keyword">return</span> Status::<span class="built_in">OK</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="7">
+<li>而 BE 是用 c++ 开发的，读取 hdfs 文件使用的是 libhdfs，调用的方法是这个；读 hdfs 文件原理可见：<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_45744501/article/details/120629378">https://blog.csdn.net/qq_45744501&#x2F;article&#x2F;details&#x2F;120629378</a></li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hdfsFile file = <span class="built_in">hdfsOpenFile</span>(handle.hdfs_fs, path.<span class="built_in">c_str</span>(), flags, hdfs_write_buffer_size, <span class="number">0</span>, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+
+<ol start="8">
+<li>既然读取 hdfs 慢，那可能是 datanode 的问题，查看慢的文件所在 datanode 的监控，发现在查询慢的时候 cpu 占比很好；<strong>至此定位了原因是： hdfs datanode 节点 cpu 过高导致响应慢的问题。</strong></li>
+</ol>
+<h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><p>我们都知道 hdfs 是 3 副本，同一个文件会存在 3 个 datanode 上。而 hdfs client 刚好读取到了那个慢的节点导致的慢。这个问题可以使用 Hdfs Hedged Read 机制来解决。这个机制的原理就是：</p>
+<ol>
+<li>先从一个 datanode 获取 block</li>
+<li>如果限定时间内获取不到，就尝试从第二个 datanode 获取，依次类推。</li>
+</ol>
+<p>datanode 同时慢的概率还是比较低的。使用上也很简单，在 hdfs 的 conf 中配置下下就行如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;property&gt;</span><br><span class="line">  &lt;name&gt;dfs.client.hedged.read.threadpool.size&lt;/name&gt;</span><br><span class="line">  &lt;value&gt;<span class="number">20</span>&lt;/value&gt;</span><br><span class="line">&lt;/property&gt;</span><br><span class="line"></span><br><span class="line">&lt;property&gt;</span><br><span class="line">  &lt;name&gt;dfs.client.hedged.read.threshold.millis&lt;/name&gt;</span><br><span class="line">  &lt;value&gt;<span class="number">6000</span>&lt;/value&gt;</span><br><span class="line">&lt;/property&gt;</span><br></pre></td></tr></table></figure>
+
+<p>Hdfs Hedged Read 的实现代码：</p>
+<ul>
+<li>位置：hadoop-hdfs-client: src&#x2F;main&#x2F;java&#x2F;org&#x2F;apache&#x2F;hadoop&#x2F;hdfs&#x2F;DFSInputStream.java</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Like &#123;<span class="doctag">@link</span> #fetchBlockByteRange&#125;except we start up a second, parallel,</span></span><br><span class="line"><span class="comment"> * &#x27;hedged&#x27; read if the first read is taking longer than configured amount of</span></span><br><span class="line"><span class="comment"> * time. We then wait on which ever read returns first.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">hedgedFetchBlockByteRange</span><span class="params">(LocatedBlock block, <span class="type">long</span> start,</span></span><br><span class="line"><span class="params">                                       <span class="type">long</span> end, ByteBuffer buf, CorruptedBlocks corruptedBlocks)</span></span><br><span class="line"><span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="type">DfsClientConf</span> <span class="variable">conf</span> <span class="operator">=</span> dfsClient.getConf();</span><br><span class="line">    ArrayList&lt;Future&lt;ByteBuffer&gt;&gt; futures = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">    CompletionService&lt;ByteBuffer&gt; hedgedService =</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">ExecutorCompletionService</span>&lt;&gt;(dfsClient.getHedgedReadsThreadPool());</span><br><span class="line">    ArrayList&lt;DatanodeInfo&gt; ignored = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">    ByteBuffer bb;</span><br><span class="line">    <span class="type">int</span> <span class="variable">len</span> <span class="operator">=</span> (<span class="type">int</span>) (end - start + <span class="number">1</span>);</span><br><span class="line">    <span class="type">int</span> <span class="variable">hedgedReadId</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="comment">// see HDFS-6591, this metric is used to verify/catch unnecessary loops</span></span><br><span class="line">        hedgedReadOpsLoopNumForTesting++;</span><br><span class="line">        <span class="type">DNAddrPair</span> <span class="variable">chosenNode</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">        <span class="comment">// there is no request already executing.</span></span><br><span class="line">        <span class="keyword">if</span> (futures.isEmpty()) &#123;</span><br><span class="line">            <span class="comment">// chooseDataNode is a commitment. If no node, we go to</span></span><br><span class="line">            <span class="comment">// the NN to reget block locations. Only go here on first read.</span></span><br><span class="line">            chosenNode = chooseDataNode(block, ignored);</span><br><span class="line">            <span class="comment">// Latest block, if refreshed internally</span></span><br><span class="line">            block = chosenNode.block;</span><br><span class="line">            bb = ByteBuffer.allocate(len);</span><br><span class="line">            Callable&lt;ByteBuffer&gt; getFromDataNodeCallable = getFromOneDataNode(</span><br><span class="line">                chosenNode, block, start, end, bb,</span><br><span class="line">                corruptedBlocks, hedgedReadId++);</span><br><span class="line">            Future&lt;ByteBuffer&gt; firstRequest = hedgedService</span><br><span class="line">            .submit(getFromDataNodeCallable);</span><br><span class="line">            futures.add(firstRequest);</span><br><span class="line">            Future&lt;ByteBuffer&gt; future = <span class="literal">null</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                future = hedgedService.poll(</span><br><span class="line">                    conf.getHedgedReadThresholdMillis(), TimeUnit.MILLISECONDS);</span><br><span class="line">                <span class="keyword">if</span> (future != <span class="literal">null</span>) &#123;</span><br><span class="line">                    <span class="type">ByteBuffer</span> <span class="variable">result</span> <span class="operator">=</span> future.get();</span><br><span class="line">                    result.flip();</span><br><span class="line">                    buf.put(result);</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                DFSClient.LOG.debug(<span class="string">&quot;Waited &#123;&#125;ms to read from &#123;&#125;; spawning hedged &quot;</span></span><br><span class="line">                                    + <span class="string">&quot;read&quot;</span>, conf.getHedgedReadThresholdMillis(), chosenNode.info);</span><br><span class="line">                dfsClient.getHedgedReadMetrics().incHedgedReadOps();</span><br><span class="line">                <span class="comment">// continue; no need to refresh block locations</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">                futures.remove(future);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">InterruptedIOException</span>(</span><br><span class="line">                    <span class="string">&quot;Interrupted while waiting for reading task&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Ignore this node on next go around.</span></span><br><span class="line">            <span class="comment">// If poll timeout and the request still ongoing, don&#x27;t consider it</span></span><br><span class="line">            <span class="comment">// again. If read data failed, don&#x27;t consider it either.</span></span><br><span class="line">            ignored.add(chosenNode.info);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// We are starting up a &#x27;hedged&#x27; read. We have a read already</span></span><br><span class="line">            <span class="comment">// ongoing. Call getBestNodeDNAddrPair instead of chooseDataNode.</span></span><br><span class="line">            <span class="comment">// If no nodes to do hedged reads against, pass.</span></span><br><span class="line">            <span class="type">boolean</span> <span class="variable">refetch</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                chosenNode = chooseDataNode(block, ignored, <span class="literal">false</span>);</span><br><span class="line">                <span class="keyword">if</span> (chosenNode != <span class="literal">null</span>) &#123;</span><br><span class="line">                    <span class="comment">// Latest block, if refreshed internally</span></span><br><span class="line">                    block = chosenNode.block;</span><br><span class="line">                bb = ByteBuffer.allocate(len);</span><br><span class="line">                Callable&lt;ByteBuffer&gt; getFromDataNodeCallable =</span><br><span class="line">                getFromOneDataNode(chosenNode, block, start, end, bb,</span><br><span class="line">                corruptedBlocks, hedgedReadId++);</span><br><span class="line">                Future&lt;ByteBuffer&gt; oneMoreRequest =</span><br><span class="line">                hedgedService.submit(getFromDataNodeCallable);</span><br><span class="line">                futures.add(oneMoreRequest);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                refetch = <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException ioe) &#123;</span><br><span class="line">                DFSClient.LOG.debug(<span class="string">&quot;Failed getting node for hedged read: &#123;&#125;&quot;</span>,</span><br><span class="line">                ioe.getMessage());</span><br><span class="line">            &#125;</span><br><span class="line">                <span class="comment">// if not succeeded. Submit callables for each datanode in a loop, wait</span></span><br><span class="line">                <span class="comment">// for a fixed interval and get the result from the fastest one.</span></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="type">ByteBuffer</span> <span class="variable">result</span> <span class="operator">=</span> getFirstToComplete(hedgedService, futures);</span><br><span class="line">                <span class="comment">// cancel the rest.</span></span><br><span class="line">                cancelAll(futures);</span><br><span class="line">                dfsClient.getHedgedReadMetrics().incHedgedReadWins();</span><br><span class="line">                result.flip();</span><br><span class="line">                buf.put(result);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</span><br><span class="line">                <span class="comment">// Ignore and retry</span></span><br><span class="line">            &#125;</span><br><span class="line">                <span class="keyword">if</span> (refetch) &#123;</span><br><span class="line">                refetchLocations(block, ignored);</span><br><span class="line">            &#125;</span><br><span class="line">                <span class="comment">// We got here if exception. Ignore this node on next go around IFF</span></span><br><span class="line">                <span class="comment">// we found a chosenNode to hedge read against.</span></span><br><span class="line">                <span class="keyword">if</span> (chosenNode != <span class="literal">null</span> &amp;&amp; chosenNode.info != <span class="literal">null</span>) &#123;</span><br><span class="line">                ignored.add(chosenNode.info);</span><br><span class="line">            &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="又出问题"><a href="#又出问题" class="headerlink" title="又出问题"></a>又出问题</h1><p>定位了原因，又有解决方案，于是我们开开心心的来测试 Hdfs Hedged Read 功能。通过加日志的方式发现一个奇怪的现象。</p>
+<p>测试步骤：</p>
+<ul>
+<li>打开 Hdfs Hedged Read，<code>dfs.client.hedged.read.threshold.millis</code> 设置为 6s</li>
+<li>禁用一个 hdfs 文件所在的 datanode 的网络</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo iptables -A OUTPUT -d xxx -j DROP</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>这样测试的 SQL，预期应该读取这个 hdfs 文件时，从第一个 datanode 读取等待 6s，然后会从第二个 datanode 读取。所以这个 SQL 应该比正常执行慢 6s。</li>
+</ul>
+<p>BUT，经过测试发现实际这个 SQL <strong>慢了 12s。这是为什么呢？经过又一轮分析，发现是因为：</strong>StarRocks 读取 hdfs parquet 文件分 2 步</p>
+<ol>
+<li>第一步读取 footer</li>
+<li>第二步读取数据</li>
+</ol>
+<p>这 2 步都会调用 hdfs client 读文件，所以导致每一步都触发了测试的逻辑慢了 6s，2 步加起来就慢了 12s 多。<strong>其实这个文件非常小只有几 kb，完全可以一次性读完，这也算是 StarRocks 可以优化的一个点吧。如下 profile 所示：GroupChunkRead 是读文件，ReaderInitFooterRead 是读 footer。可以看到都是用了 6s 多。</strong><br><img src="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FhZxdbi6FzijwVFx80qLMjK7Ig5o.png"></p>
+<p>StarRocks 读取 hdfs parquet 文件的 2 个步实现：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Status <span class="title">FileReader::init</span><span class="params">(vectorized::HdfsScannerContext* ctx)</span> </span>&#123;</span><br><span class="line">    _scanner_ctx = ctx;</span><br><span class="line">    <span class="comment">// 读取 footer</span></span><br><span class="line">    <span class="built_in">RETURN_IF_ERROR</span>(_parse_footer());</span><br><span class="line"></span><br><span class="line">    std::unordered_set&lt;std::string&gt; names;</span><br><span class="line">    _file_metadata-&gt;<span class="built_in">schema</span>().<span class="built_in">get_field_names</span>(&amp;names);</span><br><span class="line">    _scanner_ctx-&gt;<span class="built_in">set_columns_from_file</span>(names);</span><br><span class="line">    <span class="built_in">ASSIGN_OR_RETURN</span>(_is_file_filtered, _scanner_ctx-&gt;<span class="built_in">should_skip_by_evaluating_not_existed_slots</span>());</span><br><span class="line">    <span class="keyword">if</span> (_is_file_filtered) &#123;</span><br><span class="line">        <span class="keyword">return</span> Status::<span class="built_in">OK</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    _prepare_read_columns();</span><br><span class="line">    <span class="comment">// 为读文件做准备, 真正的读取动作在 Status FileReader::get_next(vectorized::ChunkPtr* chunk) 方法中</span></span><br><span class="line">    <span class="built_in">RETURN_IF_ERROR</span>(_init_group_readers());</span><br><span class="line">    <span class="keyword">return</span> Status::<span class="built_in">OK</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://www.haiboself.cn/2023/06/03/yuque/%E4%BD%BF%E7%94%A8Hdfs%20Hedged%20Read%E6%9C%BA%E5%88%B6%E8%A7%A3%E5%86%B3Hive%E5%A4%96%E8%A1%A8%E6%9F%A5%E8%AF%A2%E6%85%A2%E7%9A%84%E9%97%AE%E9%A2%98/" title="使用Hdfs Hedged Read机制解决Hive外表查询慢的问题" target="_blank" rel="external">https://www.haiboself.cn/2023/06/03/yuque/使用Hdfs Hedged Read机制解决Hive外表查询慢的问题/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/haiboself" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/curry.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/haiboself" target="_blank"><span class="text-dark">海博</span><small class="ml-1x">Fluent &amp; Low Latency</small></a></h3>
+        <div>大数据研发工程师</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2023/03/25/yuque/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/" title="StarRocks COMPACTION 机制解读1"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: true,
+    appId: 'GRcHYS3Jka5FNZsVBbtGprIk-gzGzoHsz',
+    appKey: 'BOoClE3WSUbzE8xszYY308bu',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>
