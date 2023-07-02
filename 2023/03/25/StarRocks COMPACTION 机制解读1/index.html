@@ -22,7 +22,7 @@
   <meta name="description" content="引言StarRocks，它的计算部分借鉴了 impala[1]，存储部分借鉴了 Google Mesa[2]。而 Compaction 机制正是来源于 Google Mesa。Mesa 是一个分析型的数据仓库系统（highly scalable analytic data warehousing system），主要用于谷歌的广告业务（分析、报表）中。它非常强调“实时性”，它要支持：  Near">
 <meta property="og:type" content="article">
 <meta property="og:title" content="StarRocks COMPACTION 机制解读1">
-<meta property="og:url" content="https://www.haiboself.cn/2023/03/25/yuque/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/index.html">
+<meta property="og:url" content="https://www.haiboself.cn/2023/03/25/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="引言StarRocks，它的计算部分借鉴了 impala[1]，存储部分借鉴了 Google Mesa[2]。而 Compaction 机制正是来源于 Google Mesa。Mesa 是一个分析型的数据仓库系统（highly scalable analytic data warehousing system），主要用于谷歌的广告业务（分析、报表）中。它非常强调“实时性”，它要支持：  Near">
 <meta property="og:locale" content="zh_CN">
@@ -40,12 +40,13 @@
 <meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FoC2Z8UK2VosagfOdm7NWTT2SdTr.png">
 <meta property="og:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FmR_7KX29UEaM-6bd2ZhcC_PNQEB.png">
 <meta property="article:published_time" content="2023-03-25T13:18:08.000Z">
-<meta property="article:modified_time" content="2023-06-18T06:59:18.558Z">
+<meta property="article:modified_time" content="2023-07-02T08:05:44.402Z">
 <meta property="article:author" content="John Doe">
+<meta property="article:tag" content="starrocks">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://blog-1314398479.cos.ap-nanjing.myqcloud.com/undefined/FtksectCgCsVhU-CB5saLIQOPsgo.png">
   <!-- Canonical links -->
-  <link rel="canonical" href="https://www.haiboself.cn/2023/03/25/yuque/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/index.html">
+  <link rel="canonical" href="https://www.haiboself.cn/2023/03/25/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -198,7 +199,7 @@
   <div class="widget">
     <h3 class="widget-title">分类</h3>
     <div class="widget-body">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/olap/">olap</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a><span class="category-list-count">9</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/olap/">olap</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a><span class="category-list-count">9</span></li></ul>
     </div>
   </div>
 
@@ -236,7 +237,7 @@
                 <a class="category-link" href="/categories/olap/">olap</a>
               </p>
               <p class="item-title">
-                <a href="/2023/06/18/yuque/StarRocks%20Catalog/" class="title">StarRocks Catalog</a>
+                <a href="/2023/06/18/StarRocks%20Catalog/" class="title">StarRocks Catalog</a>
               </p>
               <p class="item-date">
                 <time datetime="2023-06-18T06:56:47.000Z" itemprop="datePublished">2023-06-18</time>
@@ -248,10 +249,10 @@
             
             <div class="item-inner">
               <p class="item-category">
-                
+                <a class="category-link" href="/categories/olap/">olap</a>
               </p>
               <p class="item-title">
-                <a href="/2023/06/03/yuque/%E4%BD%BF%E7%94%A8Hdfs%20Hedged%20Read%E6%9C%BA%E5%88%B6%E8%A7%A3%E5%86%B3Hive%E5%A4%96%E8%A1%A8%E6%9F%A5%E8%AF%A2%E6%85%A2%E7%9A%84%E9%97%AE%E9%A2%98/" class="title">使用Hdfs Hedged Read机制解决Hive外表查询慢的问题</a>
+                <a href="/2023/06/03/%E4%BD%BF%E7%94%A8Hdfs%20Hedged%20Read%E6%9C%BA%E5%88%B6%E8%A7%A3%E5%86%B3Hive%E5%A4%96%E8%A1%A8%E6%9F%A5%E8%AF%A2%E6%85%A2%E7%9A%84%E9%97%AE%E9%A2%98/" class="title">使用Hdfs Hedged Read机制解决Hive外表查询慢的问题</a>
               </p>
               <p class="item-date">
                 <time datetime="2023-06-03T13:39:05.000Z" itemprop="datePublished">2023-06-03</time>
@@ -263,10 +264,10 @@
             
             <div class="item-inner">
               <p class="item-category">
-                
+                <a class="category-link" href="/categories/olap/">olap</a>
               </p>
               <p class="item-title">
-                <a href="/2023/03/25/yuque/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/" class="title">StarRocks COMPACTION 机制解读1</a>
+                <a href="/2023/03/25/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/" class="title">StarRocks COMPACTION 机制解读1</a>
               </p>
               <p class="item-date">
                 <time datetime="2023-03-25T13:18:08.000Z" itemprop="datePublished">2023-03-25</time>
@@ -317,7 +318,7 @@
   
 <main class="main" role="main">
   <div class="content">
-  <article id="post-yuque/StarRocks COMPACTION 机制解读1" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+  <article id="post-StarRocks COMPACTION 机制解读1" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
     
     <div class="article-header">
       
@@ -332,12 +333,22 @@
       <div class="article-meta">
         <span class="article-date">
     <i class="icon icon-calendar-check"></i>
-	<a href="/2023/03/25/yuque/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/" class="article-date">
+	<a href="/2023/03/25/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/" class="article-date">
 	  <time datetime="2023-03-25T13:18:08.000Z" itemprop="datePublished">2023-03-25</time>
 	</a>
 </span>
         
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/olap/">olap</a>
+  </span>
+
         
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/starrocks/" rel="tag">starrocks</a>
+  </span>
+
 
         
 	<span class="article-read hidden-xs">
@@ -348,7 +359,7 @@
 	</span>
 
 
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2023/03/25/yuque/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/#comments" class="article-comment-link">评论</a></span>
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2023/03/25/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/#comments" class="article-comment-link">评论</a></span>
         
       </div>
     </div>
@@ -461,7 +472,7 @@
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="https://www.haiboself.cn/2023/03/25/yuque/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/" title="StarRocks COMPACTION 机制解读1" target="_blank" rel="external">https://www.haiboself.cn/2023/03/25/yuque/StarRocks COMPACTION 机制解读1/</a>
+      <a href="https://www.haiboself.cn/2023/03/25/StarRocks%20COMPACTION%20%E6%9C%BA%E5%88%B6%E8%A7%A3%E8%AF%BB1/" title="StarRocks COMPACTION 机制解读1" target="_blank" rel="external">https://www.haiboself.cn/2023/03/25/StarRocks COMPACTION 机制解读1/</a>
     </li>
     
     <li class="post-copyright-license">
@@ -508,7 +519,7 @@
   <ul class="pager pull-left">
     
     <li class="prev">
-      <a href="/2023/06/03/yuque/%E4%BD%BF%E7%94%A8Hdfs%20Hedged%20Read%E6%9C%BA%E5%88%B6%E8%A7%A3%E5%86%B3Hive%E5%A4%96%E8%A1%A8%E6%9F%A5%E8%AF%A2%E6%85%A2%E7%9A%84%E9%97%AE%E9%A2%98/" title="使用Hdfs Hedged Read机制解决Hive外表查询慢的问题"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+      <a href="/2023/06/03/%E4%BD%BF%E7%94%A8Hdfs%20Hedged%20Read%E6%9C%BA%E5%88%B6%E8%A7%A3%E5%86%B3Hive%E5%A4%96%E8%A1%A8%E6%9F%A5%E8%AF%A2%E6%85%A2%E7%9A%84%E9%97%AE%E9%A2%98/" title="使用Hdfs Hedged Read机制解决Hive外表查询慢的问题"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
     </li>
     
     
